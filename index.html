@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Simulateur Biamortier V37 - Grain Fin Unique</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        /* --- STYLES CONSERVÉS --- */
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #eef2f6; margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: row; }
+        .controls { width: 380px; min-width: 380px; background: white; height: 100%; overflow-y: auto; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 10; display: flex; flex-direction: column; gap: 15px; }
+        .preview-container { flex: 1; background: #dce1e8; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; position: relative; height: 100%; }
+        .canvas-wrapper { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; max-height: 90vh; }
+        canvas { display: block; max-width: 100%; max-height: 100%; width: auto; height: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3); background: white; }
+        h2 { margin: 0 0 5px 0; color: #1a1a1a; font-size: 1.2rem; }
+        label { display: block; font-size: 0.85rem; color: #343a40; margin-bottom: 4px; font-weight: 600; }
+        .input-row { display: flex; gap: 10px; }
+        .input-group { flex: 1; }
+        input[type="text"], input[type="number"], select { width: 100%; padding: 8px; border: 1px solid #ced4da; border-radius: 6px; font-size: 0.9rem; }
+        input[type="range"] { width: 100%; margin: 8px 0; }
+        .upload-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+        .brick-container { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .brick-slot { width: 100%; aspect-ratio: 16/9; border: 2px dashed #cbd5e1; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; position: relative; background: #f8f9fa; transition: 0.2s; font-size: 0.8rem; color: #adb5bd; flex-direction: column; text-align:center; }
+        .brick-slot:hover { border-color: #007bff; color: #007bff; background: #eef7ff; }
+        .brick-slot img { width: 100%; height: 100%; object-fit: cover; }
+        .brick-slot.active { border-style: solid; border-color: #28a745; }
+        .remove-btn { position: absolute; top: 2px; right: 2px; background: rgba(255,0,0,0.7); color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 10px; display: flex; align-items: center; justify-content: center; }
+        .target-selector { font-size: 0.75rem; color: #666; display: flex; align-items: center; gap: 5px; cursor: pointer; background: #f1f3f5; padding: 4px 8px; border-radius: 12px; border: 1px solid #dee2e6; }
+        .calibration-box { background: #fff3cd; border: 1px solid #ffeeba; padding: 10px; border-radius: 8px; margin-top: 15px; position: relative; }
+        .calibration-slider { display: flex; align-items: center; gap: 10px; font-size: 0.8rem; margin-bottom: 5px; }
+        .calibration-slider label { width: 70px; margin:0; }
+        .calibration-slider input { flex:1; }
+        .reset-calib-btn { position: absolute; top: 10px; right: 10px; background: #fff; border: 1px solid #e0c46c; border-radius: 4px; font-size: 0.7rem; padding: 2px 6px; cursor: pointer; color: #856404; }
+        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
+        button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn-jpg { background: #198754; color: white; }
+        .btn-pdf { background: #dc3545; color: white; }
+        button:hover { opacity: 0.95; transform: translateY(-1px); }
+        #joint-preview-dot { width: 40px; height: 38px; border-radius: 6px; border: 1px solid #dee2e6; background-color: #f4f4f4; flex-shrink: 0; }
+        .btn-magic { width: 100%; background: linear-gradient(135deg, #6610f2, #5f3dc4); color: white; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 10px rgba(102, 16, 242, 0.2); transition: 0.2s; font-size: 0.95rem; }
+        .submit-btn { background: #0d47a1; color: white; width: 100%; margin-top: 15px; padding: 12px; border-radius: 6px; border:none; cursor: pointer; font-weight: bold; display:flex; align-items:center; justify-content:center; gap:8px; }
+        .library-box { background: #e3f2fd; border: 1px solid #90caf9; padding: 15px; border-radius: 8px; margin-bottom: 5px; }
+        .instruction-box { font-size: 0.75rem; color: #495057; background: #e2e6ea; padding: 10px; border-radius: 6px; margin-top: 10px; line-height: 1.4; border-left: 4px solid #6c757d; }
+        .lib-controls { display: flex; gap: 5px; margin-top: 10px; }
+        .btn-save-lib { background: #0d6efd; color: white; flex: 2; font-size: 0.8rem; padding: 8px; }
+        .btn-del-lib { background: #dc3545; color: white; flex: 1; font-size: 0.8rem; padding: 8px; }
+        
+        /* STYLE POUR LE CHAMP GRAIN FIXE */
+        .fixed-value-box { width: 100%; padding: 8px; background: #e9ecef; border: 1px solid #ced4da; border-radius: 6px; font-size: 0.9rem; color: #495057; }
+
+        @media (max-width: 850px) {
+            body { flex-direction: column; overflow: auto; height: auto; }
+            .preview-container { order: 1; position: sticky; top: 0; z-index: 100; height: 40vh; padding: 10px; border-bottom: 2px solid #ccc; }
+            .controls { order: 2; width: 100%; height: auto; overflow: visible; box-shadow: none; padding-bottom: 50px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="controls">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid #f0f2f5; padding-bottom:10px; margin-bottom:5px;">
+        <h2>🛠️ Configurateur</h2>
+        <span style="font-size:0.7rem; color:#888;">V37 Perso</span>
+    </div>
+
+    <div class="library-box">
+        <h3 style="color:#0d47a1; margin:0 0 10px 0; font-size:0.9rem;">💾 Ma Bibliothèque Personnelle</h3>
+        <select id="userLibrarySelect" onchange="loadUserPreset()" style="width:100%;">
+            <option value="">-- Vos projets sauvegardés --</option>
+        </select>
+        <div class="lib-controls">
+            <button class="btn-save-lib" onclick="saveToUserLibrary()">+ Sauvegarder config.</button>
+            <button class="btn-del-lib" onclick="deleteFromUserLibrary()">Supprimer</button>
+        </div>
+        <div style="font-size:0.7rem; color:#555; margin-top:5px; font-style:italic;">
+            Sauvegarde automatique vers l'admin active.
+        </div>
+    </div>
+    
+    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+        <h3>1. Configuration Brique</h3>
+        
+        <div style="margin-bottom: 10px;">
+            <label>Nom du projet / Référence :</label>
+            <input type="text" id="input-brick-name" placeholder="Ex: Brique Moulée Main Rouge" oninput="render()">
+        </div>
+
+        <div class="upload-grid">
+            <div class="brick-container">
+                <div class="brick-slot" id="slot-0" onclick="triggerUpload(0)"><span>+ Photo 1</span></div>
+                <label class="target-selector"><input type="checkbox" class="target-chk" value="0" checked> <span>Cible</span></label>
+            </div>
+            <div class="brick-container">
+                <div class="brick-slot" id="slot-1" onclick="triggerUpload(1)"><span>+ Photo 2</span></div>
+                <label class="target-selector"><input type="checkbox" class="target-chk" value="1"> <span>Cible</span></label>
+            </div>
+            <div class="brick-container">
+                <div class="brick-slot" id="slot-2" onclick="triggerUpload(2)"><span>+ Photo 3</span></div>
+                <label class="target-selector"><input type="checkbox" class="target-chk" value="2"> <span>Cible</span></label>
+            </div>
+        </div>
+        <input type="file" id="hidden-file-input" accept="image/*" style="display: none;">
+
+        <div class="calibration-box">
+            <h4 style="margin:0 0 10px 0; font-size:0.85rem; color:#856404;">🎨 Calibrage Photo</h4>
+            <button class="reset-calib-btn" onclick="resetCalibration()" title="Remettre à l'origine">↺ R.A.Z</button>
+            <div class="calibration-slider"><label>Lumière</label><input type="range" id="calib-brightness" min="50" max="150" value="100" oninput="render()"></div>
+            <div class="calibration-slider"><label>Contraste</label><input type="range" id="calib-contrast" min="50" max="150" value="100" oninput="render()"></div>
+            <div class="calibration-slider"><label>Saturat.</label><input type="range" id="calib-saturation" min="0" max="300" value="100" oninput="render()"></div>
+            <div class="calibration-slider"><label>Teinte</label><input type="range" id="calib-hue" min="-180" max="180" value="0" step="1" oninput="render()"></div>
+        </div>
+
+        <div class="input-row" style="margin-top:15px;">
+            <div class="input-group"><label>L. (mm)</label><input type="number" id="input-longueur" value="220" min="50" max="600" onchange="forceWallRegen()"></div>
+            <div class="input-group"><label>H. (mm)</label><input type="number" id="input-hauteur" value="60" min="20" max="300" onchange="forceWallRegen()"></div>
+        </div>
+    </div>
+
+    <div id="section-joint" style="padding: 0 5px;">
+        <h3>2. Joint & Mortier</h3>
+        
+        <div style="margin-top:15px; margin-bottom:15px;">
+            <button class="btn-magic" onclick="triggerAutoDetection()">✨ Calculer la Moyenne</button>
+        </div>
+
+        <div class="input-group">
+            <label>Teinte actuelle :</label>
+            <div class="input-row">
+                <select id="categorySelect" onchange="filterColors()" style="flex:1;">
+                    <option value="all">-- Tout afficher --</option>
+                    <option value="Standards">Standards</option>
+                    <option value="Noirs & Gris">Noirs & Gris</option>
+                    <option value="Jaunes">Jaunes</option>
+                    <option value="Marron">Marron & Terre</option>
+                    <option value="Rouges">Rouges</option>
+                    <option value="Saumon">Saumons</option>
+                    <option value="Lie de vin">Lie de Vin</option>
+                </select>
+                <div id="joint-preview-dot" title="Aperçu couleur"></div>
+            </div>
+            <select id="jointColorSelect" onchange="updatePreviewDot(); render();" style="margin-top:5px;"></select>
+        </div>
+
+        <div class="input-row" style="margin-top:15px; align-items: flex-end;">
+            <div class="input-group">
+                <label>Ep. (mm) : <span id="val-ep" style="color:#007bff;">12</span></label>
+                <input type="range" id="slider-epaisseur" min="8" max="25" step="1" value="12" oninput="document.getElementById('val-ep').innerText = this.value; render()">
+            </div>
+            <div class="input-group">
+                <label>Grain :</label>
+                <div class="fixed-value-box">Fin (0/1)</div>
+            </div>
+        </div>
+        
+        <button class="submit-btn" onclick="submitToAdmin()">
+            📤 Demande de référencement (Email)
+        </button>
+    </div>
+
+    <div style="background: #e7f5ff; padding: 15px; border-radius: 8px; border: 1px solid #d0ebff;">
+        <h3>3. Vue & Export</h3>
+        <label style="margin-top:10px;">Distance de vue (Zoom) :</label>
+        <input type="range" id="slider-zoom" min="0.5" max="5.0" step="0.1" value="1.5" oninput="render()">
+        <div class="btn-group">
+            <button class="btn-jpg" onclick="downloadImage()">JPG</button>
+            <button class="btn-pdf" onclick="downloadPDF()">PDF</button>
+        </div>
+        <button onclick="forceWallRegen()" style="margin-top:10px; width:100%; background:#fff; border:1px solid #ccc; color:#666; padding:8px; border-radius:4px; font-size:0.8rem; cursor:pointer;">🔀 Régénérer le placement</button>
+    </div>
+</div>
+
+<div class="preview-container">
+    <div class="canvas-wrapper">
+        <canvas id="canvas"></canvas>
+    </div>
+    <div style="margin-top:10px; font-size:0.75rem; color:#666; display:flex; justify-content:space-between; width:100%; max-width:800px;">
+        <span id="scale-info"></span>
+        <span>Aperçu HD</span>
+    </div>
+</div>
+
+<script>
+    // --- CONFIGURATION ADMIN ---
+    // Remplacez cette URL par votre Webhook (Make, Zapier) pour recevoir les "Ghosts"
+    const GHOST_WEBHOOK_URL = ""; 
+
+    // 2. NUANCIER
+    const NUANCIER_COMPLET = [
+        { cat: "Standards", name: "TON PIERRE", r: 215, g: 195, b: 150 },
+        { cat: "Standards", name: "SUPER BLANC", r: 235, g: 235, b: 230 },
+        { cat: "Standards", name: "BLANC", r: 220, g: 220, b: 215 },
+        { cat: "Standards", name: "GRIS CLAIR", r: 180, g: 180, b: 175 },
+        { cat: "Noirs & Gris", name: "50% BL 50% GR", r: 190, g: 190, b: 180 },
+        { cat: "Noirs & Gris", name: "SBN125", r: 130, g: 130, b: 130 },
+        { cat: "Noirs & Gris", name: "SBN250", r: 100, g: 100, b: 100 },
+        { cat: "Noirs & Gris", name: "GA125", r: 90, g: 95, b: 90 },
+        { cat: "Noirs & Gris", name: "GA250", r: 70, g: 75, b: 75 },
+        { cat: "Noirs & Gris", name: "GN500 (Anthracite)", r: 60, g: 60, b: 60 },
+        { cat: "Noirs & Gris", name: "SBA250", r: 50, g: 55, b: 55 },
+        { cat: "Noirs & Gris", name: "GA450R50", r: 45, g: 45, b: 45 },
+        { cat: "Noirs & Gris", name: "GA500", r: 40, g: 40, b: 40 },
+        { cat: "Noirs & Gris", name: "SBA500 (Noir Intense)", r: 30, g: 35, b: 35 },
+        { cat: "Jaunes", name: "SBJ8.25", r: 230, g: 220, b: 180 },
+        { cat: "Jaunes", name: "SBJ30", r: 225, g: 210, b: 150 },
+        { cat: "Jaunes", name: "75% TP 25% BL", r: 210, g: 190, b: 140 },
+        { cat: "Jaunes", name: "GJ125", r: 180, g: 160, b: 100 },
+        { cat: "Jaunes", name: "SBJ62.5", r: 230, g: 200, b: 120 },
+        { cat: "Jaunes", name: "SBJ250 (Vif)", r: 220, g: 180, b: 60 },
+        { cat: "Jaunes", name: "GJ250", r: 190, g: 160, b: 80 },
+        { cat: "Jaunes", name: "SBJ120N30", r: 180, g: 150, b: 100 },
+        { cat: "Jaunes", name: "GJ500 (Moutarde)", r: 160, g: 140, b: 60 },
+        { cat: "Jaunes", name: "SBJ500", r: 210, g: 170, b: 50 },
+        { cat: "Lie de vin", name: "GR416N84", r: 140, g: 80, b: 70 },
+        { cat: "Lie de vin", name: "SBR250N125", r: 120, g: 80, b: 70 },
+        { cat: "Lie de vin", name: "GR125N100S25", r: 130, g: 110, b: 100 },
+        { cat: "Lie de vin", name: "GR200S200N100", r: 140, g: 100, b: 70 },
+        { cat: "Lie de vin", name: "GR300S100N100", r: 110, g: 70, b: 60 },
+        { cat: "Lie de vin", name: "GR200N50", r: 120, g: 90, b: 80 },
+        { cat: "Marron", name: "GS15J10", r: 200, g: 190, b: 170 },
+        { cat: "Marron", name: "GS150N100", r: 150, g: 150, b: 130 },
+        { cat: "Marron", name: "GN90S35", r: 160, g: 140, b: 120 },
+        { cat: "Marron", name: "SBJ90R70N90", r: 140, g: 110, b: 90 },
+        { cat: "Marron", name: "SBJ180R180N140 (Chocolat)", r: 110, g: 80, b: 70 },
+        { cat: "Marron", name: "GS125N250R125", r: 130, g: 120, b: 100 },
+        { cat: "Marron", name: "GS200N150", r: 140, g: 130, b: 100 },
+        { cat: "Marron", name: "GS150A100", r: 120, g: 130, b: 110 },
+        { cat: "Marron", name: "GS300A200", r: 90, g: 100, b: 80 },
+        { cat: "Marron", name: "GN416S84", r: 80, g: 90, b: 80 },
+        { cat: "Marron", name: "GS250A250", r: 70, g: 80, b: 70 },
+        { cat: "Rouges", name: "GR100N25", r: 160, g: 120, b: 110 },
+        { cat: "Rouges", name: "SBR125 (Rosé)", r: 200, g: 150, b: 140 },
+        { cat: "Rouges", name: "SBR250", r: 190, g: 120, b: 110 },
+        { cat: "Rouges", name: "GR250", r: 170, g: 100, b: 90 },
+        { cat: "Rouges", name: "GR125", r: 180, g: 130, b: 120 },
+        { cat: "Rouges", name: "GR150S100", r: 180, g: 120, b: 90 },
+        { cat: "Rouges", name: "GR150J100", r: 170, g: 130, b: 90 },
+        { cat: "Rouges", name: "GR250S250", r: 180, g: 110, b: 60 },
+        { cat: "Rouges", name: "SBR375 (Vif)", r: 180, g: 90, b: 80 },
+        { cat: "Rouges", name: "GR375", r: 150, g: 80, b: 70 },
+        { cat: "Rouges", name: "GR500", r: 140, g: 60, b: 50 },
+        { cat: "Saumon", name: "SBS15J20", r: 220, g: 200, b: 170 },
+        { cat: "Saumon", name: "GS62.5", r: 200, g: 180, b: 150 },
+        { cat: "Saumon", name: "GS125", r: 190, g: 160, b: 120 },
+        { cat: "Saumon", name: "SBJ45R45N35", r: 180, g: 160, b: 140 },
+        { cat: "Saumon", name: "SBS62.5", r: 220, g: 190, b: 160 },
+        { cat: "Saumon", name: "SBS125", r: 210, g: 170, b: 130 },
+        { cat: "Saumon", name: "GS250", r: 180, g: 140, b: 100 },
+        { cat: "Saumon", name: "SBS250 (Orange)", r: 200, g: 150, b: 100 },
+        { cat: "Saumon", name: "SBS500", r: 190, g: 130, b: 80 },
+        { cat: "Saumon", name: "GS500", r: 170, g: 120, b: 70 },
+        { cat: "Saumon", name: "GS375R125", r: 180, g: 110, b: 80 }
+    ];
+
+    let loadedBricks = [null, null, null];
+    let grainTexture = null;
+    let wallLayoutCache = []; 
+    let currentJointColor = null;
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let currentSlot = 0;
+    
+    // --- GESTION DU LOCAL STORAGE & GHOST MODE ---
+    const STORAGE_KEY = 'biamortier_user_lib';
+
+    function getUserLibrary() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        return stored ? JSON.parse(stored) : [];
+    }
+
+    function refreshLibraryUI() {
+        const lib = getUserLibrary();
+        const select = document.getElementById('userLibrarySelect');
+        select.innerHTML = '<option value="">-- Vos projets sauvegardés --</option>';
+        lib.forEach((item, index) => {
+            const opt = document.createElement('option');
+            opt.value = index;
+            const dateStr = new Date(item.date).toLocaleDateString();
+            opt.innerText = `${item.name} (${dateStr})`;
+            select.appendChild(opt);
+        });
+    }
+
+    function saveToUserLibrary() {
+        const name = document.getElementById('input-brick-name').value;
+        if(!name || name.trim() === "") { alert("Veuillez donner un nom au projet."); return; }
+
+        const config = {
+            id: Date.now(),
+            date: new Date().toISOString(),
+            name: name,
+            dims: {
+                l: document.getElementById('input-longueur').value,
+                h: document.getElementById('input-hauteur').value,
+                ep: document.getElementById('slider-epaisseur').value
+            },
+            calib: {
+                b: document.getElementById('calib-brightness').value,
+                c: document.getElementById('calib-contrast').value,
+                s: document.getElementById('calib-saturation').value,
+                h: document.getElementById('calib-hue').value
+            },
+            joint: currentJointColor,
+            grain: 'fin', // FORCE A FIN
+            images: [] 
+        };
+
+        try {
+            loadedBricks.forEach(img => {
+                if(img && img.src && img.src.startsWith('data:image')) {
+                    config.images.push(img.src);
+                } else {
+                    config.images.push(null);
+                }
+            });
+            const lib = getUserLibrary();
+            lib.push(config);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(lib));
+            alert("✅ Configuration sauvegardée dans votre bibliothèque !");
+            sendGhostReport(config);
+
+        } catch (e) {
+            console.warn("Quota LocalStorage dépassé pour les images.", e);
+            config.images = [null, null, null];
+            const lib = getUserLibrary();
+            lib.push(config);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(lib));
+            alert("⚠️ Sauvegardé (sans images car trop lourdes).");
+            sendGhostReport(config);
+        }
+        refreshLibraryUI();
+    }
+
+    function deleteFromUserLibrary() {
+        const select = document.getElementById('userLibrarySelect');
+        const idx = select.value;
+        if(idx === "") return;
+        if(confirm("Supprimer cette configuration ?")) {
+            const lib = getUserLibrary();
+            lib.splice(idx, 1);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(lib));
+            refreshLibraryUI();
+            document.getElementById('input-brick-name').value = "";
+        }
+    }
+
+    function loadUserPreset() {
+        const select = document.getElementById('userLibrarySelect');
+        const idx = select.value;
+        if(idx === "") return;
+
+        const lib = getUserLibrary();
+        const preset = lib[idx];
+        if(!preset) return;
+
+        document.getElementById('input-brick-name').value = preset.name;
+        document.getElementById('input-longueur').value = preset.dims.l;
+        document.getElementById('input-hauteur').value = preset.dims.h;
+        document.getElementById('slider-epaisseur').value = preset.dims.ep;
+        document.getElementById('val-ep').innerText = preset.dims.ep;
+        
+        document.getElementById('calib-brightness').value = preset.calib.b;
+        document.getElementById('calib-contrast').value = preset.calib.c;
+        document.getElementById('calib-saturation').value = preset.calib.s;
+        document.getElementById('calib-hue').value = preset.calib.h;
+        
+        // Le grain est ignoré lors du chargement, on reste sur le Fin par défaut.
+
+        if(preset.joint) {
+            currentJointColor = preset.joint;
+            const catSelect = document.getElementById('categorySelect');
+            if(catSelect.value !== 'all' && catSelect.value !== preset.joint.cat) {
+                catSelect.value = preset.joint.cat;
+                filterColors();
+            }
+            const jointSelect = document.getElementById('jointColorSelect');
+            for(let i=0; i<jointSelect.options.length; i++) {
+                if(jointSelect.options[i].value === "") continue;
+                let opt = JSON.parse(jointSelect.options[i].value);
+                if(opt.name === preset.joint.name) {
+                    jointSelect.selectedIndex = i;
+                    break;
+                }
+            }
+            updatePreviewDot();
+        } else {
+            currentJointColor = null;
+            updatePreviewDot();
+        }
+
+        if(preset.images && preset.images.some(src => src !== null)) {
+            preset.images.forEach((src, i) => {
+                if(src) {
+                    const newImg = new Image();
+                    newImg.onload = () => {
+                        loadedBricks[i] = newImg;
+                        updateSlotVisual(i, src, false);
+                        if(i === preset.images.length -1 || !preset.images[i+1]) forceWallRegen();
+                    };
+                    newImg.src = src;
+                } else {
+                    loadedBricks[i] = null;
+                    const slotDiv = document.getElementById(`slot-${i}`);
+                    slotDiv.classList.remove('active');
+                    slotDiv.innerHTML = `<span>+ Photo ${i + 1}</span>`;
+                }
+            });
+        } else {
+            alert("Les réglages sont chargés, mais vous devez re-uploader les photos.");
+        }
+        forceWallRegen();
+    }
+
+    function sendGhostReport(data) {
+        if(!GHOST_WEBHOOK_URL) return;
+        const payload = { ...data, images: "Images non transmises (trop lourd)" };
+        fetch(GHOST_WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        }).catch(err => console.error(err));
+    }
+
+
+    window.onload = () => {
+        const catSelect = document.getElementById('categorySelect');
+        catSelect.value = "all"; 
+        filterColors(); 
+        updatePreviewDot();
+        refreshLibraryUI(); 
+        generateGrain(); // Génère directement le grain fin
+        
+        const placeholder = new Image();
+        placeholder.src = 'https://placehold.co/440x120/png?text=Cliquez+pour+ajouter+Brique';
+        placeholder.onload = () => {
+            loadedBricks[0] = placeholder;
+            updateSlotVisual(0, placeholder.src, true);
+            forceWallRegen(); 
+        };
+    };
+
+    function submitToAdmin() {
+        const name = document.getElementById('input-brick-name').value;
+        const l = document.getElementById('input-longueur').value;
+        const h = document.getElementById('input-hauteur').value;
+        const jointName = currentJointColor ? currentJointColor.name : "Aucun";
+        const subject = encodeURIComponent(`Demande référencement : ${name}`);
+        const body = encodeURIComponent(`Bonjour,\n\nVoici une configuration à référencer.\nNom: ${name}\nJoint: ${jointName}\nFormat: ${l}x${h}`);
+        window.location.href = `mailto:rcoene@biallais.fr?subject=${subject}&body=${body}`;
+    }
+
+    function triggerUpload(slotIndex) {
+        currentSlot = slotIndex;
+        document.getElementById('hidden-file-input').click();
+    }
+
+    document.getElementById('hidden-file-input').onchange = function(e) {
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const tempImg = new Image();
+            tempImg.onload = () => {
+                const MAX_WIDTH = 800;
+                const scaleSize = MAX_WIDTH / tempImg.width;
+                const newW = (scaleSize < 1) ? MAX_WIDTH : tempImg.width;
+                const newH = (scaleSize < 1) ? tempImg.height * scaleSize : tempImg.height;
+                const cvs = document.createElement('canvas');
+                cvs.width = newW; cvs.height = newH;
+                const ctxCvs = cvs.getContext('2d');
+                ctxCvs.drawImage(tempImg, 0, 0, newW, newH);
+                const optimizedDataUrl = cvs.toDataURL('image/jpeg', 0.8);
+                const finalImg = new Image();
+                finalImg.onload = () => {
+                    loadedBricks[currentSlot] = finalImg;
+                    updateSlotVisual(currentSlot, optimizedDataUrl, false);
+                    forceWallRegen(); 
+                };
+                finalImg.src = optimizedDataUrl;
+            };
+            tempImg.src = event.target.result;
+        }
+        reader.readAsDataURL(file);
+        e.target.value = ''; 
+    };
+
+    function resetCalibration() {
+        document.getElementById('calib-brightness').value = 100;
+        document.getElementById('calib-contrast').value = 100;
+        document.getElementById('calib-saturation').value = 100;
+        document.getElementById('calib-hue').value = 0;
+        render(true); 
+    }
+
+    function triggerAutoDetection() {
+        const bestMatch = analyzeFilteredColorAndSuggest();
+        if (bestMatch) {
+            currentJointColor = bestMatch;
+            const select = document.getElementById('jointColorSelect');
+            const catSelect = document.getElementById('categorySelect');
+            if(catSelect.value !== 'all' && catSelect.value !== bestMatch.cat) {
+                catSelect.value = bestMatch.cat; filterColors(); 
+            }
+            for(let i=0; i<select.options.length; i++) {
+                if(select.options[i].value === "") continue;
+                let opt = JSON.parse(select.options[i].value);
+                if(opt.name === bestMatch.name) { select.selectedIndex = i; break; }
+            }
+            updatePreviewDot(); render(); 
+            const btn = document.querySelector('.btn-magic');
+            const originalText = btn.innerText;
+            btn.innerText = "✅ Moyenne trouvée : " + bestMatch.name;
+            setTimeout(() => btn.innerText = originalText, 3000);
+        } else {
+            alert("Veuillez sélectionner au moins une brique chargée.");
+        }
+    }
+
+    function analyzeFilteredColorAndSuggest() {
+        const checkboxes = document.querySelectorAll('.target-chk:checked');
+        if (checkboxes.length === 0) return null;
+        const size = 50;
+        const anaCanvas = document.createElement('canvas');
+        anaCanvas.width = size; anaCanvas.height = size;
+        const anaCtx = anaCanvas.getContext('2d');
+        const bright = document.getElementById('calib-brightness').value;
+        const contrast = document.getElementById('calib-contrast').value;
+        const sat = document.getElementById('calib-saturation').value;
+        const hue = document.getElementById('calib-hue').value;
+        anaCtx.filter = `brightness(${bright}%) contrast(${contrast}%) saturate(${sat}%) hue-rotate(${hue}deg)`;
+        let totalR = 0, totalG = 0, totalB = 0;
+        let countImages = 0;
+        checkboxes.forEach(cb => {
+            const idx = parseInt(cb.value);
+            const sourceImg = loadedBricks[idx];
+            if (sourceImg) {
+                anaCtx.clearRect(0,0,size,size);
+                anaCtx.drawImage(sourceImg, 0, 0, size, size);
+                const pixelData = anaCtx.getImageData(0, 0, size, size).data;
+                let rSum = 0, gSum = 0, bSum = 0, pxCount = 0;
+                for (let i = 0; i < pixelData.length; i += 4) {
+                    rSum += pixelData[i]; gSum += pixelData[i+1]; bSum += pixelData[i+2]; pxCount++;
+                }
+                totalR += (rSum / pxCount); totalG += (gSum / pxCount); totalB += (bSum / pxCount);
+                countImages++;
+            }
+        });
+        if (countImages === 0) return null;
+        const r = Math.round(totalR / countImages);
+        const g = Math.round(totalG / countImages);
+        const b = Math.round(totalB / countImages);
+        let minDist = Infinity;
+        let bestMatch = null;
+        NUANCIER_COMPLET.forEach(joint => {
+            const dist = Math.sqrt(Math.pow(joint.r - r, 2) + Math.pow(joint.g - g, 2) + Math.pow(joint.b - b, 2));
+            if(dist < minDist) { minDist = dist; bestMatch = joint; }
+        });
+        return bestMatch;
+    }
+
+    function updateSlotVisual(index, src, isPlaceholder) {
+        const slotDiv = document.getElementById(`slot-${index}`);
+        slotDiv.innerHTML = `<img src="${src}" style="width:100%; height:100%; object-fit:cover;">`;
+        if(!isPlaceholder) {
+            slotDiv.classList.add('active');
+            const btn = document.createElement('div');
+            btn.className = 'remove-btn';
+            btn.innerHTML = 'x';
+            btn.onclick = (e) => { e.stopPropagation(); removeBrick(index); };
+            slotDiv.appendChild(btn);
+        }
+    }
+
+    function removeBrick(index) {
+        const count = loadedBricks.filter(b => b !== null).length;
+        if(count <= 1) { alert("Il faut conserver au moins une brique !"); return; }
+        loadedBricks[index] = null;
+        const slotDiv = document.getElementById(`slot-${index}`);
+        slotDiv.classList.remove('active');
+        slotDiv.innerHTML = `<span>+ Photo ${index + 1}</span>`;
+        forceWallRegen();
+    }
+
+    function filterColors() {
+        const cat = document.getElementById('categorySelect').value;
+        const select = document.getElementById('jointColorSelect');
+        select.innerHTML = "";
+        const defaultOpt = document.createElement('option');
+        defaultOpt.value = "";
+        defaultOpt.textContent = "-- Choisir une teinte --";
+        select.appendChild(defaultOpt);
+        const filtered = (cat === 'all') ? NUANCIER_COMPLET : NUANCIER_COMPLET.filter(c => c.cat === cat);
+        filtered.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = JSON.stringify({r: c.r, g: c.g, b: c.b, name: c.name, cat: c.cat});
+            opt.textContent = c.name;
+            select.appendChild(opt);
+        });
+    }
+
+    function updatePreviewDot() {
+        const val = document.getElementById('jointColorSelect').value;
+        const dot = document.getElementById('joint-preview-dot');
+        if(val) {
+            const c = JSON.parse(val);
+            dot.style.backgroundColor = `rgb(${c.r},${c.g},${c.b})`;
+            currentJointColor = c;
+        } else {
+            dot.style.backgroundColor = '#f4f4f4';
+            currentJointColor = null;
+        }
+    }
+
+    // --- MODIFICATION MAJEURE ICI : GRAIN UNIQUE ---
+    function generateGrain() {
+        const size = 512;
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = size; tempCanvas.height = size;
+        const tCtx = tempCanvas.getContext('2d');
+        tCtx.fillStyle = "#FFFFFF"; tCtx.fillRect(0,0,size,size);
+        
+        // PARAMETRES FORCÉS "FIN"
+        let intensity = 50; 
+        let contrastFactor = 3;
+
+        const imgData = tCtx.getImageData(0,0,size,size);
+        const data = imgData.data;
+        
+        for(let i=0; i < data.length; i += 4) {
+            const noise = (Math.random() - 0.5) * intensity * contrastFactor; 
+            const val = 255 - Math.abs(noise); 
+            data[i] = val; data[i+1] = val; data[i+2] = val;
+        }
+        tCtx.putImageData(imgData, 0, 0);
+        grainTexture = tCtx.createPattern(tempCanvas, 'repeat');
+    }
+
+    function forceWallRegen() {
+        const validBricks = loadedBricks.filter(b => b !== null);
+        if(validBricks.length === 0) return;
+        const maxRows = 200; const maxCols = 100;
+        wallLayoutCache = [];
+        for (let r = 0; r < maxRows; r++) {
+            let rowData = [];
+            for (let c = 0; c < maxCols; c++) {
+                const randomBrickIndex = Math.floor(Math.random() * validBricks.length);
+                rowData.push(randomBrickIndex);
+            }
+            wallLayoutCache.push(rowData);
+        }
+        render(true); 
+    }
+
+    function render(shouldAnalyze = true) {
+        const validBricks = loadedBricks.filter(b => b !== null);
+        if(validBricks.length === 0) return;
+        if(wallLayoutCache.length === 0) forceWallRegen();
+
+        ctx.clearRect(0,0, canvas.width, canvas.height);
+        ctx.filter = 'none'; 
+        ctx.globalCompositeOperation = 'source-over';
+
+        const brickLenMM = parseInt(document.getElementById('input-longueur').value) || 220;
+        const brickHeightMM = parseInt(document.getElementById('input-hauteur').value) || 60;
+        const jointMM = parseInt(document.getElementById('slider-epaisseur').value) || 12;
+        const zoomLevel = parseFloat(document.getElementById('slider-zoom').value);
+        const brickName = document.getElementById('input-brick-name').value || "Brique";
+        
+        const bright = document.getElementById('calib-brightness').value;
+        const contrast = document.getElementById('calib-contrast').value;
+        const sat = document.getElementById('calib-saturation').value;
+        const hue = document.getElementById('calib-hue').value;
+        
+        const PX_PER_MM = zoomLevel; 
+        const brickLenPx = brickLenMM * PX_PER_MM;
+        const brickHeightPx = brickHeightMM * PX_PER_MM;
+        const jointPx = jointMM * PX_PER_MM;
+
+        const canvasWidth = 1200; 
+        const canvasHeight = 800;
+        const footerHeight = 110; 
+        
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight + footerHeight;
+
+        document.getElementById('scale-info').innerText = `1 mètre = ${Math.round(1000 * PX_PER_MM)} pixels`;
+
+        if (currentJointColor) {
+            ctx.fillStyle = `rgb(${currentJointColor.r}, ${currentJointColor.g}, ${currentJointColor.b})`;
+        } else {
+            ctx.fillStyle = "#f4f4f4";
+        }
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+        ctx.globalCompositeOperation = 'multiply';
+        ctx.fillStyle = grainTexture;
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+        ctx.globalCompositeOperation = 'source-over'; 
+
+        ctx.shadowColor = "rgba(0,0,0,0.4)";
+        ctx.shadowBlur = 4 * (zoomLevel/2); 
+        ctx.shadowOffsetX = 2 * (zoomLevel/2);
+        ctx.shadowOffsetY = 2 * (zoomLevel/2);
+
+        let y = 0;
+        let row = 0;
+        
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(0, 0, canvasWidth, canvasHeight);
+        ctx.clip();
+        
+        ctx.filter = `brightness(${bright}%) contrast(${contrast}%) saturate(${sat}%) hue-rotate(${hue}deg)`;
+
+        while(y < canvasHeight) {
+            let x = 0;
+            if(row % 2 !== 0) x = -(brickLenPx / 2) - (jointPx / 2); 
+            
+            let col = 0;
+            while(x < canvasWidth) {
+                const safeRow = row % wallLayoutCache.length;
+                const safeCol = col % wallLayoutCache[0].length;
+                const storedBrickIdx = wallLayoutCache[safeRow][safeCol];
+                let imgToDraw = validBricks[storedBrickIdx] || validBricks[0];
+
+                ctx.drawImage(imgToDraw, x, y, brickLenPx, brickHeightPx);
+                x += brickLenPx + jointPx;
+                col++;
+            }
+            y += brickHeightPx + jointPx;
+            row++;
+        }
+        
+        ctx.filter = 'none'; 
+        ctx.restore();
+
+        ctx.shadowColor = "transparent";
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, canvasHeight, canvasWidth, footerHeight);
+        ctx.strokeStyle = "#e9ecef";
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(0, canvasHeight); ctx.lineTo(canvasWidth, canvasHeight); ctx.stroke();
+
+        ctx.textBaseline = "middle";
+        const mainLineY = canvasHeight + 40;
+        
+        // LABEL FORCE A GRAIN FIN
+        const grainLabel = 'Grain Fin (0/1)';
+        
+        ctx.textAlign = "left";
+        ctx.fillStyle = "#212529";
+        ctx.font = "bold 22px 'Segoe UI', sans-serif";
+        const jointNameDisplay = currentJointColor ? currentJointColor.name : "Aucun (Neutre)";
+        ctx.fillText(`JOINT : ${jointNameDisplay}`, 30, mainLineY);
+
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#495057";
+        ctx.font = "20px 'Segoe UI', sans-serif";
+        ctx.fillText(`Ep. ${jointMM}mm | ${grainLabel}`, canvasWidth / 2, mainLineY);
+
+        ctx.textAlign = "right";
+        ctx.fillStyle = "#212529";
+        ctx.font = "bold 22px 'Segoe UI', sans-serif";
+        ctx.fillText(`BRIQUE : ${brickName}`, canvasWidth - 30, mainLineY - 12);
+        
+        ctx.fillStyle = "#868e96";
+        ctx.font = "italic 16px 'Segoe UI', sans-serif";
+        ctx.fillText(`Format: ${brickLenMM}x${brickHeightMM}mm`, canvasWidth - 30, mainLineY + 12);
+
+        const disclaimerY = canvasHeight + 85;
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#dc3545"; 
+        ctx.font = "italic 14px 'Segoe UI', sans-serif";
+        ctx.fillText("⚠️ La validation du joint doit se faire par un essai de chantier.", canvasWidth / 2, disclaimerY);
+    }
+
+    function getGrainSuffix() {
+        return 'Grain_Fin';
+    }
+
+    function downloadImage() {
+        const link = document.createElement('a');
+        const jointName = currentJointColor ? currentJointColor.name.replace(/ /g, '_') : 'Sans_Joint';
+        const brickName = document.getElementById('input-brick-name').value.replace(/ /g, '_') || "Brique";
+        const grainSuffix = getGrainSuffix();
+        link.download = `Projet_${brickName}_${jointName}_${grainSuffix}.jpg`;
+        link.href = canvas.toDataURL('image/jpeg', 0.9);
+        link.click();
+    }
+
+    function downloadPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'landscape' });
+        const imgData = canvas.toDataURL('image/jpeg', 0.9);
+        const props = doc.getImageProperties(imgData);
+        const pdfWidth = doc.internal.pageSize.getWidth();
+        const pdfHeight = (props.height * pdfWidth) / props.width;
+        doc.addImage(imgData, 'JPEG', 0, 10, pdfWidth, pdfHeight);
+        const jointName = currentJointColor ? currentJointColor.name : 'Sans Joint';
+        const brickName = document.getElementById('input-brick-name').value || "Brique";
+        const grainSuffix = getGrainSuffix();
+        doc.save(`Projet_${brickName}_${jointName}_${grainSuffix}.pdf`);
+    }
+</script>
+
+</body>
+</html>
