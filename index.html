@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Simulateur Biamortier V87 - Ultra Fluide</title>
+    <title>Simulateur Biamortier V88 - Formulaire d'Envoi</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         * { box-sizing: border-box; }
@@ -86,7 +86,7 @@
 <div class="controls">
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid #f0f2f5; padding-bottom:10px; margin-bottom:5px;">
         <h2>🛠️ Configurateur</h2>
-        <span style="font-size:0.7rem; color:#888;">V87 - Haute Performance</span>
+        <span style="font-size:0.7rem; color:#888;">V88 - Envoi Intégré</span>
     </div>
 
     <div class="library-box">
@@ -187,12 +187,21 @@
             </div>
         </div>
         
-        <button class="submit-btn" onclick="submitToAdmin()">
-            📤 Demande de référencement
-        </button>
+        <div style="background: #e9ecef; padding: 12px; border-radius: 8px; margin-top: 20px; border: 1px solid #ced4da;">
+            <h4 style="margin:0 0 10px 0; font-size:0.85rem; color:#495057;">👤 Vos Coordonnées</h4>
+            <div style="margin-bottom: 8px;">
+                <input type="text" id="input-user-name" placeholder="Votre Nom et Prénom" style="width:100%; padding:8px; border:1px solid #ced4da; border-radius:6px; font-size:0.85rem;">
+            </div>
+            <div>
+                <input type="text" id="input-company-name" placeholder="Nom de votre entreprise" style="width:100%; padding:8px; border:1px solid #ced4da; border-radius:6px; font-size:0.85rem;">
+            </div>
+            <button class="submit-btn" onclick="submitToAdmin()" style="margin-top: 12px;">
+                📤 Demande de référencement
+            </button>
+        </div>
     </div>
 
-    <div style="background: #e7f5ff; padding: 15px; border-radius: 8px; border: 1px solid #d0ebff;">
+    <div style="background: #e7f5ff; padding: 15px; border-radius: 8px; border: 1px solid #d0ebff; margin-top: 15px;">
         <h3>3. Vue & Export</h3>
         <label style="margin-top:10px;">Distance de vue (Zoom) :</label>
         <input type="range" id="slider-zoom" min="0.5" max="5.0" step="0.1" value="1.5" oninput="scheduleRender()">
@@ -356,7 +365,7 @@
     let currentSlot = 0;
     const STORAGE_KEY = 'biamortier_user_lib';
     
-    // --- GESTION DES PERFORMANCES (THROTTLING) ---
+    // --- GESTION DES PERFORMANCES ---
     let isRendering = false;
     function scheduleRender() {
         if (!isRendering) {
@@ -595,9 +604,52 @@
         }
     }
 
+    // --- NOUVELLE FONCTION EMAIL AUTOMATIQUE ---
     function submitToAdmin() {
-        const name = document.getElementById('input-brick-name').value;
-        window.location.href = `mailto:rcoene@biallais.fr?subject=Ref:${name}&body=Demande de ref pour ${name}`;
+        const bName = document.getElementById('input-brick-name').value || "Non renseigné";
+        const l = document.getElementById('input-longueur').value;
+        const h = document.getElementById('input-hauteur').value;
+        
+        const bri = document.getElementById('calib-brightness').value;
+        const con = document.getElementById('calib-contrast').value;
+        const sat = document.getElementById('calib-saturation').value;
+        const hue = document.getElementById('calib-hue').value;
+        
+        const jointName = currentJointColor ? currentJointColor.name : "Aucun joint sélectionné";
+        const ep = document.getElementById('slider-epaisseur').value;
+
+        const userName = document.getElementById('input-user-name').value || "Non renseigné";
+        const companyName = document.getElementById('input-company-name').value || "Non renseigné";
+
+        const subject = encodeURIComponent(`Demande de référencement : ${bName}`);
+        
+        let body = `Bonjour,%0D%0A%0D%0A`;
+        body += `Je souhaite faire une demande de référencement pour une nouvelle brique.%0D%0A%0D%0A`;
+        
+        body += `👤 CONTACT :%0D%0A`;
+        body += `- Nom / Prénom : ${userName}%0D%0A`;
+        body += `- Entreprise : ${companyName}%0D%0A%0D%0A`;
+        
+        body += `🧱 INFORMATIONS BRIQUE :%0D%0A`;
+        body += `- Référence : ${bName}%0D%0A`;
+        body += `- Dimensions : ${l} mm x ${h} mm%0D%0A%0D%0A`;
+        
+        body += `🎨 RÉGLAGES CALIBRAGE :%0D%0A`;
+        body += `- Lumière : ${bri} %%0D%0A`;
+        body += `- Contraste : ${con} %%0D%0A`;
+        body += `- Saturation : ${sat} %%0D%0A`;
+        body += `- Teinte : ${hue}°%0D%0A%0D%0A`;
+        
+        body += `🧪 JOINT SÉLECTIONNÉ :%0D%0A`;
+        body += `- Teinte : ${jointName}%0D%0A`;
+        body += `- Épaisseur : ${ep} mm%0D%0A%0D%0A`;
+        
+        body += `---%0D%0A`;
+        body += `⚠️ Pensez à joindre à cet email :%0D%0A`;
+        body += `1. La photo de la brique d'origine%0D%0A`;
+        body += `2. L'export JPG ou PDF de votre simulation%0D%0A`;
+
+        window.location.href = `mailto:rcoene@biallais.fr?subject=${subject}&body=${body}`;
     }
 
     function triggerUpload(i) { currentSlot = i; document.getElementById('hidden-file-input').click(); }
@@ -769,7 +821,7 @@
         document.getElementById('calib-contrast').value = 100;
         document.getElementById('calib-saturation').value = 100;
         document.getElementById('calib-hue').value = 0;
-        render(); // Pas de drag ici, donc un rendu immédiat est ok
+        render();
     }
 
     function triggerAutoDetection() {
@@ -1015,8 +1067,7 @@
         const sat = document.getElementById('calib-saturation').value;
         const hue = document.getElementById('calib-hue').value;
 
-        // ÉTAPE 1 : PRE-CACHING (Fabrique les briques en mémoire pour ne pas recalculer l'ombre)
-        const pad = 15 * zoom; // Marge pour l'ombre
+        const pad = 15 * zoom; 
         const preRenderedBricks = valid.map(img => {
             const tempCvs = document.createElement('canvas');
             tempCvs.width = L_px + pad * 2;
@@ -1035,7 +1086,6 @@
             return tempCvs;
         });
 
-        // MODE PIPETTE
         if (isColorPicking) {
             ctx.fillStyle = "#ffffff"; 
             ctx.fillRect(0, 0, W, H);
@@ -1064,7 +1114,6 @@
             return; 
         }
 
-        // MODE NORMAL (Dessin du joint)
         if(currentJointColor) {
             ctx.fillStyle = `rgb(${currentJointColor.r}, ${currentJointColor.g}, ${currentJointColor.b})`;
         } else {
@@ -1082,7 +1131,6 @@
 
         let y = 0; let rIdx = 0;
         
-        // DESSIN DE LA CACHE (Ultra rapide)
         while(y < H) {
             let x = (rIdx % 2 !== 0) ? -(L_px/2) - (J_px/2) : 0;
             let cIdx = 0;
@@ -1097,7 +1145,6 @@
         }
         ctx.restore();
 
-        // FOOTER
         ctx.fillStyle = "white"; ctx.fillRect(0, H, W, Footer);
         ctx.strokeStyle = "#ddd"; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(0,H); ctx.lineTo(W,H); ctx.stroke();
         
@@ -1107,7 +1154,7 @@
         ctx.fillText(`JOINT : ${currentJointColor ? currentJointColor.name : "Aucun"}`, 30, Y_txt);
         
         ctx.textAlign = "center"; ctx.fillStyle = "#555"; ctx.font = "20px 'Segoe UI'";
-        ctx.fillText(`Ep. ${J_mm}mm | V87 HD`, W/2, Y_txt);
+        ctx.fillText(`Ep. ${J_mm}mm | V88`, W/2, Y_txt);
 
         ctx.textAlign = "right"; ctx.fillStyle = "#222"; ctx.font = "bold 22px 'Segoe UI'";
         const bName = document.getElementById('input-brick-name').value || "Brique";
@@ -1118,7 +1165,7 @@
         const valid = loadedBricks.filter(b => b && !b.isPlaceholder);
         if(!valid.length) { alert("Veuillez d'abord charger une brique avant d'exporter."); return; }
         const link = document.createElement('a');
-        link.download = `Projet_V87_LCh.jpg`;
+        link.download = `Projet_V88_LCh.jpg`;
         link.href = canvas.toDataURL('image/jpeg', 0.92);
         link.click();
     }
@@ -1133,7 +1180,7 @@
         const w = doc.internal.pageSize.getWidth();
         const h = (props.height * w) / props.width;
         doc.addImage(img, 'JPEG', 0, 10, w, h);
-        doc.save('Projet_V87.pdf');
+        doc.save('Projet_V88.pdf');
     }
 </script>
 </body>
