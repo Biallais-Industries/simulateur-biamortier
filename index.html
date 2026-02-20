@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Simulateur Biamortier V86 - Aperçu Immédiat</title>
+    <title>Simulateur Biamortier V87 - Ultra Fluide</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         * { box-sizing: border-box; }
@@ -86,7 +86,7 @@
 <div class="controls">
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid #f0f2f5; padding-bottom:10px; margin-bottom:5px;">
         <h2>🛠️ Configurateur</h2>
-        <span style="font-size:0.7rem; color:#888;">V86 - Opérateur</span>
+        <span style="font-size:0.7rem; color:#888;">V87 - Haute Performance</span>
     </div>
 
     <div class="library-box">
@@ -104,7 +104,7 @@
         <h3>1. Configuration Brique</h3>
         <div style="margin-bottom: 10px;">
             <label>Nom du projet / Référence :</label>
-            <input type="text" id="input-brick-name" placeholder="Ex: Brique Moulée Main Rouge" oninput="render()">
+            <input type="text" id="input-brick-name" placeholder="Ex: Brique Moulée Main Rouge" oninput="scheduleRender()">
         </div>
         
         <div class="input-row" style="margin-bottom:15px;">
@@ -142,10 +142,10 @@
             
             <button class="reset-calib-btn" onclick="resetCalibration()" title="Remettre à l'origine">↺ R.A.Z</button>
             
-            <div class="calibration-slider"><label>Lumière</label><input type="range" id="calib-brightness" min="50" max="150" value="100" oninput="render()"></div>
-            <div class="calibration-slider"><label>Contraste</label><input type="range" id="calib-contrast" min="50" max="150" value="100" oninput="render()"></div>
-            <div class="calibration-slider"><label>Saturat.</label><input type="range" id="calib-saturation" min="0" max="300" value="100" oninput="render()"></div>
-            <div class="calibration-slider"><label>Teinte</label><input type="range" id="calib-hue" min="-180" max="180" value="0" step="1" oninput="render()"></div>
+            <div class="calibration-slider"><label>Lumière</label><input type="range" id="calib-brightness" min="50" max="150" value="100" oninput="scheduleRender()"></div>
+            <div class="calibration-slider"><label>Contraste</label><input type="range" id="calib-contrast" min="50" max="150" value="100" oninput="scheduleRender()"></div>
+            <div class="calibration-slider"><label>Saturat.</label><input type="range" id="calib-saturation" min="0" max="300" value="100" oninput="scheduleRender()"></div>
+            <div class="calibration-slider"><label>Teinte</label><input type="range" id="calib-hue" min="-180" max="180" value="0" step="1" oninput="scheduleRender()"></div>
         </div>
     </div>
 
@@ -179,7 +179,7 @@
         <div class="input-row" style="margin-top:15px; align-items: flex-end;">
             <div class="input-group" style="flex: 0.8;">
                 <label>Ep. (mm) : <span id="val-ep" style="color:#007bff;">12</span></label>
-                <input type="range" id="slider-epaisseur" min="8" max="25" step="1" value="12" oninput="document.getElementById('val-ep').innerText = this.value; render()">
+                <input type="range" id="slider-epaisseur" min="8" max="25" step="1" value="12" oninput="document.getElementById('val-ep').innerText = this.value; scheduleRender()">
             </div>
             <div class="input-group" style="flex: 1.2;">
                 <label>Texture Simulée :</label>
@@ -195,7 +195,7 @@
     <div style="background: #e7f5ff; padding: 15px; border-radius: 8px; border: 1px solid #d0ebff;">
         <h3>3. Vue & Export</h3>
         <label style="margin-top:10px;">Distance de vue (Zoom) :</label>
-        <input type="range" id="slider-zoom" min="0.5" max="5.0" step="0.1" value="1.5" oninput="render()">
+        <input type="range" id="slider-zoom" min="0.5" max="5.0" step="0.1" value="1.5" oninput="scheduleRender()">
         <div class="btn-group">
             <button class="btn-jpg" onclick="downloadImage()">JPG</button>
             <button class="btn-pdf" onclick="downloadPDF()">PDF</button>
@@ -355,6 +355,18 @@
     const ctx = canvas.getContext('2d');
     let currentSlot = 0;
     const STORAGE_KEY = 'biamortier_user_lib';
+    
+    // --- GESTION DES PERFORMANCES (THROTTLING) ---
+    let isRendering = false;
+    function scheduleRender() {
+        if (!isRendering) {
+            isRendering = true;
+            requestAnimationFrame(() => {
+                render();
+                isRendering = false;
+            });
+        }
+    }
 
     function convertLchPaletteToRgb() {
         const tempCvs = document.createElement('canvas');
@@ -426,7 +438,6 @@
         return tCtx.createPattern(cvs, 'repeat');
     }
 
-    // NOUVEAU : GENERATEUR DE BRIQUE PAR DEFAUT POUR L'OUVERTURE DE L'APP
     function generateDefaultBrick() {
         const cvs = document.createElement('canvas');
         cvs.width = 440; cvs.height = 120;
@@ -466,7 +477,6 @@
         document.getElementById('categorySelect').value = "Standards";
         filterColors();
         
-        // Sélection par défaut de "GRIS CLAIR"
         const sel = document.getElementById('jointColorSelect');
         for(let i=0; i<sel.options.length; i++) {
             if(sel.options[i].value) {
@@ -482,18 +492,14 @@
         refreshLibraryUI();
         grainTexture = generateProceduralGrain(); 
         
-        // Chargement de la brique d'exemple
         const defaultBrickSrc = generateDefaultBrick();
         const img = new Image();
-        img.isPlaceholder = true; // Marqueur pour reconnaitre que c'est une fausse brique
+        img.isPlaceholder = true; 
         img.onload = () => { 
             loadedBricks[0] = img; 
             updateSlotVisual(0, defaultBrickSrc, true); 
-            
-            // On met les textes vides sur les slots 2 et 3
             updateSlotVisual(1, "", true);
             updateSlotVisual(2, "", true);
-            
             forceWallRegen(); 
         };
         img.src = defaultBrickSrc;
@@ -763,7 +769,7 @@
         document.getElementById('calib-contrast').value = 100;
         document.getElementById('calib-saturation').value = 100;
         document.getElementById('calib-hue').value = 0;
-        render(true);
+        render(); // Pas de drag ici, donc un rendu immédiat est ok
     }
 
     function triggerAutoDetection() {
@@ -978,6 +984,7 @@
         render();
     }
 
+    // --- LE MOTEUR DE RENDU HAUTE PERFORMANCE ---
     function render() {
         let valid = loadedBricks.filter(b => b && !b.isPlaceholder);
         if(!valid.length) {
@@ -1008,11 +1015,31 @@
         const sat = document.getElementById('calib-saturation').value;
         const hue = document.getElementById('calib-hue').value;
 
+        // ÉTAPE 1 : PRE-CACHING (Fabrique les briques en mémoire pour ne pas recalculer l'ombre)
+        const pad = 15 * zoom; // Marge pour l'ombre
+        const preRenderedBricks = valid.map(img => {
+            const tempCvs = document.createElement('canvas');
+            tempCvs.width = L_px + pad * 2;
+            tempCvs.height = H_px + pad * 2;
+            const tCtx = tempCvs.getContext('2d');
+            
+            if (!isColorPicking) {
+                tCtx.shadowColor = "rgba(0,0,0,0.6)";
+                tCtx.shadowBlur = 4 * (zoom/1.5);
+                tCtx.shadowOffsetX = 1 * (zoom/1.5); 
+                tCtx.shadowOffsetY = 2 * (zoom/1.5);
+            }
+            
+            tCtx.filter = `brightness(${bri}%) contrast(${con}%) saturate(${sat}%) hue-rotate(${hue}deg)`;
+            tCtx.drawImage(img, pad, pad, L_px, H_px);
+            return tempCvs;
+        });
+
+        // MODE PIPETTE
         if (isColorPicking) {
             ctx.fillStyle = "#ffffff"; 
             ctx.fillRect(0, 0, W, H);
             
-            ctx.filter = `brightness(${bri}%) contrast(${con}%) saturate(${sat}%) hue-rotate(${hue}deg)`;
             let y = 0; let rIdx = 0;
             while(y < H) {
                 let x = (rIdx % 2 !== 0) ? -(L_px/2) - (J_px/2) : 0;
@@ -1021,14 +1048,12 @@
                     const sR = rIdx % wallLayoutCache.length;
                     const sC = cIdx % wallLayoutCache[0].length;
                     const bIdx = wallLayoutCache[sR][sC];
-                    const img = valid[bIdx] || valid[0];
-                    ctx.drawImage(img, x, y, L_px, H_px);
+                    ctx.drawImage(preRenderedBricks[bIdx], x - pad, y - pad);
                     x += L_px + J_px; cIdx++;
                 }
                 y += H_px + J_px; rIdx++;
             }
 
-            ctx.filter = 'none';
             ctx.fillStyle = "rgba(0,0,0,0.8)";
             ctx.fillRect(0, 0, W, 60);
             ctx.fillStyle = "white";
@@ -1039,6 +1064,7 @@
             return; 
         }
 
+        // MODE NORMAL (Dessin du joint)
         if(currentJointColor) {
             ctx.fillStyle = `rgb(${currentJointColor.r}, ${currentJointColor.g}, ${currentJointColor.b})`;
         } else {
@@ -1054,14 +1080,9 @@
         ctx.save();
         ctx.beginPath(); ctx.rect(0,0,W,H); ctx.clip();
 
-        ctx.shadowColor = "rgba(0,0,0,0.6)";
-        ctx.shadowBlur = 4 * (zoom/1.5);
-        ctx.shadowOffsetX = 1 * (zoom/1.5); 
-        ctx.shadowOffsetY = 2 * (zoom/1.5);
-
         let y = 0; let rIdx = 0;
-        ctx.filter = `brightness(${bri}%) contrast(${con}%) saturate(${sat}%) hue-rotate(${hue}deg)`;
-
+        
+        // DESSIN DE LA CACHE (Ultra rapide)
         while(y < H) {
             let x = (rIdx % 2 !== 0) ? -(L_px/2) - (J_px/2) : 0;
             let cIdx = 0;
@@ -1069,15 +1090,14 @@
                 const sR = rIdx % wallLayoutCache.length;
                 const sC = cIdx % wallLayoutCache[0].length;
                 const bIdx = wallLayoutCache[sR][sC];
-                const img = valid[bIdx] || valid[0];
-                ctx.drawImage(img, x, y, L_px, H_px);
+                ctx.drawImage(preRenderedBricks[bIdx], x - pad, y - pad);
                 x += L_px + J_px; cIdx++;
             }
             y += H_px + J_px; rIdx++;
         }
         ctx.restore();
 
-        ctx.filter = 'none'; ctx.shadowColor = "transparent";
+        // FOOTER
         ctx.fillStyle = "white"; ctx.fillRect(0, H, W, Footer);
         ctx.strokeStyle = "#ddd"; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(0,H); ctx.lineTo(W,H); ctx.stroke();
         
@@ -1087,10 +1107,10 @@
         ctx.fillText(`JOINT : ${currentJointColor ? currentJointColor.name : "Aucun"}`, 30, Y_txt);
         
         ctx.textAlign = "center"; ctx.fillStyle = "#555"; ctx.font = "20px 'Segoe UI'";
-        ctx.fillText(`Ep. ${J_mm}mm | Calibrage LCh (V86)`, W/2, Y_txt);
+        ctx.fillText(`Ep. ${J_mm}mm | V87 HD`, W/2, Y_txt);
 
         ctx.textAlign = "right"; ctx.fillStyle = "#222"; ctx.font = "bold 22px 'Segoe UI'";
-        const bName = document.getElementById('input-brick-name').value || "Exemple";
+        const bName = document.getElementById('input-brick-name').value || "Brique";
         ctx.fillText(`PROJET : ${bName}`, W-30, Y_txt);
     }
 
@@ -1098,7 +1118,7 @@
         const valid = loadedBricks.filter(b => b && !b.isPlaceholder);
         if(!valid.length) { alert("Veuillez d'abord charger une brique avant d'exporter."); return; }
         const link = document.createElement('a');
-        link.download = `Projet_V86_LCh.jpg`;
+        link.download = `Projet_V87_LCh.jpg`;
         link.href = canvas.toDataURL('image/jpeg', 0.92);
         link.click();
     }
@@ -1113,7 +1133,7 @@
         const w = doc.internal.pageSize.getWidth();
         const h = (props.height * w) / props.width;
         doc.addImage(img, 'JPEG', 0, 10, w, h);
-        doc.save('Projet_V86.pdf');
+        doc.save('Projet_V87.pdf');
     }
 </script>
 </body>
