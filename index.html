@@ -3,16 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Simulateur Biamortier V37 - Grain Fin Unique</title>
+    <title>Simulateur Biamortier V86 - Aperçu Immédiat</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        /* --- STYLES CONSERVÉS --- */
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', sans-serif; background: #eef2f6; margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: row; }
         .controls { width: 380px; min-width: 380px; background: white; height: 100%; overflow-y: auto; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 10; display: flex; flex-direction: column; gap: 15px; }
         .preview-container { flex: 1; background: #dce1e8; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; position: relative; height: 100%; }
         .canvas-wrapper { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; max-height: 90vh; }
-        canvas { display: block; max-width: 100%; max-height: 100%; width: auto; height: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3); background: white; }
+        canvas { display: block; max-width: 100%; max-height: 100%; width: auto; height: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3); background: white; cursor: default; }
         h2 { margin: 0 0 5px 0; color: #1a1a1a; font-size: 1.2rem; }
         label { display: block; font-size: 0.85rem; color: #343a40; margin-bottom: 4px; font-weight: 600; }
         .input-row { display: flex; gap: 10px; }
@@ -21,33 +20,45 @@
         input[type="range"] { width: 100%; margin: 8px 0; }
         .upload-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
         .brick-container { display: flex; flex-direction: column; align-items: center; gap: 5px; }
-        .brick-slot { width: 100%; aspect-ratio: 16/9; border: 2px dashed #cbd5e1; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; position: relative; background: #f8f9fa; transition: 0.2s; font-size: 0.8rem; color: #adb5bd; flex-direction: column; text-align:center; }
+        .brick-slot { width: 100%; aspect-ratio: 16/9; border: 2px dashed #cbd5e1; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; position: relative; background: #f8f9fa; transition: 0.2s; font-size: 0.8rem; color: #adb5bd; flex-direction: column; text-align:center; line-height: 1.3; }
         .brick-slot:hover { border-color: #007bff; color: #007bff; background: #eef7ff; }
         .brick-slot img { width: 100%; height: 100%; object-fit: cover; }
         .brick-slot.active { border-style: solid; border-color: #28a745; }
-        .remove-btn { position: absolute; top: 2px; right: 2px; background: rgba(255,0,0,0.7); color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 10px; display: flex; align-items: center; justify-content: center; }
-        .target-selector { font-size: 0.75rem; color: #666; display: flex; align-items: center; gap: 5px; cursor: pointer; background: #f1f3f5; padding: 4px 8px; border-radius: 12px; border: 1px solid #dee2e6; }
+        .remove-btn { position: absolute; top: 2px; right: 2px; background: rgba(255,0,0,0.7); color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 10px; display: flex; align-items: center; justify-content: center; z-index: 10; cursor: pointer; }
+        
+        .tips-box { background: #e3f2fd; border: 1px solid #90caf9; border-radius: 6px; padding: 10px; margin-bottom: 15px; font-size: 0.8rem; color: #0d47a1; }
+        .tips-box summary { font-weight: bold; cursor: pointer; list-style: none; outline: none; }
+        .tips-box summary::-webkit-details-marker { display: none; }
+        .tips-box ul { margin: 8px 0 0 0; padding-left: 20px; color: #333; }
+        .tips-box li { margin-bottom: 6px; }
+        .tips-box strong { color: #0d47a1; }
+
         .calibration-box { background: #fff3cd; border: 1px solid #ffeeba; padding: 10px; border-radius: 8px; margin-top: 15px; position: relative; }
         .calibration-slider { display: flex; align-items: center; gap: 10px; font-size: 0.8rem; margin-bottom: 5px; }
-        .calibration-slider label { width: 70px; margin:0; }
-        .calibration-slider input { flex:1; }
+        .calibration-slider label { width: 70px; margin:0; font-weight: bold; }
+        .calibration-slider input[type="range"] { flex:1; }
         .reset-calib-btn { position: absolute; top: 10px; right: 10px; background: #fff; border: 1px solid #e0c46c; border-radius: 4px; font-size: 0.7rem; padding: 2px 6px; cursor: pointer; color: #856404; }
+        
         .btn-group { display: flex; gap: 10px; margin-top: 10px; }
         button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .btn-jpg { background: #198754; color: white; }
         .btn-pdf { background: #dc3545; color: white; }
         button:hover { opacity: 0.95; transform: translateY(-1px); }
         #joint-preview-dot { width: 40px; height: 38px; border-radius: 6px; border: 1px solid #dee2e6; background-color: #f4f4f4; flex-shrink: 0; }
-        .btn-magic { width: 100%; background: linear-gradient(135deg, #6610f2, #5f3dc4); color: white; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 10px rgba(102, 16, 242, 0.2); transition: 0.2s; font-size: 0.95rem; }
+        .btn-magic { background: linear-gradient(135deg, #6610f2, #5f3dc4); color: white; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(102, 16, 242, 0.2); transition: 0.2s; font-size: 0.85rem; }
+        .btn-magic-alt { background: linear-gradient(135deg, #0d6efd, #0b5ed7); color: white; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2); transition: 0.2s; font-size: 0.85rem; }
+        
         .submit-btn { background: #0d47a1; color: white; width: 100%; margin-top: 15px; padding: 12px; border-radius: 6px; border:none; cursor: pointer; font-weight: bold; display:flex; align-items:center; justify-content:center; gap:8px; }
         .library-box { background: #e3f2fd; border: 1px solid #90caf9; padding: 15px; border-radius: 8px; margin-bottom: 5px; }
-        .instruction-box { font-size: 0.75rem; color: #495057; background: #e2e6ea; padding: 10px; border-radius: 6px; margin-top: 10px; line-height: 1.4; border-left: 4px solid #6c757d; }
         .lib-controls { display: flex; gap: 5px; margin-top: 10px; }
         .btn-save-lib { background: #0d6efd; color: white; flex: 2; font-size: 0.8rem; padding: 8px; }
         .btn-del-lib { background: #dc3545; color: white; flex: 1; font-size: 0.8rem; padding: 8px; }
-        
-        /* STYLE POUR LE CHAMP GRAIN FIXE */
-        .fixed-value-box { width: 100%; padding: 8px; background: #e9ecef; border: 1px solid #ced4da; border-radius: 6px; font-size: 0.9rem; color: #495057; }
+        .fixed-value-box { width: 100%; padding: 8px; background: #e9ecef; border: 1px solid #ced4da; border-radius: 6px; font-size: 0.85rem; color: #495057; text-align: center; font-weight: bold;}
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 2000; display: flex; justify-content: center; align-items: center; flex-direction: column; }
+        .modal-content { background: white; padding: 20px; border-radius: 8px; text-align: center; max-width: 95vw; max-height: 95vh; display:flex; flex-direction:column; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        .crop-canvas-container { position:relative; display:inline-block; max-width:100%; margin-top: 10px; background: #222; border-radius: 4px; overflow:hidden;}
+        #crop-canvas { max-width: 100%; max-height: 60vh; cursor: crosshair; touch-action: none; display: block; }
 
         @media (max-width: 850px) {
             body { flex-direction: column; overflow: auto; height: auto; }
@@ -58,78 +69,101 @@
 </head>
 <body>
 
+<div id="crop-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-content">
+        <h2 style="margin: 0; color: #0d47a1;">✂️ Recadrer la brique</h2>
+        <p style="font-size: 0.9rem; color: #555; margin-bottom: 5px;">Tracez un rectangle. <b>Les proportions sont automatiquement verrouillées.</b></p>
+        <div class="crop-canvas-container">
+            <canvas id="crop-canvas"></canvas>
+        </div>
+        <div class="btn-group" style="margin-top:20px;">
+            <button onclick="closeCropModal()" style="background:#6c757d; color:white;">❌ Annuler</button>
+            <button onclick="validateCrop()" style="background:#198754; color:white;">✅ Valider le recadrage</button>
+        </div>
+    </div>
+</div>
+
 <div class="controls">
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid #f0f2f5; padding-bottom:10px; margin-bottom:5px;">
         <h2>🛠️ Configurateur</h2>
-        <span style="font-size:0.7rem; color:#888;">V37 Perso</span>
+        <span style="font-size:0.7rem; color:#888;">V86 - Opérateur</span>
     </div>
 
     <div class="library-box">
-        <h3 style="color:#0d47a1; margin:0 0 10px 0; font-size:0.9rem;">💾 Ma Bibliothèque Personnelle</h3>
+        <h3 style="color:#0d47a1; margin:0 0 10px 0; font-size:0.9rem;">💾 Ma Bibliothèque</h3>
         <select id="userLibrarySelect" onchange="loadUserPreset()" style="width:100%;">
-            <option value="">-- Vos projets sauvegardés --</option>
+            <option value="">-- Projets sauvegardés --</option>
         </select>
         <div class="lib-controls">
-            <button class="btn-save-lib" onclick="saveToUserLibrary()">+ Sauvegarder config.</button>
+            <button class="btn-save-lib" onclick="saveToUserLibrary()">+ Sauvegarder</button>
             <button class="btn-del-lib" onclick="deleteFromUserLibrary()">Supprimer</button>
-        </div>
-        <div style="font-size:0.7rem; color:#555; margin-top:5px; font-style:italic;">
-            Sauvegarde automatique vers l'admin active.
         </div>
     </div>
     
     <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
         <h3>1. Configuration Brique</h3>
-        
         <div style="margin-bottom: 10px;">
             <label>Nom du projet / Référence :</label>
             <input type="text" id="input-brick-name" placeholder="Ex: Brique Moulée Main Rouge" oninput="render()">
         </div>
+        
+        <div class="input-row" style="margin-bottom:15px;">
+            <div class="input-group"><label>L. (mm)</label><input type="number" id="input-longueur" value="220" min="50" max="600" onchange="forceWallRegen()"></div>
+            <div class="input-group"><label>H. (mm)</label><input type="number" id="input-hauteur" value="60" min="20" max="300" onchange="forceWallRegen()"></div>
+        </div>
+
+        <details class="tips-box">
+            <summary>ℹ️ Conseils pour une bonne photo</summary>
+            <ul>
+                <li><strong>Lumière :</strong> Photo en extérieur, <strong>à l'ombre</strong> (ou ciel couvert). Pas de plein soleil ni de néons intérieurs.</li>
+                <li><strong>Support neutre :</strong> Posez la brique sur du béton ou du bitume. Évitez les fonds colorés (herbe, bâche) qui s'y reflètent.</li>
+                <li><strong>Humidité :</strong> La brique doit être parfaitement sèche (une brique mouillée paraît 20% plus foncée).</li>
+                <li><strong>Astuce :</strong> Restez appuyé 2 sec. sur la brique à l'écran du téléphone pour verrouiller l'exposition (Cadenas AE/AF) avant de prendre la photo.</li>
+            </ul>
+        </details>
 
         <div class="upload-grid">
             <div class="brick-container">
-                <div class="brick-slot" id="slot-0" onclick="triggerUpload(0)"><span>+ Photo 1</span></div>
-                <label class="target-selector"><input type="checkbox" class="target-chk" value="0" checked> <span>Cible</span></label>
+                <div class="brick-slot" id="slot-0" onclick="triggerUpload(0)"></div>
             </div>
             <div class="brick-container">
-                <div class="brick-slot" id="slot-1" onclick="triggerUpload(1)"><span>+ Photo 2</span></div>
-                <label class="target-selector"><input type="checkbox" class="target-chk" value="1"> <span>Cible</span></label>
+                <div class="brick-slot" id="slot-1" onclick="triggerUpload(1)"></div>
             </div>
             <div class="brick-container">
-                <div class="brick-slot" id="slot-2" onclick="triggerUpload(2)"><span>+ Photo 3</span></div>
-                <label class="target-selector"><input type="checkbox" class="target-chk" value="2"> <span>Cible</span></label>
+                <div class="brick-slot" id="slot-2" onclick="triggerUpload(2)"></div>
             </div>
         </div>
+
         <input type="file" id="hidden-file-input" accept="image/*" style="display: none;">
 
         <div class="calibration-box">
-            <h4 style="margin:0 0 10px 0; font-size:0.85rem; color:#856404;">🎨 Calibrage Photo</h4>
+            <h4 style="margin:0 0 5px 0; font-size:0.85rem; color:#856404;">🎨 Ajustement Réalité (Brique)</h4>
+            <p style="font-size:0.75rem; color:#666; margin:0 0 10px 0; line-height:1.2;">⚠️ <strong>Important :</strong> Ajustez ces curseurs pour que la couleur de la brique à l'écran corresponde exactement à la brique physique devant vous.</p>
+            
             <button class="reset-calib-btn" onclick="resetCalibration()" title="Remettre à l'origine">↺ R.A.Z</button>
+            
             <div class="calibration-slider"><label>Lumière</label><input type="range" id="calib-brightness" min="50" max="150" value="100" oninput="render()"></div>
             <div class="calibration-slider"><label>Contraste</label><input type="range" id="calib-contrast" min="50" max="150" value="100" oninput="render()"></div>
             <div class="calibration-slider"><label>Saturat.</label><input type="range" id="calib-saturation" min="0" max="300" value="100" oninput="render()"></div>
             <div class="calibration-slider"><label>Teinte</label><input type="range" id="calib-hue" min="-180" max="180" value="0" step="1" oninput="render()"></div>
-        </div>
-
-        <div class="input-row" style="margin-top:15px;">
-            <div class="input-group"><label>L. (mm)</label><input type="number" id="input-longueur" value="220" min="50" max="600" onchange="forceWallRegen()"></div>
-            <div class="input-group"><label>H. (mm)</label><input type="number" id="input-hauteur" value="60" min="20" max="300" onchange="forceWallRegen()"></div>
         </div>
     </div>
 
     <div id="section-joint" style="padding: 0 5px;">
         <h3>2. Joint & Mortier</h3>
         
-        <div style="margin-top:15px; margin-bottom:15px;">
-            <button class="btn-magic" onclick="triggerAutoDetection()">✨ Calculer la Moyenne</button>
+        <div style="display: flex; gap: 10px; margin-top: 15px; margin-bottom: 15px;">
+            <button class="btn-magic-alt" style="flex: 1;" onclick="triggerAutoDetection()">✨ Auto (Moyenne)</button>
+            <button id="btn-pipette-color" class="btn-magic" style="flex: 1;" onclick="toggleColorPicker()">🧪 Cible (Pipette)</button>
         </div>
 
         <div class="input-group">
-            <label>Teinte actuelle :</label>
+            <label>Teinte :</label>
             <div class="input-row">
                 <select id="categorySelect" onchange="filterColors()" style="flex:1;">
                     <option value="all">-- Tout afficher --</option>
                     <option value="Standards">Standards</option>
+                    <option value="Autres">Autres</option>
                     <option value="Noirs & Gris">Noirs & Gris</option>
                     <option value="Jaunes">Jaunes</option>
                     <option value="Marron">Marron & Terre</option>
@@ -139,22 +173,22 @@
                 </select>
                 <div id="joint-preview-dot" title="Aperçu couleur"></div>
             </div>
-            <select id="jointColorSelect" onchange="updatePreviewDot(); render();" style="margin-top:5px;"></select>
+            <select id="jointColorSelect" onchange="onJointSelected();" style="margin-top:5px;"></select>
         </div>
 
         <div class="input-row" style="margin-top:15px; align-items: flex-end;">
-            <div class="input-group">
+            <div class="input-group" style="flex: 0.8;">
                 <label>Ep. (mm) : <span id="val-ep" style="color:#007bff;">12</span></label>
                 <input type="range" id="slider-epaisseur" min="8" max="25" step="1" value="12" oninput="document.getElementById('val-ep').innerText = this.value; render()">
             </div>
-            <div class="input-group">
-                <label>Grain :</label>
-                <div class="fixed-value-box">Fin (0/1)</div>
+            <div class="input-group" style="flex: 1.2;">
+                <label>Texture Simulée :</label>
+                <div class="fixed-value-box">Joint Fin Nuancé</div>
             </div>
         </div>
         
         <button class="submit-btn" onclick="submitToAdmin()">
-            📤 Demande de référencement (Email)
+            📤 Demande de référencement
         </button>
     </div>
 
@@ -176,633 +210,911 @@
     </div>
     <div style="margin-top:10px; font-size:0.75rem; color:#666; display:flex; justify-content:space-between; width:100%; max-width:800px;">
         <span id="scale-info"></span>
-        <span>Aperçu HD</span>
+        <span>Rendu Réaliste PBR</span>
     </div>
 </div>
 
 <script>
-    // --- CONFIGURATION ADMIN ---
-    // Remplacez cette URL par votre Webhook (Make, Zapier) pour recevoir les "Ghosts"
-    const GHOST_WEBHOOK_URL = ""; 
+    let NUANCIER_COMPLET = [
+        { cat: "Standards", name: "SUPER BLANC", l: 86.00, c: 3.50, h: 73.00 },
+        { cat: "Standards", name: "BLANC", l: 82.00, c: 5.50, h: 85.00 },
+        { cat: "Standards", name: "TON PIERRE", l: 76.50, c: 21.00, h: 89.00 },
+        { cat: "Standards", name: "GRIS CLAIR", l: 60.00, c: 3.00, h: 92.00 },
 
-    // 2. NUANCIER
-    const NUANCIER_COMPLET = [
-        { cat: "Standards", name: "TON PIERRE", r: 215, g: 195, b: 150 },
-        { cat: "Standards", name: "SUPER BLANC", r: 235, g: 235, b: 230 },
-        { cat: "Standards", name: "BLANC", r: 220, g: 220, b: 215 },
-        { cat: "Standards", name: "GRIS CLAIR", r: 180, g: 180, b: 175 },
-        { cat: "Noirs & Gris", name: "50% BL 50% GR", r: 190, g: 190, b: 180 },
-        { cat: "Noirs & Gris", name: "SBN125", r: 130, g: 130, b: 130 },
-        { cat: "Noirs & Gris", name: "SBN250", r: 100, g: 100, b: 100 },
-        { cat: "Noirs & Gris", name: "GA125", r: 90, g: 95, b: 90 },
-        { cat: "Noirs & Gris", name: "GA250", r: 70, g: 75, b: 75 },
-        { cat: "Noirs & Gris", name: "GN500 (Anthracite)", r: 60, g: 60, b: 60 },
-        { cat: "Noirs & Gris", name: "SBA250", r: 50, g: 55, b: 55 },
-        { cat: "Noirs & Gris", name: "GA450R50", r: 45, g: 45, b: 45 },
-        { cat: "Noirs & Gris", name: "GA500", r: 40, g: 40, b: 40 },
-        { cat: "Noirs & Gris", name: "SBA500 (Noir Intense)", r: 30, g: 35, b: 35 },
-        { cat: "Jaunes", name: "SBJ8.25", r: 230, g: 220, b: 180 },
-        { cat: "Jaunes", name: "SBJ30", r: 225, g: 210, b: 150 },
-        { cat: "Jaunes", name: "75% TP 25% BL", r: 210, g: 190, b: 140 },
-        { cat: "Jaunes", name: "GJ125", r: 180, g: 160, b: 100 },
-        { cat: "Jaunes", name: "SBJ62.5", r: 230, g: 200, b: 120 },
-        { cat: "Jaunes", name: "SBJ250 (Vif)", r: 220, g: 180, b: 60 },
-        { cat: "Jaunes", name: "GJ250", r: 190, g: 160, b: 80 },
-        { cat: "Jaunes", name: "SBJ120N30", r: 180, g: 150, b: 100 },
-        { cat: "Jaunes", name: "GJ500 (Moutarde)", r: 160, g: 140, b: 60 },
-        { cat: "Jaunes", name: "SBJ500", r: 210, g: 170, b: 50 },
-        { cat: "Lie de vin", name: "GR416N84", r: 140, g: 80, b: 70 },
-        { cat: "Lie de vin", name: "SBR250N125", r: 120, g: 80, b: 70 },
-        { cat: "Lie de vin", name: "GR125N100S25", r: 130, g: 110, b: 100 },
-        { cat: "Lie de vin", name: "GR200S200N100", r: 140, g: 100, b: 70 },
-        { cat: "Lie de vin", name: "GR300S100N100", r: 110, g: 70, b: 60 },
-        { cat: "Lie de vin", name: "GR200N50", r: 120, g: 90, b: 80 },
-        { cat: "Marron", name: "GS15J10", r: 200, g: 190, b: 170 },
-        { cat: "Marron", name: "GS150N100", r: 150, g: 150, b: 130 },
-        { cat: "Marron", name: "GN90S35", r: 160, g: 140, b: 120 },
-        { cat: "Marron", name: "SBJ90R70N90", r: 140, g: 110, b: 90 },
-        { cat: "Marron", name: "SBJ180R180N140 (Chocolat)", r: 110, g: 80, b: 70 },
-        { cat: "Marron", name: "GS125N250R125", r: 130, g: 120, b: 100 },
-        { cat: "Marron", name: "GS200N150", r: 140, g: 130, b: 100 },
-        { cat: "Marron", name: "GS150A100", r: 120, g: 130, b: 110 },
-        { cat: "Marron", name: "GS300A200", r: 90, g: 100, b: 80 },
-        { cat: "Marron", name: "GN416S84", r: 80, g: 90, b: 80 },
-        { cat: "Marron", name: "GS250A250", r: 70, g: 80, b: 70 },
-        { cat: "Rouges", name: "GR100N25", r: 160, g: 120, b: 110 },
-        { cat: "Rouges", name: "SBR125 (Rosé)", r: 200, g: 150, b: 140 },
-        { cat: "Rouges", name: "SBR250", r: 190, g: 120, b: 110 },
-        { cat: "Rouges", name: "GR250", r: 170, g: 100, b: 90 },
-        { cat: "Rouges", name: "GR125", r: 180, g: 130, b: 120 },
-        { cat: "Rouges", name: "GR150S100", r: 180, g: 120, b: 90 },
-        { cat: "Rouges", name: "GR150J100", r: 170, g: 130, b: 90 },
-        { cat: "Rouges", name: "GR250S250", r: 180, g: 110, b: 60 },
-        { cat: "Rouges", name: "SBR375 (Vif)", r: 180, g: 90, b: 80 },
-        { cat: "Rouges", name: "GR375", r: 150, g: 80, b: 70 },
-        { cat: "Rouges", name: "GR500", r: 140, g: 60, b: 50 },
-        { cat: "Saumon", name: "SBS15J20", r: 220, g: 200, b: 170 },
-        { cat: "Saumon", name: "GS62.5", r: 200, g: 180, b: 150 },
-        { cat: "Saumon", name: "GS125", r: 190, g: 160, b: 120 },
-        { cat: "Saumon", name: "SBJ45R45N35", r: 180, g: 160, b: 140 },
-        { cat: "Saumon", name: "SBS62.5", r: 220, g: 190, b: 160 },
-        { cat: "Saumon", name: "SBS125", r: 210, g: 170, b: 130 },
-        { cat: "Saumon", name: "GS250", r: 180, g: 140, b: 100 },
-        { cat: "Saumon", name: "SBS250 (Orange)", r: 200, g: 150, b: 100 },
-        { cat: "Saumon", name: "SBS500", r: 190, g: 130, b: 80 },
-        { cat: "Saumon", name: "GS500", r: 170, g: 120, b: 70 },
-        { cat: "Saumon", name: "GS375R125", r: 180, g: 110, b: 80 }
+        { cat: "Autres", name: "SBV60", l: 68.00, c: 6.50, h: 111.00 },
+        { cat: "Autres", name: "SBV125", l: 65.50, c: 9.00, h: 121.00 },
+        { cat: "Autres", name: "SBB125", l: 63.00, c: 3.50, h: 219.00 },
+        { cat: "Autres", name: "SBV250", l: 62.00, c: 11.00, h: 128.00 },
+        { cat: "Autres", name: "SBB250", l: 58.50, c: 9.00, h: 241.00 },
+
+        { cat: "Noirs & Gris", name: "50% BL 50% GR", l: 50.00, c: 20.00, h: 0.00 },
+        { cat: "Noirs & Gris", name: "SBN62.5", l: 52.00, c: 0.50, h: 6.00 },
+        { cat: "Noirs & Gris", name: "GN62.5", l: 51.00, c: 2.00, h: 73.00 },
+        { cat: "Noirs & Gris", name: "SBN60", l: 50.00, c: 2.00, h: 37.00 },
+        { cat: "Noirs & Gris", name: "SBN125", l: 41.50, c: 1.00, h: 276.00 }, 
+        { cat: "Noirs & Gris", name: "GN60", l: 46.00, c: 2.50, h: 64.00 },
+        { cat: "Noirs & Gris", name: "GN125", l: 43.50, c: 0.50, h: 2.00 },
+        { cat: "Noirs & Gris", name: "TPN250", l: 41.50, c: 1.00, h: 299.00 },
+        { cat: "Noirs & Gris", name: "GN250", l: 39.50, c: 0.50, h: 319.00 },
+        { cat: "Noirs & Gris", name: "SBN250", l: 37.50, c: 2.00, h: 293.00 }, 
+        { cat: "Noirs & Gris", name: "GA125", l: 26.50, c: 0.50, h: 351.00 }, 
+        { cat: "Noirs & Gris", name: "SBA125", l: 33.50, c: 2.50, h: 275.00 },
+        { cat: "Noirs & Gris", name: "SBN500", l: 32.50, c: 1.00, h: 355.00 },
+        { cat: "Noirs & Gris", name: "SBA250", l: 28.50, c: 2.00, h: 284.00 }, 
+        { cat: "Noirs & Gris", name: "SBA375", l: 25.00, c: 2.00, h: 282.00 },
+        { cat: "Noirs & Gris", name: "GA250", l: 24.50, c: 2.00, h: 276.00 },
+        { cat: "Noirs & Gris", name: "GA450R50", l: 20.50, c: 1.50, h: 348.00 }, 
+        { cat: "Noirs & Gris", name: "SBA500", l: 16.00, c: 1.00, h: 310.00 }, 
+        { cat: "Noirs & Gris", name: "GN500", l: 29.50, c: 2.00, h: 43.00 }, 
+        { cat: "Noirs & Gris", name: "GA500", l: 16.50, c: 0.50, h: 325.00 }, 
+
+        { cat: "Jaunes", name: "SBJ8.25", l: 79.00, c: 10.50, h: 85.00 }, 
+        { cat: "Jaunes", name: "SBJ30", l: 74.00, c: 19.50, h: 87.00 }, 
+        { cat: "Jaunes", name: "SBJ62.5", l: 74.50, c: 26.50, h: 92.00 }, 
+        { cat: "Jaunes", name: "SBJ20S15", l: 66.00, c: 19.50, h: 76.00 }, 
+        { cat: "Jaunes", name: "75% TP 25% BL", l: 68.50, c: 29.50, h: 99.00 }, 
+        { cat: "Jaunes", name: "SBJ125", l: 62.50, c: 30.50, h: 83.00 }, 
+        { cat: "Jaunes", name: "SBJ250", l: 68.00, c: 41.00, h: 83.00 }, 
+        { cat: "Jaunes", name: "GJ15", l: 61.50, c: 9.00, h: 94.00 }, 
+        { cat: "Jaunes", name: "GJ30", l: 61.50, c: 12.50, h: 93.00 }, 
+        { cat: "Jaunes", name: "GJ125", l: 54.00, c: 26.00, h: 87.00 }, 
+        { cat: "Jaunes", name: "GJ20S15", l: 58.50, c: 13.00, h: 83.00 }, 
+        { cat: "Jaunes", name: "GJ250", l: 60.50, c: 31.50, h: 85.00 }, 
+        { cat: "Jaunes", name: "SBJ500", l: 61.00, c: 40.50, h: 80.00 }, 
+        { cat: "Jaunes", name: "SBJ375", l: 56.50, c: 38.50, h: 81.00 }, 
+        { cat: "Jaunes", name: "GJ500", l: 53.00, c: 35.00, h: 84.00 }, 
+        { cat: "Jaunes", name: "SBJ62.5N62.5", l: 51.00, c: 11.00, h: 94.00 }, 
+        { cat: "Jaunes", name: "SBJ120N30", l: 67.50, c: 29.00, h: 94.00 }, 
+        { cat: "Jaunes", name: "GJ62.5N62.5", l: 48.00, c: 9.50, h: 94.00 }, 
+
+        { cat: "Marron", name: "GJ10S15", l: 55.00, c: 12.00, h: 76.00 }, 
+        { cat: "Marron", name: "GS15J10", l: 46.00, c: 15.00, h: 87.00 }, 
+        { cat: "Marron", name: "GS15", l: 60.00, c: 10.00, h: 75.00 }, 
+        { cat: "Marron", name: "GN90S35", l: 37.50, c: 6.00, h: 79.00 }, 
+        { cat: "Marron", name: "GJ100R150", l: 46.00, c: 24.50, h: 47.00 }, 
+        { cat: "Marron", name: "GS150N100", l: 45.50, c: 13.50, h: 70.00 }, 
+        { cat: "Marron", name: "GS200N150", l: 45.50, c: 16.50, h: 69.00 }, 
+        { cat: "Marron", name: "GJ90R90N70", l: 44.50, c: 15.00, h: 52.00 }, 
+        { cat: "Marron", name: "GJ10N115", l: 41.00, c: 2.00, h: 66.00 }, 
+        { cat: "Marron", name: "SBJ90R70N90", l: 46.50, c: 12.50, h: 52.00 }, 
+        { cat: "Marron", name: "SBJ90R90N70", l: 40.00, c: 15.50, h: 46.00 }, 
+        { cat: "Marron", name: "GJ180R180N140", l: 39.00, c: 14.50, h: 54.00 }, 
+        { cat: "Marron", name: "GJ20N200", l: 37.50, c: 1.50, h: 52.00 }, 
+        { cat: "Marron", name: "GJ15N150", l: 37.50, c: 1.50, h: 51.00 }, 
+        { cat: "Marron", name: "GS150A100", l: 37.00, c: 7.50, h: 69.00 }, 
+        { cat: "Marron", name: "GS125N250R125", l: 37.50, c: 11.00, h: 49.00 }, 
+        { cat: "Marron", name: "SBJ180R180N140", l: 45.50, c: 16.00, h: 45.00 }, 
+        { cat: "Marron", name: "GS125A125", l: 33.50, c: 4.00, h: 73.00 }, 
+        { cat: "Marron", name: "GS300N200", l: 33.00, c: 13.00, h: 65.00 }, 
+        { cat: "Marron", name: "SBJ180N180R140", l: 33.00, c: 13.50, h: 50.00 }, 
+        { cat: "Marron", name: "GS200A150", l: 32.50, c: 5.50, h: 74.00 }, 
+        { cat: "Marron", name: "GN416S84", l: 27.50, c: 3.50, h: 57.00 }, 
+        { cat: "Marron", name: "GS250A250", l: 30.00, c: 7.00, h: 72.00 }, 
+        { cat: "Marron", name: "GS300N100A100", l: 28.00, c: 8.50, h: 68.00 }, 
+        { cat: "Marron", name: "GS300A200", l: 27.00, c: 7.00, h: 67.00 }, 
+        { cat: "Marron", name: "GJ100R200N50A150", l: 24.50, c: 7.50, h: 37.00 }, 
+        { cat: "Marron", name: "GS150R150A200", l: 23.00, c: 7.00, h: 42.00 }, 
+        { cat: "Marron", name: "GJ100R200A200", l: 21.50, c: 6.50, h: 37.00 }, 
+
+        { cat: "Rouges", name: "GR150J100", l: 51.00, c: 27.00, h: 47.00 }, 
+        { cat: "Rouges", name: "SBR125", l: 51.50, c: 27.00, h: 28.00 }, 
+        { cat: "Rouges", name: "GR125", l: 52.00, c: 21.50, h: 30.00 }, 
+        { cat: "Rouges", name: "GR150S100", l: 54.50, c: 31.50, h: 45.00 }, 
+        { cat: "Rouges", name: "SBR250", l: 48.50, c: 26.50, h: 27.00 }, 
+        { cat: "Rouges", name: "GR100N25", l: 38.00, c: 18.50, h: 39.00 }, 
+        { cat: "Rouges", name: "SBR375", l: 45.00, c: 31.50, h: 27.00 }, 
+        { cat: "Rouges", name: "GR375", l: 35.00, c: 27.50, h: 30.00 }, 
+        { cat: "Rouges", name: "GR20", l: 36.50, c: 19.00, h: 29.00 }, 
+        { cat: "Rouges", name: "GR250", l: 41.50, c: 25.50, h: 29.00 }, 
+        { cat: "Rouges", name: "GJ250R250", l: 36.50, c: 27.00, h: 40.00 }, 
+        { cat: "Rouges", name: "GR250S250", l: 41.50, c: 29.00, h: 39.00 }, 
+        { cat: "Rouges", name: "SBR500", l: 34.00, c: 30.00, h: 30.00 }, 
+        { cat: "Rouges", name: "GS200R300", l: 37.50, c: 29.50, h: 36.00 }, 
+        { cat: "Rouges", name: "GR500", l: 29.00, c: 26.50, h: 33.00 }, 
+
+        { cat: "Saumon", name: "SBS15J20", l: 71.00, c: 27.50, h: 76.00 }, 
+        { cat: "Saumon", name: "SBS62.5", l: 61.00, c: 25.50, h: 61.00 }, 
+        { cat: "Saumon", name: "SBS125", l: 54.00, c: 33.00, h: 58.00 }, 
+        { cat: "Saumon", name: "GS30R30", l: 54.00, c: 16.50, h: 50.00 }, 
+        { cat: "Saumon", name: "GS62.5", l: 55.00, c: 25.00, h: 82.00 }, 
+        { cat: "Saumon", name: "GS125", l: 50.00, c: 23.50, h: 63.00 }, 
+        { cat: "Saumon", name: "GS250", l: 44.50, c: 30.00, h: 60.00 }, 
+        { cat: "Saumon", name: "SBS250", l: 51.50, c: 37.00, h: 56.00 }, 
+        { cat: "Saumon", name: "SBS35N90", l: 48.00, c: 6.00, h: 73.00 }, 
+        { cat: "Saumon", name: "GJ45R45N35", l: 47.50, c: 13.00, h: 55.00 }, 
+        { cat: "Saumon", name: "SBJ45R45N35", l: 46.50, c: 14.00, h: 48.00 }, 
+        { cat: "Saumon", name: "SBS500", l: 51.50, c: 40.50, h: 54.00 }, 
+        { cat: "Saumon", name: "GS500", l: 42.50, c: 31.50, h: 56.00 }, 
+        { cat: "Saumon", name: "SBS250R250", l: 39.00, c: 28.00, h: 41.00 }, 
+        { cat: "Saumon", name: "GS375R125", l: 40.00, c: 30.50, h: 46.00 }, 
+        { cat: "Saumon", name: "SBS125A125", l: 33.50, c: 3.50, h: 75.00 }, 
+
+        { cat: "Lie de vin", name: "GR125N100S25", l: 31.50, c: 11.50, h: 38.00 }, 
+        { cat: "Lie de vin", name: "GR200N50", l: 36.50, c: 19.00, h: 32.00 }, 
+        { cat: "Lie de vin", name: "SBR250N125", l: 35.00, c: 14.00, h: 28.00 }, 
+        { cat: "Lie de vin", name: "GS100R300N100", l: 37.00, c: 19.50, h: 38.00 }, 
+        { cat: "Lie de vin", name: "GR300S100N100", l: 27.50, c: 19.50, h: 38.00 }, 
+        { cat: "Lie de vin", name: "GR200S200N100", l: 40.00, c: 23.00, h: 48.00 }, 
+        { cat: "Lie de vin", name: "GR300N200", l: 31.50, c: 13.50, h: 30.00 }, 
+        { cat: "Lie de vin", name: "GR416N84", l: 35.50, c: 21.50, h: 30.00 } 
     ];
 
     let loadedBricks = [null, null, null];
     let grainTexture = null;
     let wallLayoutCache = []; 
     let currentJointColor = null;
+    let isColorPicking = false; 
+
+    let cropImg = null;
+    let cropScale = 1;
+    let cropRect = { x: 0, y: 0, w: 0, h: 0 };
+    let isDraggingCrop = false;
+    let cropStartX = 0; let cropStartY = 0;
 
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     let currentSlot = 0;
-    
-    // --- GESTION DU LOCAL STORAGE & GHOST MODE ---
     const STORAGE_KEY = 'biamortier_user_lib';
 
-    function getUserLibrary() {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        return stored ? JSON.parse(stored) : [];
+    function convertLchPaletteToRgb() {
+        const tempCvs = document.createElement('canvas');
+        tempCvs.width = 1; tempCvs.height = 1;
+        const tCtx = tempCvs.getContext('2d');
+
+        NUANCIER_COMPLET.forEach(item => {
+            if (item.l !== undefined && item.r === undefined) {
+                tCtx.clearRect(0,0,1,1);
+                tCtx.fillStyle = `lch(${item.l}% ${item.c} ${item.h})`;
+                tCtx.fillRect(0, 0, 1, 1);
+                const p = tCtx.getImageData(0, 0, 1, 1).data;
+                item.r = p[0]; item.g = p[1]; item.b = p[2];
+            }
+        });
     }
 
+    function generateProceduralGrain() {
+        const size = 512;
+        const cvs = document.createElement('canvas');
+        cvs.width = size; cvs.height = size;
+        const tCtx = cvs.getContext('2d');
+
+        tCtx.fillStyle = "rgb(128, 128, 128)";
+        tCtx.fillRect(0, 0, size, size);
+
+        const imgData = tCtx.getImageData(0, 0, size, size);
+        const data = imgData.data;
+
+        for (let i = 0; i < data.length; i += 4) {
+            const mod = (Math.random() - 0.5) * 12; 
+            data[i] = 128 + mod;
+            data[i+1] = 128 + mod;
+            data[i+2] = 128 + mod;
+            data[i+3] = 255;
+        }
+
+        for(let y = 0; y < size; y++) {
+            for(let x = 0; x < size; x++) {
+                const rand = Math.random();
+                const i = (y * size + x) * 4;
+
+                if(rand > 0.90) {
+                    let intensity = 10 + Math.random() * 15; 
+                    data[i] = Math.min(255, data[i] + intensity);
+                    data[i+1] = Math.min(255, data[i+1] + intensity);
+                    data[i+2] = Math.min(255, data[i+2] + intensity);
+                    if(x < size - 1 && Math.random() > 0.5) {
+                        data[i+4] = Math.min(255, data[i+4] + intensity * 0.5);
+                        data[i+5] = Math.min(255, data[i+5] + intensity * 0.5);
+                        data[i+6] = Math.min(255, data[i+6] + intensity * 0.5);
+                    }
+                } 
+                else if (rand < 0.10) {
+                    let depth = 10 + Math.random() * 15; 
+                    data[i] = Math.max(0, data[i] - depth);
+                    data[i+1] = Math.max(0, data[i+1] - depth);
+                    data[i+2] = Math.max(0, data[i+2] - depth);
+                    if(x < size - 1 && Math.random() > 0.5) { 
+                        data[i+4] = Math.max(0, data[i+4] - depth * 0.5);
+                        data[i+5] = Math.max(0, data[i+5] - depth * 0.5);
+                        data[i+6] = Math.max(0, data[i+6] - depth * 0.5);
+                    }
+                }
+            }
+        }
+
+        tCtx.putImageData(imgData, 0, 0);
+        return tCtx.createPattern(cvs, 'repeat');
+    }
+
+    // NOUVEAU : GENERATEUR DE BRIQUE PAR DEFAUT POUR L'OUVERTURE DE L'APP
+    function generateDefaultBrick() {
+        const cvs = document.createElement('canvas');
+        cvs.width = 440; cvs.height = 120;
+        const ctx = cvs.getContext('2d');
+
+        ctx.fillStyle = "#c25e44";
+        ctx.fillRect(0, 0, cvs.width, cvs.height);
+
+        const imgData = ctx.getImageData(0, 0, cvs.width, cvs.height);
+        const data = imgData.data;
+        for(let i=0; i<data.length; i+=4) {
+            const noise = (Math.random() - 0.5) * 40;
+            data[i] = Math.min(255, Math.max(0, data[i] + noise));
+            data[i+1] = Math.min(255, Math.max(0, data[i+1] + noise));
+            data[i+2] = Math.min(255, Math.max(0, data[i+2] + noise));
+        }
+        ctx.putImageData(imgData, 0, 0);
+
+        ctx.fillStyle = "rgba(0,0,0,0.15)";
+        ctx.fillRect(0, 0, cvs.width, 4);
+        ctx.fillRect(0, 0, 4, cvs.height);
+        ctx.fillStyle = "rgba(255,255,255,0.15)";
+        ctx.fillRect(0, cvs.height-4, cvs.width, 4);
+        ctx.fillRect(cvs.width-4, 0, 4, cvs.height);
+
+        ctx.fillStyle = "rgba(255,255,255,0.4)";
+        ctx.font = "bold 26px 'Segoe UI'";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("Brique d'exemple", cvs.width/2, cvs.height/2);
+
+        return cvs.toDataURL();
+    }
+
+    window.onload = () => {
+        convertLchPaletteToRgb(); 
+        document.getElementById('categorySelect').value = "Standards";
+        filterColors();
+        
+        // Sélection par défaut de "GRIS CLAIR"
+        const sel = document.getElementById('jointColorSelect');
+        for(let i=0; i<sel.options.length; i++) {
+            if(sel.options[i].value) {
+                const c = JSON.parse(sel.options[i].value);
+                if(c.name === "GRIS CLAIR") {
+                    sel.selectedIndex = i;
+                    onJointSelected();
+                    break;
+                }
+            }
+        }
+
+        refreshLibraryUI();
+        grainTexture = generateProceduralGrain(); 
+        
+        // Chargement de la brique d'exemple
+        const defaultBrickSrc = generateDefaultBrick();
+        const img = new Image();
+        img.isPlaceholder = true; // Marqueur pour reconnaitre que c'est une fausse brique
+        img.onload = () => { 
+            loadedBricks[0] = img; 
+            updateSlotVisual(0, defaultBrickSrc, true); 
+            
+            // On met les textes vides sur les slots 2 et 3
+            updateSlotVisual(1, "", true);
+            updateSlotVisual(2, "", true);
+            
+            forceWallRegen(); 
+        };
+        img.src = defaultBrickSrc;
+    };
+
+    function getUserLibrary() { const s = localStorage.getItem(STORAGE_KEY); return s ? JSON.parse(s) : []; }
+    
     function refreshLibraryUI() {
         const lib = getUserLibrary();
-        const select = document.getElementById('userLibrarySelect');
-        select.innerHTML = '<option value="">-- Vos projets sauvegardés --</option>';
+        const sel = document.getElementById('userLibrarySelect');
+        sel.innerHTML = '<option value="">-- Projets sauvegardés --</option>';
         lib.forEach((item, index) => {
             const opt = document.createElement('option');
             opt.value = index;
-            const dateStr = new Date(item.date).toLocaleDateString();
-            opt.innerText = `${item.name} (${dateStr})`;
-            select.appendChild(opt);
+            opt.innerText = `${item.name} (${new Date(item.date).toLocaleDateString()})`;
+            sel.appendChild(opt);
         });
     }
 
     function saveToUserLibrary() {
         const name = document.getElementById('input-brick-name').value;
-        if(!name || name.trim() === "") { alert("Veuillez donner un nom au projet."); return; }
-
+        if(!name || name.trim() === "") { alert("Veuillez nommer le projet."); return; }
         const config = {
-            id: Date.now(),
-            date: new Date().toISOString(),
-            name: name,
-            dims: {
-                l: document.getElementById('input-longueur').value,
-                h: document.getElementById('input-hauteur').value,
-                ep: document.getElementById('slider-epaisseur').value
-            },
-            calib: {
-                b: document.getElementById('calib-brightness').value,
-                c: document.getElementById('calib-contrast').value,
-                s: document.getElementById('calib-saturation').value,
-                h: document.getElementById('calib-hue').value
-            },
+            id: Date.now(), date: new Date().toISOString(), name: name,
+            dims: { l: document.getElementById('input-longueur').value, h: document.getElementById('input-hauteur').value, ep: document.getElementById('slider-epaisseur').value },
+            calib: { b: document.getElementById('calib-brightness').value, c: document.getElementById('calib-contrast').value, s: document.getElementById('calib-saturation').value, h: document.getElementById('calib-hue').value },
             joint: currentJointColor,
-            grain: 'fin', // FORCE A FIN
-            images: [] 
+            images: loadedBricks.map(img => img && img.src.startsWith('data:image') && !img.isPlaceholder ? img.src : null)
         };
-
         try {
-            loadedBricks.forEach(img => {
-                if(img && img.src && img.src.startsWith('data:image')) {
-                    config.images.push(img.src);
-                } else {
-                    config.images.push(null);
-                }
-            });
-            const lib = getUserLibrary();
-            lib.push(config);
+            const lib = getUserLibrary(); lib.push(config);
             localStorage.setItem(STORAGE_KEY, JSON.stringify(lib));
-            alert("✅ Configuration sauvegardée dans votre bibliothèque !");
-            sendGhostReport(config);
-
+            alert("✅ Configuration sauvegardée !");
         } catch (e) {
-            console.warn("Quota LocalStorage dépassé pour les images.", e);
             config.images = [null, null, null];
-            const lib = getUserLibrary();
-            lib.push(config);
+            const lib = getUserLibrary(); lib.push(config);
             localStorage.setItem(STORAGE_KEY, JSON.stringify(lib));
-            alert("⚠️ Sauvegardé (sans images car trop lourdes).");
-            sendGhostReport(config);
+            alert("⚠️ Sauvegardé sans images (mémoire pleine).");
         }
         refreshLibraryUI();
     }
 
     function deleteFromUserLibrary() {
-        const select = document.getElementById('userLibrarySelect');
-        const idx = select.value;
-        if(idx === "") return;
-        if(confirm("Supprimer cette configuration ?")) {
-            const lib = getUserLibrary();
-            lib.splice(idx, 1);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(lib));
-            refreshLibraryUI();
-            document.getElementById('input-brick-name').value = "";
+        const idx = document.getElementById('userLibrarySelect').value;
+        if(idx==="") return;
+        if(confirm("Supprimer ce projet ?")) {
+            const lib = getUserLibrary(); lib.splice(idx, 1);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(lib)); refreshLibraryUI();
         }
     }
 
     function loadUserPreset() {
-        const select = document.getElementById('userLibrarySelect');
-        const idx = select.value;
-        if(idx === "") return;
+        const idx = document.getElementById('userLibrarySelect').value;
+        if(idx==="") return;
+        const p = getUserLibrary()[idx];
+        if(!p) return;
 
-        const lib = getUserLibrary();
-        const preset = lib[idx];
-        if(!preset) return;
+        document.getElementById('input-brick-name').value = p.name;
+        document.getElementById('input-longueur').value = p.dims.l;
+        document.getElementById('input-hauteur').value = p.dims.h;
+        document.getElementById('slider-epaisseur').value = p.dims.ep;
+        document.getElementById('val-ep').innerText = p.dims.ep;
+        document.getElementById('calib-brightness').value = p.calib.b;
+        document.getElementById('calib-contrast').value = p.calib.c;
+        document.getElementById('calib-saturation').value = p.calib.s || 100;
+        document.getElementById('calib-hue').value = p.calib.h || 0;
 
-        document.getElementById('input-brick-name').value = preset.name;
-        document.getElementById('input-longueur').value = preset.dims.l;
-        document.getElementById('input-hauteur').value = preset.dims.h;
-        document.getElementById('slider-epaisseur').value = preset.dims.ep;
-        document.getElementById('val-ep').innerText = preset.dims.ep;
-        
-        document.getElementById('calib-brightness').value = preset.calib.b;
-        document.getElementById('calib-contrast').value = preset.calib.c;
-        document.getElementById('calib-saturation').value = preset.calib.s;
-        document.getElementById('calib-hue').value = preset.calib.h;
-        
-        // Le grain est ignoré lors du chargement, on reste sur le Fin par défaut.
-
-        if(preset.joint) {
-            currentJointColor = preset.joint;
-            const catSelect = document.getElementById('categorySelect');
-            if(catSelect.value !== 'all' && catSelect.value !== preset.joint.cat) {
-                catSelect.value = preset.joint.cat;
-                filterColors();
+        if(p.joint) {
+            currentJointColor = p.joint;
+            document.getElementById('categorySelect').value = p.joint.cat;
+            filterColors();
+            const sel = document.getElementById('jointColorSelect');
+            for(let i=0; i<sel.options.length; i++){
+                 if(sel.options[i].value && JSON.parse(sel.options[i].value).name === p.joint.name) {
+                     sel.selectedIndex = i;
+                     onJointSelected();
+                 }
             }
-            const jointSelect = document.getElementById('jointColorSelect');
-            for(let i=0; i<jointSelect.options.length; i++) {
-                if(jointSelect.options[i].value === "") continue;
-                let opt = JSON.parse(jointSelect.options[i].value);
-                if(opt.name === preset.joint.name) {
-                    jointSelect.selectedIndex = i;
-                    break;
-                }
-            }
-            updatePreviewDot();
-        } else {
-            currentJointColor = null;
-            updatePreviewDot();
         }
-
-        if(preset.images && preset.images.some(src => src !== null)) {
-            preset.images.forEach((src, i) => {
+        if(p.images) {
+            p.images.forEach((src, i) => {
                 if(src) {
-                    const newImg = new Image();
-                    newImg.onload = () => {
-                        loadedBricks[i] = newImg;
-                        updateSlotVisual(i, src, false);
-                        if(i === preset.images.length -1 || !preset.images[i+1]) forceWallRegen();
+                    const img = new Image();
+                    img.isPlaceholder = false;
+                    img.onload = () => { 
+                        loadedBricks[i] = img; 
+                        updateSlotVisual(i, src, false); 
+                        if(i===p.images.length-1) forceWallRegen(); 
                     };
-                    newImg.src = src;
-                } else {
-                    loadedBricks[i] = null;
-                    const slotDiv = document.getElementById(`slot-${i}`);
-                    slotDiv.classList.remove('active');
-                    slotDiv.innerHTML = `<span>+ Photo ${i + 1}</span>`;
+                    img.src = src;
                 }
             });
-        } else {
-            alert("Les réglages sont chargés, mais vous devez re-uploader les photos.");
         }
-        forceWallRegen();
     }
-
-    function sendGhostReport(data) {
-        if(!GHOST_WEBHOOK_URL) return;
-        const payload = { ...data, images: "Images non transmises (trop lourd)" };
-        fetch(GHOST_WEBHOOK_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        }).catch(err => console.error(err));
-    }
-
-
-    window.onload = () => {
-        const catSelect = document.getElementById('categorySelect');
-        catSelect.value = "all"; 
-        filterColors(); 
-        updatePreviewDot();
-        refreshLibraryUI(); 
-        generateGrain(); // Génère directement le grain fin
-        
-        const placeholder = new Image();
-        placeholder.src = 'https://placehold.co/440x120/png?text=Cliquez+pour+ajouter+Brique';
-        placeholder.onload = () => {
-            loadedBricks[0] = placeholder;
-            updateSlotVisual(0, placeholder.src, true);
-            forceWallRegen(); 
-        };
-    };
 
     function submitToAdmin() {
         const name = document.getElementById('input-brick-name').value;
-        const l = document.getElementById('input-longueur').value;
-        const h = document.getElementById('input-hauteur').value;
-        const jointName = currentJointColor ? currentJointColor.name : "Aucun";
-        const subject = encodeURIComponent(`Demande référencement : ${name}`);
-        const body = encodeURIComponent(`Bonjour,\n\nVoici une configuration à référencer.\nNom: ${name}\nJoint: ${jointName}\nFormat: ${l}x${h}`);
-        window.location.href = `mailto:rcoene@biallais.fr?subject=${subject}&body=${body}`;
+        window.location.href = `mailto:rcoene@biallais.fr?subject=Ref:${name}&body=Demande de ref pour ${name}`;
     }
 
-    function triggerUpload(slotIndex) {
-        currentSlot = slotIndex;
-        document.getElementById('hidden-file-input').click();
-    }
+    function triggerUpload(i) { currentSlot = i; document.getElementById('hidden-file-input').click(); }
 
     document.getElementById('hidden-file-input').onchange = function(e) {
-        const file = e.target.files[0];
-        if(!file) return;
+        const file = e.target.files[0]; if(!file) return;
         const reader = new FileReader();
-        reader.onload = function(event) {
-            const tempImg = new Image();
-            tempImg.onload = () => {
-                const MAX_WIDTH = 800;
-                const scaleSize = MAX_WIDTH / tempImg.width;
-                const newW = (scaleSize < 1) ? MAX_WIDTH : tempImg.width;
-                const newH = (scaleSize < 1) ? tempImg.height * scaleSize : tempImg.height;
-                const cvs = document.createElement('canvas');
-                cvs.width = newW; cvs.height = newH;
-                const ctxCvs = cvs.getContext('2d');
-                ctxCvs.drawImage(tempImg, 0, 0, newW, newH);
-                const optimizedDataUrl = cvs.toDataURL('image/jpeg', 0.8);
-                const finalImg = new Image();
-                finalImg.onload = () => {
-                    loadedBricks[currentSlot] = finalImg;
-                    updateSlotVisual(currentSlot, optimizedDataUrl, false);
-                    forceWallRegen(); 
-                };
-                finalImg.src = optimizedDataUrl;
-            };
-            tempImg.src = event.target.result;
+        reader.onload = function(evt) {
+            const img = new Image();
+            img.onload = () => { openCropModal(img); };
+            img.src = evt.target.result;
         }
-        reader.readAsDataURL(file);
-        e.target.value = ''; 
+        reader.readAsDataURL(file); e.target.value = ''; 
     };
+
+    function openCropModal(img) {
+        cropImg = img;
+        const modal = document.getElementById('crop-modal');
+        const cropCvs = document.getElementById('crop-canvas');
+        
+        const maxW = window.innerWidth * 0.9;
+        const maxH = window.innerHeight * 0.6;
+        cropScale = Math.min(maxW / img.width, maxH / img.height, 1);
+
+        cropCvs.width = img.width * cropScale;
+        cropCvs.height = img.height * cropScale;
+
+        const L = parseFloat(document.getElementById('input-longueur').value) || 220;
+        const H = parseFloat(document.getElementById('input-hauteur').value) || 60;
+        const targetRatio = L / H;
+
+        let initW = cropCvs.width * 0.8;
+        let initH = initW / targetRatio;
+        if(initH > cropCvs.height * 0.8) {
+            initH = cropCvs.height * 0.8;
+            initW = initH * targetRatio;
+        }
+
+        cropRect = { x: (cropCvs.width - initW) / 2, y: (cropCvs.height - initH) / 2, w: initW, h: initH };
+
+        modal.style.display = 'flex';
+        drawCropView();
+    }
+
+    function closeCropModal() {
+        document.getElementById('crop-modal').style.display = 'none';
+        cropImg = null;
+    }
+
+    function drawCropView() {
+        if(!cropImg) return;
+        const cropCvs = document.getElementById('crop-canvas');
+        const cCtx = cropCvs.getContext('2d');
+
+        cCtx.drawImage(cropImg, 0, 0, cropCvs.width, cropCvs.height);
+        cCtx.fillStyle = 'rgba(0, 0, 0, 0.65)';
+        cCtx.fillRect(0, 0, cropCvs.width, cropCvs.height);
+
+        cCtx.clearRect(cropRect.x, cropRect.y, cropRect.w, cropRect.h);
+        cCtx.drawImage(cropImg,
+            cropRect.x / cropScale, cropRect.y / cropScale, cropRect.w / cropScale, cropRect.h / cropScale,
+            cropRect.x, cropRect.y, cropRect.w, cropRect.h
+        );
+
+        cCtx.strokeStyle = '#3399ff';
+        cCtx.lineWidth = 2;
+        cCtx.setLineDash([6, 6]);
+        cCtx.strokeRect(cropRect.x, cropRect.y, cropRect.w, cropRect.h);
+        cCtx.setLineDash([]);
+    }
+
+    const cropCanvasElement = document.getElementById('crop-canvas');
+    function getPointerPos(e) {
+        const rect = cropCanvasElement.getBoundingClientRect();
+        let clientX = e.clientX; let clientY = e.clientY;
+        if(e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX; clientY = e.touches[0].clientY;
+        }
+        return { x: clientX - rect.left, y: clientY - rect.top };
+    }
+
+    function onCropStart(e) {
+        e.preventDefault();
+        isDraggingCrop = true;
+        const pos = getPointerPos(e);
+        cropStartX = pos.x; cropStartY = pos.y;
+        cropRect = { x: cropStartX, y: cropStartY, w: 0, h: 0 };
+        drawCropView();
+    }
+
+    function onCropMove(e) {
+        if(!isDraggingCrop) return;
+        e.preventDefault();
+        const pos = getPointerPos(e);
+        const L = parseFloat(document.getElementById('input-longueur').value) || 220;
+        const H = parseFloat(document.getElementById('input-hauteur').value) || 60;
+        const targetRatio = L / H;
+
+        let diffX = pos.x - cropStartX;
+        let diffY = pos.y - cropStartY;
+        let w = Math.abs(diffX);
+        let h = Math.abs(diffY);
+
+        if (w / h > targetRatio) { h = w / targetRatio; } else { w = h * targetRatio; }
+
+        cropRect.w = w;
+        cropRect.h = h;
+        cropRect.x = diffX < 0 ? cropStartX - w : cropStartX;
+        cropRect.y = diffY < 0 ? cropStartY - h : cropStartY;
+        
+        drawCropView();
+    }
+
+    function onCropEnd(e) {
+        if(!isDraggingCrop) return;
+        isDraggingCrop = false;
+        if(cropRect.w < 10 || cropRect.h < 10) { 
+            const L = parseFloat(document.getElementById('input-longueur').value) || 220;
+            const H = parseFloat(document.getElementById('input-hauteur').value) || 60;
+            const targetRatio = L / H;
+            let initW = cropCanvasElement.width * 0.8;
+            let initH = initW / targetRatio;
+            if(initH > cropCanvasElement.height * 0.8) {
+                initH = cropCanvasElement.height * 0.8;
+                initW = initH * targetRatio;
+            }
+            cropRect = { x: (cropCanvasElement.width - initW) / 2, y: (cropCanvasElement.height - initH) / 2, w: initW, h: initH };
+            drawCropView();
+        }
+    }
+
+    cropCanvasElement.addEventListener('mousedown', onCropStart);
+    cropCanvasElement.addEventListener('mousemove', onCropMove);
+    window.addEventListener('mouseup', onCropEnd);
+    cropCanvasElement.addEventListener('touchstart', onCropStart, {passive: false});
+    cropCanvasElement.addEventListener('touchmove', onCropMove, {passive: false});
+    window.addEventListener('touchend', onCropEnd);
+
+    function validateCrop() {
+        if(!cropImg || cropRect.w < 10 || cropRect.h < 10) { alert("Sélection invalide."); return; }
+        
+        const origX = cropRect.x / cropScale;
+        const origY = cropRect.y / cropScale;
+        const origW = cropRect.w / cropScale;
+        const origH = cropRect.h / cropScale;
+
+        const cvs = document.createElement('canvas');
+        const outScale = Math.min(1500 / origW, 1); 
+        cvs.width = origW * outScale;
+        cvs.height = origH * outScale;
+
+        const tCtx = cvs.getContext('2d');
+        tCtx.drawImage(cropImg, origX, origY, origW, origH, 0, 0, cvs.width, cvs.height);
+
+        const opt = cvs.toDataURL('image/jpeg', 0.95);
+        const final = new Image();
+        final.isPlaceholder = false; 
+        final.onload = () => {
+            loadedBricks[currentSlot] = final;
+            updateSlotVisual(currentSlot, opt, false);
+            forceWallRegen();
+            closeCropModal();
+        };
+        final.src = opt;
+    }
 
     function resetCalibration() {
         document.getElementById('calib-brightness').value = 100;
         document.getElementById('calib-contrast').value = 100;
         document.getElementById('calib-saturation').value = 100;
         document.getElementById('calib-hue').value = 0;
-        render(true); 
+        render(true);
     }
 
     function triggerAutoDetection() {
-        const bestMatch = analyzeFilteredColorAndSuggest();
-        if (bestMatch) {
-            currentJointColor = bestMatch;
-            const select = document.getElementById('jointColorSelect');
-            const catSelect = document.getElementById('categorySelect');
-            if(catSelect.value !== 'all' && catSelect.value !== bestMatch.cat) {
-                catSelect.value = bestMatch.cat; filterColors(); 
+        const best = analyzeFilteredColorAndSuggest();
+        if (best) {
+            currentJointColor = best;
+            document.getElementById('categorySelect').value = best.cat;
+            filterColors();
+            const sel = document.getElementById('jointColorSelect');
+            for(let i=0; i<sel.options.length; i++) {
+                if(sel.options[i].value && JSON.parse(sel.options[i].value).name === best.name) {
+                    sel.selectedIndex = i;
+                    onJointSelected();
+                }
             }
-            for(let i=0; i<select.options.length; i++) {
-                if(select.options[i].value === "") continue;
-                let opt = JSON.parse(select.options[i].value);
-                if(opt.name === bestMatch.name) { select.selectedIndex = i; break; }
-            }
-            updatePreviewDot(); render(); 
-            const btn = document.querySelector('.btn-magic');
-            const originalText = btn.innerText;
-            btn.innerText = "✅ Moyenne trouvée : " + bestMatch.name;
-            setTimeout(() => btn.innerText = originalText, 3000);
-        } else {
-            alert("Veuillez sélectionner au moins une brique chargée.");
+        } else { 
+            alert("Veuillez d'abord charger une brique."); 
         }
     }
 
     function analyzeFilteredColorAndSuggest() {
-        const checkboxes = document.querySelectorAll('.target-chk:checked');
-        if (checkboxes.length === 0) return null;
-        const size = 50;
-        const anaCanvas = document.createElement('canvas');
-        anaCanvas.width = size; anaCanvas.height = size;
-        const anaCtx = anaCanvas.getContext('2d');
-        const bright = document.getElementById('calib-brightness').value;
-        const contrast = document.getElementById('calib-contrast').value;
+        const cvs = document.createElement('canvas'); cvs.width = 50; cvs.height = 50;
+        const ctxA = cvs.getContext('2d');
+        let tR=0, tG=0, tB=0, cnt=0;
+        const bri = document.getElementById('calib-brightness').value;
+        const con = document.getElementById('calib-contrast').value;
         const sat = document.getElementById('calib-saturation').value;
         const hue = document.getElementById('calib-hue').value;
-        anaCtx.filter = `brightness(${bright}%) contrast(${contrast}%) saturate(${sat}%) hue-rotate(${hue}deg)`;
-        let totalR = 0, totalG = 0, totalB = 0;
-        let countImages = 0;
-        checkboxes.forEach(cb => {
-            const idx = parseInt(cb.value);
-            const sourceImg = loadedBricks[idx];
-            if (sourceImg) {
-                anaCtx.clearRect(0,0,size,size);
-                anaCtx.drawImage(sourceImg, 0, 0, size, size);
-                const pixelData = anaCtx.getImageData(0, 0, size, size).data;
-                let rSum = 0, gSum = 0, bSum = 0, pxCount = 0;
-                for (let i = 0; i < pixelData.length; i += 4) {
-                    rSum += pixelData[i]; gSum += pixelData[i+1]; bSum += pixelData[i+2]; pxCount++;
-                }
-                totalR += (rSum / pxCount); totalG += (gSum / pxCount); totalB += (bSum / pxCount);
-                countImages++;
+        ctxA.filter = `brightness(${bri}%) contrast(${con}%) saturate(${sat}%) hue-rotate(${hue}deg)`;
+
+        const validBricks = loadedBricks.filter(b => b && !b.isPlaceholder);
+        if(validBricks.length === 0) return null;
+
+        validBricks.forEach(img => {
+            ctxA.drawImage(img, 0, 0, 50, 50);
+            const data = ctxA.getImageData(0,0,50,50).data;
+            for(let i=0; i<data.length; i+=4) { tR+=data[i]; tG+=data[i+1]; tB+=data[i+2]; cnt++; }
+        });
+        
+        if(cnt===0) return null;
+        const r = tR/cnt, g = tG/cnt, b = tB/cnt;
+        let minD = Infinity, best = null;
+        
+        NUANCIER_COMPLET.forEach(j => {
+            if (j.r !== undefined) {
+                const dist = Math.sqrt((j.r-r)**2 + (j.g-g)**2 + (j.b-b)**2);
+                if(dist < minD) { minD = dist; best = j; }
             }
         });
-        if (countImages === 0) return null;
-        const r = Math.round(totalR / countImages);
-        const g = Math.round(totalG / countImages);
-        const b = Math.round(totalB / countImages);
-        let minDist = Infinity;
-        let bestMatch = null;
-        NUANCIER_COMPLET.forEach(joint => {
-            const dist = Math.sqrt(Math.pow(joint.r - r, 2) + Math.pow(joint.g - g, 2) + Math.pow(joint.b - b, 2));
-            if(dist < minDist) { minDist = dist; bestMatch = joint; }
-        });
-        return bestMatch;
+        return best;
     }
 
-    function updateSlotVisual(index, src, isPlaceholder) {
-        const slotDiv = document.getElementById(`slot-${index}`);
-        slotDiv.innerHTML = `<img src="${src}" style="width:100%; height:100%; object-fit:cover;">`;
-        if(!isPlaceholder) {
-            slotDiv.classList.add('active');
-            const btn = document.createElement('div');
-            btn.className = 'remove-btn';
-            btn.innerHTML = 'x';
-            btn.onclick = (e) => { e.stopPropagation(); removeBrick(index); };
-            slotDiv.appendChild(btn);
+    function updateSlotVisual(idx, src, isPlace) {
+        const d = document.getElementById(`slot-${idx}`);
+        
+        if (src === "") {
+            d.innerHTML = "";
+        } else {
+            d.innerHTML = `<img src="${src}" style="width:100%;height:100%;object-fit:cover;">`;
+        }
+        
+        if(!isPlace) {
+            d.classList.add('active');
+            const b = document.createElement('div'); b.className='remove-btn'; b.innerHTML='x';
+            b.onclick=(e)=>{e.stopPropagation(); removeBrick(idx);}; d.appendChild(b);
+        } else {
+            d.classList.remove('active');
+            const label = document.createElement('div');
+            label.innerHTML = `<span>+ Charger<br>Photo ${idx+1}</span>`;
+            label.style.position = 'absolute';
+            label.style.background = 'rgba(248, 249, 250, 0.85)';
+            label.style.width = '100%';
+            label.style.height = '100%';
+            label.style.display = 'flex';
+            label.style.alignItems = 'center';
+            label.style.justifyContent = 'center';
+            label.style.color = '#007bff';
+            label.style.fontWeight = 'bold';
+            d.appendChild(label);
         }
     }
 
-    function removeBrick(index) {
-        const count = loadedBricks.filter(b => b !== null).length;
-        if(count <= 1) { alert("Il faut conserver au moins une brique !"); return; }
-        loadedBricks[index] = null;
-        const slotDiv = document.getElementById(`slot-${index}`);
-        slotDiv.classList.remove('active');
-        slotDiv.innerHTML = `<span>+ Photo ${index + 1}</span>`;
+    function removeBrick(i) {
+        const userBricks = loadedBricks.filter(b => b && !b.isPlaceholder);
+        
+        if(userBricks.length <= 1) { 
+            const defaultBrickSrc = generateDefaultBrick();
+            const img = new Image();
+            img.isPlaceholder = true;
+            img.onload = () => {
+                loadedBricks[i] = img;
+                updateSlotVisual(i, defaultBrickSrc, true);
+                forceWallRegen();
+            };
+            img.src = defaultBrickSrc;
+            return; 
+        }
+        
+        loadedBricks[i] = null;
+        updateSlotVisual(i, "", true);
         forceWallRegen();
     }
 
+    function toggleColorPicker() {
+        const btn = document.getElementById('btn-pipette-color');
+        if (!isColorPicking) {
+            isColorPicking = true;
+            btn.style.background = '#0d6efd';
+            btn.innerText = '👉 Cliquez sur la couleur souhaitée sur la brique';
+            canvas.style.cursor = 'crosshair';
+            render(); 
+        } else {
+            isColorPicking = false;
+            btn.style.background = 'linear-gradient(135deg, #6610f2, #5f3dc4)';
+            btn.innerText = '🧪 Cible (Pipette)';
+            canvas.style.cursor = 'default';
+            render(); 
+        }
+    }
+
+    canvas.addEventListener('click', function(e) {
+        if (!isColorPicking) return;
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const x = Math.floor((e.clientX - rect.left) * scaleX);
+        const y = Math.floor((e.clientY - rect.top) * scaleY);
+
+        const pixel = ctx.getImageData(x, y, 1, 1).data;
+        const r = pixel[0], g = pixel[1], b = pixel[2];
+
+        let minD = Infinity, best = null;
+        NUANCIER_COMPLET.forEach(j => {
+            if (j.r !== undefined) {
+                const dist = Math.sqrt((j.r-r)**2 + (j.g-g)**2 + (j.b-b)**2);
+                if(dist < minD) { minD = dist; best = j; }
+            }
+        });
+
+        if (best) {
+            currentJointColor = best;
+            document.getElementById('categorySelect').value = best.cat;
+            filterColors();
+            const sel = document.getElementById('jointColorSelect');
+            for(let i=0; i<sel.options.length; i++) {
+                if(sel.options[i].value && JSON.parse(sel.options[i].value).name === best.name) {
+                    sel.selectedIndex = i;
+                    onJointSelected();
+                }
+            }
+        }
+        toggleColorPicker(); 
+    });
+
     function filterColors() {
         const cat = document.getElementById('categorySelect').value;
-        const select = document.getElementById('jointColorSelect');
-        select.innerHTML = "";
-        const defaultOpt = document.createElement('option');
-        defaultOpt.value = "";
-        defaultOpt.textContent = "-- Choisir une teinte --";
-        select.appendChild(defaultOpt);
-        const filtered = (cat === 'all') ? NUANCIER_COMPLET : NUANCIER_COMPLET.filter(c => c.cat === cat);
-        filtered.forEach(c => {
-            const opt = document.createElement('option');
-            opt.value = JSON.stringify({r: c.r, g: c.g, b: c.b, name: c.name, cat: c.cat});
-            opt.textContent = c.name;
-            select.appendChild(opt);
+        const sel = document.getElementById('jointColorSelect');
+        sel.innerHTML = '<option value="" style="background:#fff; color:#000;">-- Choisir une teinte --</option>';
+        
+        const list = cat === 'all' ? NUANCIER_COMPLET : NUANCIER_COMPLET.filter(c => c.cat === cat);
+        
+        list.forEach(c => {
+            const o = document.createElement('option');
+            o.value = JSON.stringify(c); 
+            o.textContent = c.name;
+            if(c.r !== undefined) {
+                o.style.backgroundColor = `rgb(${c.r}, ${c.g}, ${c.b})`;
+                const luminance = 0.299 * c.r + 0.587 * c.g + 0.114 * c.b;
+                o.style.color = luminance > 130 ? '#000000' : '#ffffff';
+                o.style.fontWeight = "bold";
+            }
+            sel.appendChild(o);
         });
+        
+        updatePreviewDot();
+        render();
     }
 
-    function updatePreviewDot() {
-        const val = document.getElementById('jointColorSelect').value;
-        const dot = document.getElementById('joint-preview-dot');
-        if(val) {
-            const c = JSON.parse(val);
-            dot.style.backgroundColor = `rgb(${c.r},${c.g},${c.b})`;
-            currentJointColor = c;
+    function onJointSelected() {
+        const v = document.getElementById('jointColorSelect').value;
+        if(v) {
+            currentJointColor = JSON.parse(v);
         } else {
-            dot.style.backgroundColor = '#f4f4f4';
             currentJointColor = null;
         }
+        updatePreviewDot();
+        render();
     }
-
-    // --- MODIFICATION MAJEURE ICI : GRAIN UNIQUE ---
-    function generateGrain() {
-        const size = 512;
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = size; tempCanvas.height = size;
-        const tCtx = tempCanvas.getContext('2d');
-        tCtx.fillStyle = "#FFFFFF"; tCtx.fillRect(0,0,size,size);
-        
-        // PARAMETRES FORCÉS "FIN"
-        let intensity = 50; 
-        let contrastFactor = 3;
-
-        const imgData = tCtx.getImageData(0,0,size,size);
-        const data = imgData.data;
-        
-        for(let i=0; i < data.length; i += 4) {
-            const noise = (Math.random() - 0.5) * intensity * contrastFactor; 
-            const val = 255 - Math.abs(noise); 
-            data[i] = val; data[i+1] = val; data[i+2] = val;
+    
+    function updatePreviewDot() {
+        const dot = document.getElementById('joint-preview-dot');
+        if(currentJointColor) {
+            dot.style.backgroundColor = `rgb(${currentJointColor.r},${currentJointColor.g},${currentJointColor.b})`;
+        } else { 
+            dot.style.backgroundColor = '#f4f4f4'; 
         }
-        tCtx.putImageData(imgData, 0, 0);
-        grainTexture = tCtx.createPattern(tempCanvas, 'repeat');
     }
 
     function forceWallRegen() {
-        const validBricks = loadedBricks.filter(b => b !== null);
-        if(validBricks.length === 0) return;
-        const maxRows = 200; const maxCols = 100;
-        wallLayoutCache = [];
-        for (let r = 0; r < maxRows; r++) {
-            let rowData = [];
-            for (let c = 0; c < maxCols; c++) {
-                const randomBrickIndex = Math.floor(Math.random() * validBricks.length);
-                rowData.push(randomBrickIndex);
-            }
-            wallLayoutCache.push(rowData);
+        let valid = loadedBricks.filter(b => b && !b.isPlaceholder);
+        if(!valid.length) {
+            valid = [loadedBricks[0]]; 
         }
-        render(true); 
+        if(!valid[0]) return;
+
+        wallLayoutCache = [];
+        for(let r=0; r<200; r++) {
+            let row = [];
+            for(let c=0; c<100; c++) row.push(Math.floor(Math.random() * valid.length));
+            wallLayoutCache.push(row);
+        }
+        render();
     }
 
-    function render(shouldAnalyze = true) {
-        const validBricks = loadedBricks.filter(b => b !== null);
-        if(validBricks.length === 0) return;
-        if(wallLayoutCache.length === 0) forceWallRegen();
+    function render() {
+        let valid = loadedBricks.filter(b => b && !b.isPlaceholder);
+        if(!valid.length) {
+            valid = [loadedBricks[0]];
+        }
+        if(!valid[0]) return;
+        
+        if(!wallLayoutCache.length) forceWallRegen();
 
         ctx.clearRect(0,0, canvas.width, canvas.height);
-        ctx.filter = 'none'; 
-        ctx.globalCompositeOperation = 'source-over';
-
-        const brickLenMM = parseInt(document.getElementById('input-longueur').value) || 220;
-        const brickHeightMM = parseInt(document.getElementById('input-hauteur').value) || 60;
-        const jointMM = parseInt(document.getElementById('slider-epaisseur').value) || 12;
-        const zoomLevel = parseFloat(document.getElementById('slider-zoom').value);
-        const brickName = document.getElementById('input-brick-name').value || "Brique";
         
-        const bright = document.getElementById('calib-brightness').value;
-        const contrast = document.getElementById('calib-contrast').value;
+        const L_mm = parseInt(document.getElementById('input-longueur').value)||220;
+        const H_mm = parseInt(document.getElementById('input-hauteur').value)||60;
+        const J_mm = parseInt(document.getElementById('slider-epaisseur').value)||12;
+        const zoom = parseFloat(document.getElementById('slider-zoom').value);
+        
+        const pxPerMM = zoom;
+        const L_px = L_mm * pxPerMM;
+        const H_px = H_mm * pxPerMM;
+        const J_px = J_mm * pxPerMM;
+
+        const W = 1200; const H = 800; const Footer = 110;
+        canvas.width = W; canvas.height = H + Footer;
+        document.getElementById('scale-info').innerText = `1m = ${Math.round(1000*pxPerMM)}px`;
+
+        const bri = document.getElementById('calib-brightness').value;
+        const con = document.getElementById('calib-contrast').value;
         const sat = document.getElementById('calib-saturation').value;
         const hue = document.getElementById('calib-hue').value;
-        
-        const PX_PER_MM = zoomLevel; 
-        const brickLenPx = brickLenMM * PX_PER_MM;
-        const brickHeightPx = brickHeightMM * PX_PER_MM;
-        const jointPx = jointMM * PX_PER_MM;
 
-        const canvasWidth = 1200; 
-        const canvasHeight = 800;
-        const footerHeight = 110; 
-        
-        canvas.width = canvasWidth;
-        canvas.height = canvasHeight + footerHeight;
+        if (isColorPicking) {
+            ctx.fillStyle = "#ffffff"; 
+            ctx.fillRect(0, 0, W, H);
+            
+            ctx.filter = `brightness(${bri}%) contrast(${con}%) saturate(${sat}%) hue-rotate(${hue}deg)`;
+            let y = 0; let rIdx = 0;
+            while(y < H) {
+                let x = (rIdx % 2 !== 0) ? -(L_px/2) - (J_px/2) : 0;
+                let cIdx = 0;
+                while(x < W) {
+                    const sR = rIdx % wallLayoutCache.length;
+                    const sC = cIdx % wallLayoutCache[0].length;
+                    const bIdx = wallLayoutCache[sR][sC];
+                    const img = valid[bIdx] || valid[0];
+                    ctx.drawImage(img, x, y, L_px, H_px);
+                    x += L_px + J_px; cIdx++;
+                }
+                y += H_px + J_px; rIdx++;
+            }
 
-        document.getElementById('scale-info').innerText = `1 mètre = ${Math.round(1000 * PX_PER_MM)} pixels`;
+            ctx.filter = 'none';
+            ctx.fillStyle = "rgba(0,0,0,0.8)";
+            ctx.fillRect(0, 0, W, 60);
+            ctx.fillStyle = "white";
+            ctx.font = "bold 20px 'Segoe UI'";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("🧪 MODE PIPETTE : Cliquez sur la couleur de la brique que vous souhaitez copier", W/2, 30);
+            return; 
+        }
 
-        if (currentJointColor) {
+        if(currentJointColor) {
             ctx.fillStyle = `rgb(${currentJointColor.r}, ${currentJointColor.g}, ${currentJointColor.b})`;
         } else {
-            ctx.fillStyle = "#f4f4f4";
+            ctx.fillStyle = "#e0e0e0"; 
         }
-        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+        ctx.fillRect(0, 0, W, H);
 
-        ctx.globalCompositeOperation = 'multiply';
+        ctx.globalCompositeOperation = 'overlay'; 
         ctx.fillStyle = grainTexture;
-        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+        ctx.fillRect(0, 0, W, H);
         ctx.globalCompositeOperation = 'source-over'; 
 
-        ctx.shadowColor = "rgba(0,0,0,0.4)";
-        ctx.shadowBlur = 4 * (zoomLevel/2); 
-        ctx.shadowOffsetX = 2 * (zoomLevel/2);
-        ctx.shadowOffsetY = 2 * (zoomLevel/2);
-
-        let y = 0;
-        let row = 0;
-        
         ctx.save();
-        ctx.beginPath();
-        ctx.rect(0, 0, canvasWidth, canvasHeight);
-        ctx.clip();
-        
-        ctx.filter = `brightness(${bright}%) contrast(${contrast}%) saturate(${sat}%) hue-rotate(${hue}deg)`;
+        ctx.beginPath(); ctx.rect(0,0,W,H); ctx.clip();
 
-        while(y < canvasHeight) {
-            let x = 0;
-            if(row % 2 !== 0) x = -(brickLenPx / 2) - (jointPx / 2); 
-            
-            let col = 0;
-            while(x < canvasWidth) {
-                const safeRow = row % wallLayoutCache.length;
-                const safeCol = col % wallLayoutCache[0].length;
-                const storedBrickIdx = wallLayoutCache[safeRow][safeCol];
-                let imgToDraw = validBricks[storedBrickIdx] || validBricks[0];
+        ctx.shadowColor = "rgba(0,0,0,0.6)";
+        ctx.shadowBlur = 4 * (zoom/1.5);
+        ctx.shadowOffsetX = 1 * (zoom/1.5); 
+        ctx.shadowOffsetY = 2 * (zoom/1.5);
 
-                ctx.drawImage(imgToDraw, x, y, brickLenPx, brickHeightPx);
-                x += brickLenPx + jointPx;
-                col++;
+        let y = 0; let rIdx = 0;
+        ctx.filter = `brightness(${bri}%) contrast(${con}%) saturate(${sat}%) hue-rotate(${hue}deg)`;
+
+        while(y < H) {
+            let x = (rIdx % 2 !== 0) ? -(L_px/2) - (J_px/2) : 0;
+            let cIdx = 0;
+            while(x < W) {
+                const sR = rIdx % wallLayoutCache.length;
+                const sC = cIdx % wallLayoutCache[0].length;
+                const bIdx = wallLayoutCache[sR][sC];
+                const img = valid[bIdx] || valid[0];
+                ctx.drawImage(img, x, y, L_px, H_px);
+                x += L_px + J_px; cIdx++;
             }
-            y += brickHeightPx + jointPx;
-            row++;
+            y += H_px + J_px; rIdx++;
         }
-        
-        ctx.filter = 'none'; 
         ctx.restore();
 
-        ctx.shadowColor = "transparent";
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(0, canvasHeight, canvasWidth, footerHeight);
-        ctx.strokeStyle = "#e9ecef";
-        ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(0, canvasHeight); ctx.lineTo(canvasWidth, canvasHeight); ctx.stroke();
-
+        ctx.filter = 'none'; ctx.shadowColor = "transparent";
+        ctx.fillStyle = "white"; ctx.fillRect(0, H, W, Footer);
+        ctx.strokeStyle = "#ddd"; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(0,H); ctx.lineTo(W,H); ctx.stroke();
+        
         ctx.textBaseline = "middle";
-        const mainLineY = canvasHeight + 40;
+        const Y_txt = H + 40;
+        ctx.textAlign = "left"; ctx.fillStyle = "#222"; ctx.font = "bold 22px 'Segoe UI'";
+        ctx.fillText(`JOINT : ${currentJointColor ? currentJointColor.name : "Aucun"}`, 30, Y_txt);
         
-        // LABEL FORCE A GRAIN FIN
-        const grainLabel = 'Grain Fin (0/1)';
-        
-        ctx.textAlign = "left";
-        ctx.fillStyle = "#212529";
-        ctx.font = "bold 22px 'Segoe UI', sans-serif";
-        const jointNameDisplay = currentJointColor ? currentJointColor.name : "Aucun (Neutre)";
-        ctx.fillText(`JOINT : ${jointNameDisplay}`, 30, mainLineY);
+        ctx.textAlign = "center"; ctx.fillStyle = "#555"; ctx.font = "20px 'Segoe UI'";
+        ctx.fillText(`Ep. ${J_mm}mm | Calibrage LCh (V86)`, W/2, Y_txt);
 
-        ctx.textAlign = "center";
-        ctx.fillStyle = "#495057";
-        ctx.font = "20px 'Segoe UI', sans-serif";
-        ctx.fillText(`Ep. ${jointMM}mm | ${grainLabel}`, canvasWidth / 2, mainLineY);
-
-        ctx.textAlign = "right";
-        ctx.fillStyle = "#212529";
-        ctx.font = "bold 22px 'Segoe UI', sans-serif";
-        ctx.fillText(`BRIQUE : ${brickName}`, canvasWidth - 30, mainLineY - 12);
-        
-        ctx.fillStyle = "#868e96";
-        ctx.font = "italic 16px 'Segoe UI', sans-serif";
-        ctx.fillText(`Format: ${brickLenMM}x${brickHeightMM}mm`, canvasWidth - 30, mainLineY + 12);
-
-        const disclaimerY = canvasHeight + 85;
-        ctx.textAlign = "center";
-        ctx.fillStyle = "#dc3545"; 
-        ctx.font = "italic 14px 'Segoe UI', sans-serif";
-        ctx.fillText("⚠️ La validation du joint doit se faire par un essai de chantier.", canvasWidth / 2, disclaimerY);
-    }
-
-    function getGrainSuffix() {
-        return 'Grain_Fin';
+        ctx.textAlign = "right"; ctx.fillStyle = "#222"; ctx.font = "bold 22px 'Segoe UI'";
+        const bName = document.getElementById('input-brick-name').value || "Exemple";
+        ctx.fillText(`PROJET : ${bName}`, W-30, Y_txt);
     }
 
     function downloadImage() {
+        const valid = loadedBricks.filter(b => b && !b.isPlaceholder);
+        if(!valid.length) { alert("Veuillez d'abord charger une brique avant d'exporter."); return; }
         const link = document.createElement('a');
-        const jointName = currentJointColor ? currentJointColor.name.replace(/ /g, '_') : 'Sans_Joint';
-        const brickName = document.getElementById('input-brick-name').value.replace(/ /g, '_') || "Brique";
-        const grainSuffix = getGrainSuffix();
-        link.download = `Projet_${brickName}_${jointName}_${grainSuffix}.jpg`;
-        link.href = canvas.toDataURL('image/jpeg', 0.9);
+        link.download = `Projet_V86_LCh.jpg`;
+        link.href = canvas.toDataURL('image/jpeg', 0.92);
         link.click();
     }
-
+    
     function downloadPDF() {
+        const valid = loadedBricks.filter(b => b && !b.isPlaceholder);
+        if(!valid.length) { alert("Veuillez d'abord charger une brique avant d'exporter."); return; }
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF({ orientation: 'landscape' });
-        const imgData = canvas.toDataURL('image/jpeg', 0.9);
-        const props = doc.getImageProperties(imgData);
-        const pdfWidth = doc.internal.pageSize.getWidth();
-        const pdfHeight = (props.height * pdfWidth) / props.width;
-        doc.addImage(imgData, 'JPEG', 0, 10, pdfWidth, pdfHeight);
-        const jointName = currentJointColor ? currentJointColor.name : 'Sans Joint';
-        const brickName = document.getElementById('input-brick-name').value || "Brique";
-        const grainSuffix = getGrainSuffix();
-        doc.save(`Projet_${brickName}_${jointName}_${grainSuffix}.pdf`);
+        const img = canvas.toDataURL('image/jpeg', 0.92);
+        const props = doc.getImageProperties(img);
+        const w = doc.internal.pageSize.getWidth();
+        const h = (props.height * w) / props.width;
+        doc.addImage(img, 'JPEG', 0, 10, w, h);
+        doc.save('Projet_V86.pdf');
     }
 </script>
-
 </body>
 </html>
