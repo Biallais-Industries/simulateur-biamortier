@@ -2,1679 +2,1186 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculatrice Biamortier V31 (M5/M10 + Couleur)</title>
-    <link rel="icon" type="image/png" href="icon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Simulateur Biamortier V88 - Formulaire d'Envoi</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        :root {
-            --primary-color: #004a99;
-            --secondary-color: #f4f6f9;
-            --accent-color: #e67e22;
-            --concrete-color: #7f8c8d;
-            --joint-color: #8e44ad;
-            --email-color: #27ae60;
-            --text-color: #2c3e50;
-            --warning-bg: #fffbf0;
-            --warning-border: #f6e05e;
-            --card-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--secondary-color);
-            margin: 0;
-            padding: 20px;
-            color: var(--text-color);
-        }
-
-        .container {
-            max-width: 700px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: var(--card-shadow);
-            overflow: hidden;
-        }
-
-        header {
-            background: linear-gradient(135deg, var(--primary-color) 0%, #002b55 100%);
-            color: white;
-            padding: 20px 30px;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .logo-container img {
-            height: 60px;
-            width: auto;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
-            background: white; 
-            padding: 5px;
-            border-radius: 5px;
-        }
-
-        .header-text h1 {
-            margin: 0;
-            font-size: 1.6rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-        }
-
-        .header-text p {
-            margin: 5px 0 0;
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
-
-        .content {
-            padding: 30px;
-        }
-
-        /* --- MAIN TYPE SWITCHER --- */
-        .main-type-switcher {
-            display: flex;
-            margin-bottom: 25px;
-            border-bottom: 2px solid #e2e8f0;
-            gap: 5px;
-        }
-
-        .main-type-btn {
-            flex: 1;
-            padding: 15px 5px;
-            text-align: center;
-            border: none;
-            background: transparent;
-            font-weight: 800;
-            font-size: 1rem;
-            color: #a0aec0;
-            cursor: pointer;
-            transition: all 0.3s;
-            border-bottom: 4px solid transparent;
-            text-transform: uppercase;
-        }
-
-        .main-type-btn:hover {
-            color: var(--primary-color);
-            background-color: #f8fafc;
-        }
-
-        .main-type-btn.active {
-            color: var(--primary-color);
-            border-bottom-color: var(--primary-color);
-        }
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #eef2f6; margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: row; }
+        .controls { width: 380px; min-width: 380px; background: white; height: 100%; overflow-y: auto; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 10; display: flex; flex-direction: column; gap: 15px; }
+        .preview-container { flex: 1; background: #dce1e8; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; position: relative; height: 100%; }
+        .canvas-wrapper { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; max-height: 90vh; }
+        canvas { display: block; max-width: 100%; max-height: 100%; width: auto; height: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3); background: white; cursor: default; }
+        h2 { margin: 0 0 5px 0; color: #1a1a1a; font-size: 1.2rem; }
+        label { display: block; font-size: 0.85rem; color: #343a40; margin-bottom: 4px; font-weight: 600; }
+        .input-row { display: flex; gap: 10px; }
+        .input-group { flex: 1; }
+        input[type="text"], input[type="number"], select { width: 100%; padding: 8px; border: 1px solid #ced4da; border-radius: 6px; font-size: 0.9rem; }
+        input[type="range"] { width: 100%; margin: 8px 0; }
+        .upload-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+        .brick-container { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .brick-slot { width: 100%; aspect-ratio: 16/9; border: 2px dashed #cbd5e1; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; position: relative; background: #f8f9fa; transition: 0.2s; font-size: 0.8rem; color: #adb5bd; flex-direction: column; text-align:center; line-height: 1.3; }
+        .brick-slot:hover { border-color: #007bff; color: #007bff; background: #eef7ff; }
+        .brick-slot img { width: 100%; height: 100%; object-fit: cover; }
+        .brick-slot.active { border-style: solid; border-color: #28a745; }
+        .remove-btn { position: absolute; top: 2px; right: 2px; background: rgba(255,0,0,0.7); color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 10px; display: flex; align-items: center; justify-content: center; z-index: 10; cursor: pointer; }
         
-        .main-type-btn.active-concrete {
-            color: var(--concrete-color);
-            border-bottom-color: var(--concrete-color);
-        }
+        .tips-box { background: #e3f2fd; border: 1px solid #90caf9; border-radius: 6px; padding: 10px; margin-bottom: 15px; font-size: 0.8rem; color: #0d47a1; }
+        .tips-box summary { font-weight: bold; cursor: pointer; list-style: none; outline: none; }
+        .tips-box summary::-webkit-details-marker { display: none; }
+        .tips-box ul { margin: 8px 0 0 0; padding-left: 20px; color: #333; }
+        .tips-box li { margin-bottom: 6px; }
+        .tips-box strong { color: #0d47a1; }
+
+        .calibration-box { background: #fff3cd; border: 1px solid #ffeeba; padding: 10px; border-radius: 8px; margin-top: 15px; position: relative; }
+        .calibration-slider { display: flex; align-items: center; gap: 10px; font-size: 0.8rem; margin-bottom: 5px; }
+        .calibration-slider label { width: 70px; margin:0; font-weight: bold; }
+        .calibration-slider input[type="range"] { flex:1; }
+        .reset-calib-btn { position: absolute; top: 10px; right: 10px; background: #fff; border: 1px solid #e0c46c; border-radius: 4px; font-size: 0.7rem; padding: 2px 6px; cursor: pointer; color: #856404; }
         
-        .main-type-btn.active-joint {
-            color: var(--joint-color);
-            border-bottom-color: var(--joint-color);
-        }
-
-        /* --- MODE SWITCHER --- */
-        .mode-switcher {
-            display: flex;
-            background: #e2e8f0;
-            padding: 5px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-        }
+        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
+        button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn-jpg { background: #198754; color: white; }
+        .btn-pdf { background: #dc3545; color: white; }
+        button:hover { opacity: 0.95; transform: translateY(-1px); }
+        #joint-preview-dot { width: 40px; height: 38px; border-radius: 6px; border: 1px solid #dee2e6; background-color: #f4f4f4; flex-shrink: 0; }
+        .btn-magic { background: linear-gradient(135deg, #6610f2, #5f3dc4); color: white; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(102, 16, 242, 0.2); transition: 0.2s; font-size: 0.85rem; }
+        .btn-magic-alt { background: linear-gradient(135deg, #0d6efd, #0b5ed7); color: white; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2); transition: 0.2s; font-size: 0.85rem; }
         
-        .mode-btn {
-            flex: 1;
-            padding: 12px;
-            text-align: center;
-            border: none;
-            background: transparent;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 700;
-            color: #718096;
-            transition: all 0.2s;
-        }
-        
-        .mode-btn.active {
-            background: white;
-            color: var(--primary-color);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        .mode-btn.concrete-active {
-            background: white;
-            color: var(--concrete-color);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
+        .submit-btn { background: #0d47a1; color: white; width: 100%; margin-top: 15px; padding: 12px; border-radius: 6px; border:none; cursor: pointer; font-weight: bold; display:flex; align-items:center; justify-content:center; gap:8px; }
+        .library-box { background: #e3f2fd; border: 1px solid #90caf9; padding: 15px; border-radius: 8px; margin-bottom: 5px; }
+        .lib-controls { display: flex; gap: 5px; margin-top: 10px; }
+        .btn-save-lib { background: #0d6efd; color: white; flex: 2; font-size: 0.8rem; padding: 8px; }
+        .btn-del-lib { background: #dc3545; color: white; flex: 1; font-size: 0.8rem; padding: 8px; }
+        .fixed-value-box { width: 100%; padding: 8px; background: #e9ecef; border: 1px solid #ced4da; border-radius: 6px; font-size: 0.85rem; color: #495057; text-align: center; font-weight: bold;}
 
-        .form-group {
-            margin-bottom: 25px;
-            transition: all 0.3s ease;
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 2000; display: flex; justify-content: center; align-items: center; flex-direction: column; }
+        .modal-content { background: white; padding: 20px; border-radius: 8px; text-align: center; max-width: 95vw; max-height: 95vh; display:flex; flex-direction:column; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        .crop-canvas-container { position:relative; display:inline-block; max-width:100%; margin-top: 10px; background: #222; border-radius: 4px; overflow:hidden;}
+        #crop-canvas { max-width: 100%; max-height: 60vh; cursor: crosshair; touch-action: none; display: block; }
 
-        .hidden-field {
-            display: none;
-        }
-
-        label {
-            display: block;
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: #4a5568;
-            font-size: 0.95rem;
-        }
-
-        select, input {
-            width: 100%;
-            padding: 14px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 16px;
-            background-color: #fff;
-            transition: border-color 0.2s;
-            box-sizing: border-box;
-            color: #2d3748;
-        }
-
-        .input-with-unit {
-            display: flex;
-            gap: 10px;
-        }
-        .input-with-unit input { flex: 2; }
-        .input-with-unit select { flex: 1; background-color: #edf2f7; border-color: #cbd5e0; font-weight: bold; }
-
-        select:disabled {
-            background-color: #edf2f7;
-            color: #a0aec0;
-            cursor: not-allowed;
-        }
-
-        select:focus, input:focus {
-            border-color: var(--primary-color);
-            outline: none;
-        }
-
-        /* --- VISUEL PRODUIT --- */
-        #product-visual-container {
-            text-align: center;
-            margin-bottom: 25px;
-            min-height: 180px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #ffffff;
-            border-radius: 12px;
-            border: 1px dashed #e2e8f0;
-            padding: 15px;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .visual-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 20px; 
-            width: 100%;
-        }
-        
-        .product-img {
-            max-height: 160px;
-            max-width: 100%;
-            height: auto;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
-            mix-blend-mode: multiply;
-        }
-        
-        /* --- REGLAGE FIN DES TAILLES (DUAL MODE) --- */
-        .visual-wrapper.dual-mode #img-primary {
-            height: 160px; 
-            width: auto;
-            max-width: 48%;
-            object-fit: contain;
-        }
-
-        .visual-wrapper.dual-mode #img-secondary {
-            height: 135px;
-            width: auto;
-            max-width: 48%;
-            object-fit: contain;
-        }
-
-        .product-img.visible { opacity: 1; }
-        .product-img.hidden { display: none; }
-
-        .visual-badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: var(--primary-color);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            display: none;
-        }
-
-        /* --- SCHÉMAS --- */
-        .schematic-wrapper {
-            text-align: center;
-            margin-bottom: 20px;
-            padding: 15px;
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-        }
-        .schematic-wrapper svg {
-            max-width: 100%;
-            height: auto;
-            max-height: 150px;
-        }
-
-        /* --- ALERTE COATED --- */
-        #coated-alert {
-            display: none;
-            background-color: var(--warning-bg);
-            border: 1px solid var(--warning-border);
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 25px;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        .coated-checkbox {
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-        }
-        .coated-checkbox input {
-            width: 20px;
-            height: 20px;
-            margin-right: 15px;
-            accent-color: #d69e2e;
-        }
-        .coated-text strong { display: block; color: #744210; margin-bottom: 2px; }
-        .coated-text span { font-size: 0.9rem; color: #975a16; }
-
-        /* Saisie manuelle */
-        #custom-dimensions {
-            display: none;
-            background-color: #fff4e6;
-            padding: 15px;
-            border: 2px dashed var(--accent-color);
-            border-radius: 12px;
-            margin-bottom: 25px;
-            animation: fadeIn 0.3s ease-in;
-        }
-
-        .dims-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 10px;
-        }
-
-        .dim-input label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            color: var(--accent-color);
-            margin-bottom: 5px;
-            display: block;
-        }
-        
-        .joint-input-group {
-            display: flex;
-            align-items: center;
-        }
-        .joint-input-group input {
-            width: 100px;
-            margin-right: 15px;
-            text-align: center;
-            font-weight: 800;
-            color: var(--primary-color);
-            font-size: 1.2rem;
-        }
-
-        #concrete-section .dim-input label { color: var(--concrete-color); }
-        #joint-section .dim-input label { color: var(--joint-color); }
-        
-        #concrete-section input, #joint-section input {
-            text-align: center;
-            font-weight: 600;
-        }
-
-        .btn-calc {
-            width: 100%;
-            background: linear-gradient(to right, var(--accent-color), #d35400);
-            color: white;
-            border: none;
-            padding: 18px;
-            font-size: 1.2rem;
-            font-weight: 800;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: transform 0.1s, box-shadow 0.2s;
-            margin-top: 15px;
-            box-shadow: 0 6px 12px rgba(230, 126, 34, 0.3);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .btn-calc.concrete-mode {
-            background: linear-gradient(to right, #95a5a6, #7f8c8d);
-            box-shadow: 0 6px 12px rgba(127, 140, 141, 0.3);
-        }
-        
-        .btn-calc.joint-mode {
-            background: linear-gradient(to right, #9b59b6, #8e44ad);
-            box-shadow: 0 6px 12px rgba(142, 68, 173, 0.3);
-        }
-        
-        .btn-email {
-            width: 100%;
-            background: linear-gradient(to right, #27ae60, #2ecc71);
-            color: white;
-            border: none;
-            padding: 15px;
-            font-size: 1.1rem;
-            font-weight: 800;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-            margin-top: 25px;
-            box-shadow: 0 6px 12px rgba(46, 204, 113, 0.3);
-            text-transform: uppercase;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        .btn-email:hover {
-            background: linear-gradient(to right, #219150, #27ae60);
-            transform: translateY(-2px);
-        }
-        .btn-email svg {
-            fill: white;
-            width: 24px;
-            height: 24px;
-        }
-
-        .btn-calc:active { transform: scale(0.98); }
-
-        .contact-form-wrapper {
-            background: #f8fafc;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 30px;
-            text-align: left;
-        }
-        .contact-form-title {
-            font-size: 1rem;
-            font-weight: 800;
-            color: #2d3748;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .required-star { color: #e74c3c; margin-left:3px; }
-
-        #result-card {
-            background-color: #fff;
-            border-radius: 16px;
-            margin-top: 40px;
-            display: none;
-            overflow: hidden;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
-            border-top: 4px solid var(--primary-color);
-            animation: slideUp 0.5s ease-out;
-        }
-
-        .result-summary {
-            background-color: #ebf8ff;
-            padding: 25px;
-            text-align: center;
-            border-bottom: 1px solid #c3dafe;
-        }
-
-        .result-weight {
-            font-size: 3rem;
-            font-weight: 800;
-            color: var(--primary-color);
-            line-height: 1.2;
-        }
-        
-        .result-label {
-            color: #4c51bf;
-            font-weight: 700;
-            text-transform: uppercase;
-            font-size: 0.9rem;
-            letter-spacing: 1px;
-        }
-
-        .logistics-container { padding: 25px; background: #fcfcfc; }
-        .logistics-option {
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 14px;
-            padding: 20px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
-        }
-        .logistics-text { flex: 1; }
-        .logistics-visual img {
-            width: 100px; height: auto; border-radius: 8px;
-            border: 1px solid #edf2f7; padding: 5px; background: white;
-        }
-        .logistics-title { font-weight: 800; color: #2d3748; margin-bottom: 15px; font-size: 1.1rem; }
-        .logistics-list { list-style: none; padding: 0; margin: 0; font-size: 1rem; }
-        .logistics-list li {
-            padding: 8px 0; border-bottom: 1px dashed #e2e8f0; display: flex; justify-content: space-between;
-        }
-        .highlight-number { font-weight: 800; color: var(--primary-color); font-size: 1.1rem; }
-
-        .checkbox-container {
-            display: flex; align-items: center; background: white; padding: 12px;
-            border: 2px solid #e2e8f0; border-radius: 10px; margin-top: 8px; cursor: pointer;
-        }
-        .checkbox-container input { width: 20px; height: 20px; margin-right: 15px; accent-color: var(--primary-color); }
-        .checkbox-container label { margin: 0; font-weight: 600; cursor: pointer; color: #2d3748; }
-
-        .technical-info {
-            text-align: center; font-size: 0.85rem; color: #718096; margin-top: 20px;
-            font-style: italic; background: #edf2f7; padding: 10px; border-radius: 8px;
-        }
-        
-        #joint-usage-desc {
-            margin-top: 10px;
-            font-size: 0.9rem;
-            color: #555;
-            background: #f8fafc;
-            padding: 10px;
-            border-left: 4px solid var(--joint-color);
-            border-radius: 4px;
-            line-height: 1.4;
-        }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-
-        @media (max-width: 480px) {
-            .logistics-option { flex-direction: column-reverse; text-align: center; }
-            .logistics-visual img { width: 80px; margin-bottom: 15px; }
-            .main-type-btn { font-size: 0.8rem; padding: 10px 2px; }
-        }
-
-        /* NOUVEAU : Style de la pastille de couleur */
-        .color-preview-circle {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            border: 2px solid #e2e8f0;
-            background-color: transparent;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        @media (max-width: 850px) {
+            body { flex-direction: column; overflow: auto; height: auto; }
+            .preview-container { order: 1; position: sticky; top: 0; z-index: 100; height: 40vh; padding: 10px; border-bottom: 2px solid #ccc; }
+            .controls { order: 2; width: 100%; height: auto; overflow: visible; box-shadow: none; padding-bottom: 50px; }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <header>
-        <div class="logo-container">
-            <img src="logo.png" alt="Biallais Industrie Logo">
+<div id="crop-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-content">
+        <h2 style="margin: 0; color: #0d47a1;">✂️ Recadrer la brique</h2>
+        <p style="font-size: 0.9rem; color: #555; margin-bottom: 5px;">Tracez un rectangle. <b>Les proportions sont automatiquement verrouillées.</b></p>
+        <div class="crop-canvas-container">
+            <canvas id="crop-canvas"></canvas>
         </div>
-        <div class="header-text">
-            <h1>Calculatrice Matériaux</h1>
-            <p>Guide technique & logistique</p>
-        </div>
-    </header>
-
-    <div class="content">
-        
-        <div class="main-type-switcher">
-            <button class="main-type-btn active" id="btnMainMortar" onclick="switchMainType('mortar')">Mortier</button>
-            <button class="main-type-btn" id="btnMainConcrete" onclick="switchMainType('concrete')">Béton</button>
-            <button class="main-type-btn" id="btnMainJoint" onclick="switchMainType('joint')">Joint</button>
-        </div>
-
-        <div id="product-visual-container">
-            <div id="badge-coated" class="visual-badge">GAMME COATED - M10</div>
-            
-            <div class="visual-wrapper" id="visual-wrapper">
-                <img id="img-primary" class="product-img" src="" alt="Sac principal">
-                <img id="img-secondary" class="product-img hidden" src="" alt="Sac secondaire">
-            </div>
-        </div>
-
-        <div id="mortar-section">
-            <div class="mode-switcher">
-                <button class="mode-btn active" id="btnModeSurface" onclick="switchMortarMode('surface')">Par Surface (m²)</button>
-                <button class="mode-btn" id="btnModeVolume" onclick="switchMortarMode('volume')">Par Volume</button>
-            </div>
-
-            <div class="form-group">
-                <label for="category">1. Gamme de produit (Optionnel en mode volume)</label>
-                <select id="category" onchange="updateReferences()">
-                    <option value="">-- Sélectionner une gamme --</option>
-                </select>
-            </div>
-
-            <div id="coated-alert">
-                <label class="coated-checkbox">
-                    <input type="checkbox" id="isCoated" onchange="updateBagVisual()">
-                    <div class="coated-text">
-                        <strong>Brique Coated (Vandersanden) ?</strong>
-                        <span>Cochez cette case pour utiliser le <b>Biamortier M10</b> (Sac Bleu/Rouge).</span>
-                    </div>
-                </label>
-            </div>
-
-            <div id="surface-fields">
-                <div class="form-group">
-                    <label for="reference">2. Référence</label>
-                    <select id="reference" disabled onchange="handleReferenceChange()">
-                        <option value="">-- Sélectionner d'abord la gamme --</option>
-                    </select>
-                </div>
-
-                <div id="custom-dimensions">
-                    <label style="margin-bottom:10px; color:var(--accent-color);">Dimensions brique (mm)</label>
-                    <div class="dims-grid">
-                        <div class="dim-input">
-                            <label>Longueur</label>
-                            <input type="number" id="custL" placeholder="ex: 500">
-                        </div>
-                        <div class="dim-input">
-                            <label>Largeur</label>
-                            <input type="number" id="custW" placeholder="ex: 200">
-                        </div>
-                        <div class="dim-input">
-                            <label>Hauteur</label>
-                            <input type="number" id="custH" placeholder="ex: 200">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="targetJoint">3. Épaisseur du joint (mm)</label>
-                    <div class="joint-input-group">
-                        <input type="number" id="targetJoint" value="10" min="5" max="30">
-                        <span>mm</span>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="surface">4. Surface à monter (m²)</label>
-                    <input type="number" id="surface" placeholder="Ex: 50.5" min="0.1" step="any">
-                    
-                    <div class="checkbox-container" onclick="document.getElementById('doubleWall').click()">
-                        <input type="checkbox" id="doubleWall" onclick="event.stopPropagation()">
-                        <label for="doubleWall">Calcul pour Mur Double</label>
-                    </div>
-                </div>
-            </div>
-            
-            <div id="volume-fields" class="hidden-field">
-                <div class="form-group">
-                    <label>2. Volume de mortier souhaité</label>
-                    <div class="input-with-unit">
-                        <input type="number" id="inputMortarVol" placeholder="Ex: 500" min="0.1" step="any">
-                        <select id="unitMortarVol">
-                            <option value="liters">Litres</option>
-                            <option value="m3">m³</option>
-                        </select>
-                    </div>
-                    <p style="font-size:0.85rem; color:#718096; margin-top:5px;">
-                        Le calcul convertit les m³ en Litres (1 m³ = 1000 L) puis en poids.
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <div id="concrete-section" class="hidden-field">
-            
-            <div class="mode-switcher">
-                <button class="mode-btn concrete-active" id="btnConcreteDims" onclick="switchConcreteMode('dims')">Par Dimensions (cm)</button>
-                <button class="mode-btn" id="btnConcreteVol" onclick="switchConcreteMode('vol')">Par Volume</button>
-            </div>
-
-            <div id="concrete-dims-fields">
-                <div class="schematic-wrapper">
-                    <svg viewBox="0 0 300 160" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M50,60 L150,60 L220,30 L120,30 Z" fill="#ecf0f1" stroke="#7f8c8d" stroke-width="2"/>
-                        <path d="M50,60 L150,60 L150,110 L50,110 Z" fill="#bdc3c7" stroke="#7f8c8d" stroke-width="2"/>
-                        <path d="M150,60 L220,30 L220,80 L150,110 Z" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
-                        <line x1="50" y1="125" x2="150" y2="125" stroke="#2c3e50" stroke-width="2" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
-                        <text x="100" y="145" font-family="Arial" font-size="14" font-weight="bold" fill="#2c3e50" text-anchor="middle">LONGUEUR (L)</text>
-                        <line x1="230" y1="30" x2="230" y2="80" stroke="#2c3e50" stroke-width="2" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
-                        <text x="235" y="60" font-family="Arial" font-size="14" font-weight="bold" fill="#2c3e50" dominant-baseline="middle">LARGEUR (l)</text>
-                        <line x1="35" y1="60" x2="35" y2="110" stroke="#e67e22" stroke-width="2" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
-                        <text x="30" y="85" font-family="Arial" font-size="12" font-weight="bold" fill="#e67e22" text-anchor="end" dominant-baseline="middle">ÉP.</text>
-                        <defs>
-                            <marker id="arrow" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
-                                <path d="M0,0 L10,5 L0,10" fill="#2c3e50" />
-                            </marker>
-                        </defs>
-                    </svg>
-                    <p style="font-size:0.8rem; color:#7f8c8d; margin-top:5px;">Remplissez les 3 dimensions en <strong>centimètres</strong>.</p>
-                </div>
-
-                <div class="form-group">
-                    <label>Dimensions de la dalle / semelle</label>
-                    <div class="dims-grid">
-                        <div class="dim-input">
-                            <label>Longueur (cm)</label>
-                            <input type="number" id="concL" placeholder="ex: 400" step="any">
-                        </div>
-                        <div class="dim-input">
-                            <label>Largeur (cm)</label>
-                            <input type="number" id="concW" placeholder="ex: 300" step="any">
-                        </div>
-                        <div class="dim-input">
-                            <label>Épaisseur (cm)</label>
-                            <input type="number" id="concH" placeholder="ex: 15" step="any">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="concrete-vol-fields" class="hidden-field">
-                <div class="form-group">
-                    <label>Volume de béton souhaité</label>
-                    <div class="input-with-unit">
-                        <input type="number" id="inputConcreteVol" placeholder="Ex: 1.5" min="0.1" step="any">
-                        <select id="unitConcreteVol">
-                            <option value="m3" selected>m³</option>
-                            <option value="liters">Litres</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <p style="font-size:0.9rem; color:#718096; margin-bottom:20px; background:#f0f2f5; padding:10px; border-radius:8px;">
-                <strong>Info dosage :</strong> 1 sac de Tradi Béton (25kg) permet de réaliser environ <strong>12 Litres</strong> de béton gâché.
-            </p>
-        </div>
-
-        <div id="joint-section" class="hidden-field">
-            
-            <div class="schematic-wrapper" style="border-color:#d2b4de;">
-                <svg viewBox="0 0 300 120" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="50" y="30" width="100" height="60" fill="#e74c3c" stroke="#c0392b" stroke-width="2" />
-                    <text x="100" y="65" font-family="Arial" font-size="12" fill="white" text-anchor="middle">PLAQUETTE</text>
-                    <rect x="150" y="30" width="20" height="60" fill="#95a5a6" opacity="0.5" />
-                    <rect x="170" y="30" width="60" height="60" fill="#e74c3c" stroke="#c0392b" stroke-width="2" />
-                    <line x1="150" y1="20" x2="170" y2="20" stroke="#8e44ad" stroke-width="2" />
-                    <text x="160" y="15" font-family="Arial" font-size="10" fill="#8e44ad" text-anchor="middle">Largeur Joint</text>
-                    <rect x="260" y="30" width="15" height="60" fill="#e74c3c" stroke="#c0392b" stroke-width="2" />
-                    <line x1="260" y1="100" x2="275" y2="100" stroke="#e67e22" stroke-width="2" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
-                    <text x="268" y="115" font-family="Arial" font-size="10" fill="#e67e22" text-anchor="middle">Profond.</text>
-                </svg>
-                <p style="font-size:0.8rem; color:#8e44ad; margin-top:5px;">Indiquez les dimensions de la plaquette et <strong>la profondeur à remplir</strong> (épaisseur plaquette).</p>
-            </div>
-
-            <div class="form-group">
-                <label style="color:var(--joint-color);">1. Choix du Produit Joint</label>
-                <select id="jointProductType" onchange="updateJointInfo()">
-                    <option value="biajoint">BIAJOINT (Classique)</option>
-                    <option value="easyjoint">EASY JOINT</option>
-                </select>
-                
-                <div id="joint-usage-desc">
-                    Usage : Rejointoiement traditionnel à la main.
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label style="color:var(--joint-color);">2. Dimensions de la plaquette (mm)</label>
-                <div class="dims-grid">
-                    <div class="dim-input">
-                        <label>Longueur</label>
-                        <input type="number" id="jointL" placeholder="ex: 220">
-                    </div>
-                    <div class="dim-input">
-                        <label>Hauteur</label>
-                        <input type="number" id="jointH" placeholder="ex: 60">
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label style="color:var(--joint-color);">3. Dimensions du joint (mm)</label>
-                <div class="dims-grid">
-                    <div class="dim-input">
-                        <label>Largeur Joint</label>
-                        <input type="number" id="jointW" value="10">
-                    </div>
-                    <div class="dim-input">
-                        <label style="color:#d35400; font-weight:800;">Profondeur</label>
-                        <input type="number" id="jointD" placeholder="ex: 20" style="border-color:#d35400;">
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="jointSurface">4. Surface Totale à jointer (m²)</label>
-                <input type="number" id="jointSurface" placeholder="Ex: 50">
-            </div>
-
-            <p style="font-size:0.9rem; color:#718096; margin-bottom:20px; background:#f3e5f5; padding:10px; border-radius:8px;">
-                <strong>Info :</strong> Calibré sur une consommation réelle (perte incluse).
-            </p>
-
-        </div>
-
-
-        <button id="btnAction" class="btn-calc" onclick="calculate()">CALCULER MA COMMANDE</button>
-
-        <div id="result-card">
-            <div class="result-summary">
-                <div class="result-label">Poids Total Nécessaire</div>
-                <div class="result-weight"><span id="totalWeight">0</span> kg</div>
-                
-                <div style="font-size:1.1rem; color:#718096; margin-top:5px; font-weight:600;">
-                    Soit environ <span id="totalVolume" style="color:#2d3748;">0</span> Litres
-                </div>
-
-                <div id="consumption-result-line" style="font-size:0.95rem; color:#2c3e50; margin-top:10px; background:rgba(255,255,255,0.7); padding:5px; border-radius:5px; display:none;">
-                     Consommation estimée : <strong id="consomVal" style="color:var(--accent-color);">0</strong> kg/m²
-                </div>
-                
-                <div id="brick-result-line" style="font-size:1rem; color:#4a5568; margin-top:15px; border-top:1px solid #c3dafe; padding-top:10px;">
-                    Pour environ <strong id="totalBricks" style="color:var(--accent-color)">0</strong> briques/blocs
-                </div>
-            </div>
-
-            <div class="logistics-container">
-                <div class="logistics-option">
-                    <div class="logistics-text">
-                        <div class="logistics-title">OPTION A : VRAC (Big Bags)</div>
-                        <ul class="logistics-list" id="bigBagList"></ul>
-                    </div>
-                    <div class="logistics-visual">
-                        <img src="bigbag.jpg" alt="Big Bag Mortier">
-                    </div>
-                </div>
-
-                <div class="logistics-option">
-                    <div class="logistics-text">
-                        <div class="logistics-title">OPTION B : PALETTISÉ (Sacs 25kg)</div>
-                        <ul class="logistics-list">
-                            <li>
-                                <span>Palettes complètes (56 sacs)</span>
-                                <span class="highlight-number" id="nbPallets">0</span>
-                            </li>
-                            <li>
-                                <span>Sacs supplémentaires (Reliquat)</span>
-                                <span class="highlight-number" id="nbExtraBags">0</span>
-                            </li>
-                            <li style="border-top: 1px solid #e2e8f0; margin-top:8px; padding-top:12px; color:#718096; font-weight:600;">
-                                Total sacs : <span id="totalBagsCount">0</span>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="logistics-visual">
-                        <img src="palette.jpg" alt="Palette de sacs">
-                    </div>
-                </div>
-
-                <div class="technical-info" id="tech-info-text">
-                    Calcul technique inclus.
-                </div>
-
-                <div class="contact-form-wrapper">
-                    <div class="contact-form-title">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="#2d3748">
-                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                        </svg>
-                        Vos coordonnées pour le devis
-                    </div>
-                    
-                    <div class="form-group" style="margin-bottom:15px;">
-                        <label for="userCompany">Nom de l'entreprise <span class="required-star">*</span></label>
-                        <input type="text" id="userCompany" placeholder="Ex: Maçonnerie Durand" style="padding:10px; font-size:0.9rem;">
-                    </div>
-                    
-                    <div class="form-group" style="margin-bottom:15px;">
-                        <label for="userContact">Nom du contact <span class="required-star">*</span></label>
-                        <input type="text" id="userContact" placeholder="Ex: Jean Dupont" style="padding:10px; font-size:0.9rem;">
-                    </div>
-
-                    <div class="form-group" style="margin-bottom:15px;">
-                        <label for="userDealer">Négociant de matériaux (Souhaité) <span class="required-star">*</span></label>
-                        <input type="text" id="userDealer" placeholder="Ex: Point P, Chausson, BigMat..." style="padding:10px; font-size:0.9rem;">
-                    </div>
-
-                    <div class="form-group" style="margin-bottom:15px;">
-                        <label for="userColor" style="color:var(--accent-color);">Couleur de joint souhaitée <span class="required-star">*</span></label>
-                        <div style="display: flex; gap: 15px; align-items: center;">
-                            <select id="userColor" onchange="updateColorPreview()" style="flex: 1; padding:10px; font-size:0.9rem; border-color:var(--accent-color); border-radius: 12px; background-color: #fff; cursor: pointer;">
-                                <option value="">-- Sélectionnez une couleur --</option>
-                            </select>
-                            <div id="colorPreview" class="color-preview-circle"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group" style="margin-bottom:0;">
-                        <label for="userRef">Référence Chantier</label>
-                        <input type="text" id="userRef" placeholder="Ex: Résidence Les Lilas" style="padding:10px; font-size:0.9rem;">
-                    </div>
-                </div>
-
-                <button class="btn-email" onclick="sendQuoteEmail()">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
-                    </svg>
-                    DEMANDER UN DEVIS PAR EMAIL
-                </button>
-            </div>
+        <div class="btn-group" style="margin-top:20px;">
+            <button onclick="closeCropModal()" style="background:#6c757d; color:white;">❌ Annuler</button>
+            <button onclick="validateCrop()" style="background:#198754; color:white;">✅ Valider le recadrage</button>
         </div>
     </div>
 </div>
 
+<div class="controls">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid #f0f2f5; padding-bottom:10px; margin-bottom:5px;">
+        <h2>🛠️ Configurateur</h2>
+        <span style="font-size:0.7rem; color:#888;">V88 - Envoi Intégré</span>
+    </div>
+
+    <div class="library-box">
+        <h3 style="color:#0d47a1; margin:0 0 10px 0; font-size:0.9rem;">💾 Ma Bibliothèque</h3>
+        <select id="userLibrarySelect" onchange="loadUserPreset()" style="width:100%;">
+            <option value="">-- Projets sauvegardés --</option>
+        </select>
+        <div class="lib-controls">
+            <button class="btn-save-lib" onclick="saveToUserLibrary()">+ Sauvegarder</button>
+            <button class="btn-del-lib" onclick="deleteFromUserLibrary()">Supprimer</button>
+        </div>
+    </div>
+    
+    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+        <h3>1. Configuration Brique</h3>
+        <div style="margin-bottom: 10px;">
+            <label>Nom du projet / Référence :</label>
+            <input type="text" id="input-brick-name" placeholder="Ex: Brique Moulée Main Rouge" oninput="scheduleRender()">
+        </div>
+        
+        <div class="input-row" style="margin-bottom:15px;">
+            <div class="input-group"><label>L. (mm)</label><input type="number" id="input-longueur" value="220" min="50" max="600" onchange="forceWallRegen()"></div>
+            <div class="input-group"><label>H. (mm)</label><input type="number" id="input-hauteur" value="60" min="20" max="300" onchange="forceWallRegen()"></div>
+        </div>
+
+        <details class="tips-box">
+            <summary>ℹ️ Conseils pour une bonne photo</summary>
+            <ul>
+                <li><strong>Lumière :</strong> Photo en extérieur, <strong>à l'ombre</strong> (ou ciel couvert). Pas de plein soleil ni de néons intérieurs.</li>
+                <li><strong>Support neutre :</strong> Posez la brique sur du béton ou du bitume. Évitez les fonds colorés (herbe, bâche) qui s'y reflètent.</li>
+                <li><strong>Humidité :</strong> La brique doit être parfaitement sèche (une brique mouillée paraît 20% plus foncée).</li>
+                <li><strong>Astuce :</strong> Restez appuyé 2 sec. sur la brique à l'écran du téléphone pour verrouiller l'exposition (Cadenas AE/AF) avant de prendre la photo.</li>
+            </ul>
+        </details>
+
+        <div class="upload-grid">
+            <div class="brick-container">
+                <div class="brick-slot" id="slot-0" onclick="triggerUpload(0)"></div>
+            </div>
+            <div class="brick-container">
+                <div class="brick-slot" id="slot-1" onclick="triggerUpload(1)"></div>
+            </div>
+            <div class="brick-container">
+                <div class="brick-slot" id="slot-2" onclick="triggerUpload(2)"></div>
+            </div>
+        </div>
+
+        <input type="file" id="hidden-file-input" accept="image/*" style="display: none;">
+
+        <div class="calibration-box">
+            <h4 style="margin:0 0 5px 0; font-size:0.85rem; color:#856404;">🎨 Ajustement Réalité (Brique)</h4>
+            <p style="font-size:0.75rem; color:#666; margin:0 0 10px 0; line-height:1.2;">⚠️ <strong>Important :</strong> Ajustez ces curseurs pour que la couleur de la brique à l'écran corresponde exactement à la brique physique devant vous.</p>
+            
+            <button class="reset-calib-btn" onclick="resetCalibration()" title="Remettre à l'origine">↺ R.A.Z</button>
+            
+            <div class="calibration-slider"><label>Lumière</label><input type="range" id="calib-brightness" min="50" max="150" value="100" oninput="scheduleRender()"></div>
+            <div class="calibration-slider"><label>Contraste</label><input type="range" id="calib-contrast" min="50" max="150" value="100" oninput="scheduleRender()"></div>
+            <div class="calibration-slider"><label>Saturat.</label><input type="range" id="calib-saturation" min="0" max="300" value="100" oninput="scheduleRender()"></div>
+            <div class="calibration-slider"><label>Teinte</label><input type="range" id="calib-hue" min="-180" max="180" value="0" step="1" oninput="scheduleRender()"></div>
+        </div>
+    </div>
+
+    <div id="section-joint" style="padding: 0 5px;">
+        <h3>2. Joint & Mortier</h3>
+        
+        <div style="display: flex; gap: 10px; margin-top: 15px; margin-bottom: 15px;">
+            <button class="btn-magic-alt" style="flex: 1;" onclick="triggerAutoDetection()">✨ Auto (Moyenne)</button>
+            <button id="btn-pipette-color" class="btn-magic" style="flex: 1;" onclick="toggleColorPicker()">🧪 Cible (Pipette)</button>
+        </div>
+
+        <div class="input-group">
+            <label>Teinte :</label>
+            <div class="input-row">
+                <select id="categorySelect" onchange="filterColors()" style="flex:1;">
+                    <option value="all">-- Tout afficher --</option>
+                    <option value="Standards">Standards</option>
+                    <option value="Autres">Autres</option>
+                    <option value="Noirs & Gris">Noirs & Gris</option>
+                    <option value="Jaunes">Jaunes</option>
+                    <option value="Marron">Marron & Terre</option>
+                    <option value="Rouges">Rouges</option>
+                    <option value="Saumon">Saumons</option>
+                    <option value="Lie de vin">Lie de Vin</option>
+                </select>
+                <div id="joint-preview-dot" title="Aperçu couleur"></div>
+            </div>
+            <select id="jointColorSelect" onchange="onJointSelected();" style="margin-top:5px;"></select>
+        </div>
+
+        <div class="input-row" style="margin-top:15px; align-items: flex-end;">
+            <div class="input-group" style="flex: 0.8;">
+                <label>Ep. (mm) : <span id="val-ep" style="color:#007bff;">12</span></label>
+                <input type="range" id="slider-epaisseur" min="8" max="25" step="1" value="12" oninput="document.getElementById('val-ep').innerText = this.value; scheduleRender()">
+            </div>
+            <div class="input-group" style="flex: 1.2;">
+                <label>Texture Simulée :</label>
+                <div class="fixed-value-box">Joint Fin Nuancé</div>
+            </div>
+        </div>
+        
+        <div style="background: #e9ecef; padding: 12px; border-radius: 8px; margin-top: 20px; border: 1px solid #ced4da;">
+            <h4 style="margin:0 0 10px 0; font-size:0.85rem; color:#495057;">👤 Vos Coordonnées</h4>
+            <div style="margin-bottom: 8px;">
+                <input type="text" id="input-user-name" placeholder="Votre Nom et Prénom" style="width:100%; padding:8px; border:1px solid #ced4da; border-radius:6px; font-size:0.85rem;">
+            </div>
+            <div>
+                <input type="text" id="input-company-name" placeholder="Nom de votre entreprise" style="width:100%; padding:8px; border:1px solid #ced4da; border-radius:6px; font-size:0.85rem;">
+            </div>
+            <button class="submit-btn" onclick="submitToAdmin()" style="margin-top: 12px;">
+                📤 Demande de référencement
+            </button>
+        </div>
+    </div>
+
+    <div style="background: #e7f5ff; padding: 15px; border-radius: 8px; border: 1px solid #d0ebff; margin-top: 15px;">
+        <h3>3. Vue & Export</h3>
+        <label style="margin-top:10px;">Distance de vue (Zoom) :</label>
+        <input type="range" id="slider-zoom" min="0.5" max="5.0" step="0.1" value="1.5" oninput="scheduleRender()">
+        <div class="btn-group">
+            <button class="btn-jpg" onclick="downloadImage()">JPG</button>
+            <button class="btn-pdf" onclick="downloadPDF()">PDF</button>
+        </div>
+        <button onclick="forceWallRegen()" style="margin-top:10px; width:100%; background:#fff; border:1px solid #ccc; color:#666; padding:8px; border-radius:4px; font-size:0.8rem; cursor:pointer;">🔀 Régénérer le placement</button>
+    </div>
+</div>
+
+<div class="preview-container">
+    <div class="canvas-wrapper">
+        <canvas id="canvas"></canvas>
+    </div>
+    <div style="margin-top:10px; font-size:0.75rem; color:#666; display:flex; justify-content:space-between; width:100%; max-width:800px;">
+        <span id="scale-info"></span>
+        <span>Rendu Réaliste PBR</span>
+    </div>
+</div>
+
 <script>
-    // ---------------------------------------------------------
-    // 1. CONFIGURATION DES IMAGES
-    // ---------------------------------------------------------
-    const IMG_SAC_BIACOLOR = "sac_biacolor.png";
-    const IMG_SAC_TERRE_CUITE = "sac_terrecuite.png";
-    const IMG_SAC_BETON = "sac_tradibeton.png";
-    const IMG_SAC_BIAJOINT = "sac_biajoint.png";
-    const IMG_SAC_EASYJOINT = "sac_easyjoint.png";
+    let NUANCIER_COMPLET = [
+        { cat: "Standards", name: "SUPER BLANC", l: 86.00, c: 3.50, h: 73.00 },
+        { cat: "Standards", name: "BLANC", l: 82.00, c: 5.50, h: 85.00 },
+        { cat: "Standards", name: "TON PIERRE", l: 76.50, c: 21.00, h: 89.00 },
+        { cat: "Standards", name: "GRIS CLAIR", l: 60.00, c: 3.00, h: 92.00 },
 
-    // ---------------------------------------------------------
-    // 2. VARIABLES GLOBALES & DATA
-    // ---------------------------------------------------------
-    let currentMainType = 'mortar'; 
-    let currentMortarMode = 'surface'; 
-    let currentConcreteMode = 'dims'; 
+        { cat: "Autres", name: "SBV60", l: 68.00, c: 6.50, h: 111.00 },
+        { cat: "Autres", name: "SBV125", l: 65.50, c: 9.00, h: 121.00 },
+        { cat: "Autres", name: "SBB125", l: 63.00, c: 3.50, h: 219.00 },
+        { cat: "Autres", name: "SBV250", l: 62.00, c: 11.00, h: 128.00 },
+        { cat: "Autres", name: "SBB250", l: 58.50, c: 9.00, h: 241.00 },
 
-    const db = {
-        "GAMME BIACOLOR": {
-            items: [
-                { name: "22x22x45", weightM2: 40, bricksM2: 9.45, loss: "80", jointRef: 10 },
-                { name: "19x19x39", weightM2: 40, bricksM2: 12.50, loss: "80", jointRef: 10 },
-                { name: "15x19x39", weightM2: 32, bricksM2: 12.50, loss: "80", jointRef: 10 },
-                { name: "9x19x39", weightM2: 19, bricksM2: 12.50, loss: "80", jointRef: 10 },
-                { name: "4x19x39", weightM2: 6, bricksM2: 12.50, loss: "30", jointRef: 10 },
-                { name: "9x19x24", weightM2: 73, bricksM2: 40.00, loss: "80", jointRef: 10 },
-                { name: "6x22x22", weightM2: 112, bricksM2: 62.11, loss: "80", jointRef: 10 },
-                { name: "6x10,5x22", weightM2: 39, weightDoubleM2: 90, bricksM2: 62.11, loss: "30", jointRef: 10 },
-                { name: "5,6x9,3x19", weightM2: 37, weightDoubleM2: 87, bricksM2: 75.76, loss: "30", jointRef: 10 },
-                { name: "6x2x22 (Plaquette)", weightM2: 8, bricksM2: 62.11, loss: "35", jointRef: 10 },
-                { name: "6,5x2x21,5 (Plaquette)", weightM2: 9, bricksM2: 57.21, loss: "35", jointRef: 10 }
-            ],
-            allowCustom: false 
-        },
-        "TERRE CUITE (Pleines)": {
-            items: [
-                { name: "6x10,5x22", weightM2: 47, weightDoubleM2: 110, bricksM2: 59.87, loss: "35", jointRef: 12 },
-                { name: "6x22x22", weightM2: 98, bricksM2: 59.87, loss: "35", jointRef: 12 },
-                { name: "5x9x19", weightM2: 46, weightDoubleM2: 109, bricksM2: 79.85, loss: "35", jointRef: 12 },
-                { name: "6,5x9x19", weightM2: 40, weightDoubleM2: 93, bricksM2: 64.29, loss: "35", jointRef: 12 },
-                { name: "9x9x19", weightM2: 33, weightDoubleM2: 77, bricksM2: 48.53, loss: "35", jointRef: 12 },
-                { name: "4x10x21", weightM2: 58, weightDoubleM2: 136, bricksM2: 86.63, loss: "35", jointRef: 12 },
-                { name: "5x10x21", weightM2: 51, weightDoubleM2: 119, bricksM2: 72.65, loss: "35", jointRef: 12 },
-                { name: "6,5x10x21", weightM2: 43, weightDoubleM2: 101, bricksM2: 58.50, loss: "35", jointRef: 12 },
-                { name: "4x9x24", weightM2: 51, weightDoubleM2: 120, bricksM2: 76.31, loss: "35", jointRef: 12 },
-                { name: "5x9x24", weightM2: 45, weightDoubleM2: 104, bricksM2: 64.00, loss: "35", jointRef: 12 },
-                { name: "4x9x29", weightM2: 50, weightDoubleM2: 118, bricksM2: 63.68, loss: "35", jointRef: 12 },
-                { name: "5x9x29", weightM2: 43, weightDoubleM2: 102, bricksM2: 53.41, loss: "35", jointRef: 12 },
-                { name: "6x9x29", weightM2: 38, weightDoubleM2: 90, bricksM2: 45.99, loss: "35", jointRef: 12 },
-                { name: "5x10,5x21", weightM2: 53, weightDoubleM2: 124, bricksM2: 72.65, loss: "35", jointRef: 12 }
-            ],
-            allowCustom: true,
-            densityFactor: 2120,
-            defaultJoint: 12
-        },
-        "TERRE CUITE (Perforées)": {
-            items: [
-                { name: "6x10,5x22", weightM2: 69, weightDoubleM2: 163, bricksM2: 59.87, loss: "100", jointRef: 12 },
-                { name: "6x22x22", weightM2: 145, bricksM2: 59.87, loss: "100", jointRef: 12 },
-                { name: "9x9x29", weightM2: 43, weightDoubleM2: 102, bricksM2: 32.46, loss: "100", jointRef: 12 },
-                { name: "14x9x29", weightM2: 33, weightDoubleM2: 77, bricksM2: 21.78, loss: "100", jointRef: 12 },
-                { name: "19x9x29", weightM2: 28, weightDoubleM2: 65, bricksM2: 16.39, loss: "100", jointRef: 12 },
-                { name: "9x14x19", weightM2: 75, weightDoubleM2: 176, bricksM2: 48.53, loss: "100", jointRef: 12 },
-                { name: "14x14x29", weightM2: 51, weightDoubleM2: 120, bricksM2: 21.78, loss: "100", jointRef: 12 },
-                { name: "19x14x29", weightM2: 43, weightDoubleM2: 100, bricksM2: 16.39, loss: "100", jointRef: 12 },
-                { name: "9x19x29", weightM2: 91, weightDoubleM2: 214, bricksM2: 32.46, loss: "100", jointRef: 12 },
-                { name: "14x19x29", weightM2: 69, weightDoubleM2: 162, bricksM2: 21.78, loss: "100", jointRef: 12 },
-                { name: "19x19x29", weightM2: 58, weightDoubleM2: 136, bricksM2: 16.39, loss: "100", jointRef: 12 }
-            ],
-            allowCustom: true,
-            densityFactor: 3150,
-            defaultJoint: 12
-        },
-        "TERRE CUITE (Avec Cuvettes)": {
-            items: [
-                { name: "6x10,5x22", weightM2: 61, weightDoubleM2: 143, bricksM2: 59.87, loss: "75", jointRef: 12 },
-                { name: "5x9x19", weightM2: 60, weightDoubleM2: 141, bricksM2: 79.85, loss: "75", jointRef: 12 },
-                { name: "6,5x9x19", weightM2: 51, weightDoubleM2: 120, bricksM2: 64.29, loss: "75", jointRef: 12 },
-                { name: "9x9x19", weightM2: 42, weightDoubleM2: 99, bricksM2: 48.53, loss: "75", jointRef: 12 },
-                { name: "4x10x21", weightM2: 75, weightDoubleM2: 176, bricksM2: 86.63, loss: "75", jointRef: 12 },
-                { name: "5x10x21", weightM2: 65, weightDoubleM2: 154, bricksM2: 72.65, loss: "75", jointRef: 12 },
-                { name: "6,5x10x21", weightM2: 56, weightDoubleM2: 131, bricksM2: 58.50, loss: "75", jointRef: 12 },
-                { name: "4x9x24", weightM2: 66, weightDoubleM2: 156, bricksM2: 76.31, loss: "75", jointRef: 12 },
-                { name: "5x9x24", weightM2: 58, weightDoubleM2: 135, bricksM2: 64.00, loss: "75", jointRef: 12 },
-                { name: "4x9x29", weightM2: 65, weightDoubleM2: 152, bricksM2: 63.68, loss: "75", jointRef: 12 },
-                { name: "5x9x29", weightM2: 56, weightDoubleM2: 132, bricksM2: 53.41, loss: "75", jointRef: 12 },
-                { name: "6x9x29", weightM2: 50, weightDoubleM2: 117, bricksM2: 45.99, loss: "75", jointRef: 12 },
-                { name: "5x10,5x21", weightM2: 69, weightDoubleM2: 161, bricksM2: 72.65, loss: "75", jointRef: 12 }
-            ],
-            allowCustom: true,
-            densityFactor: 2750,
-            defaultJoint: 12
-        }
-    };
+        { cat: "Noirs & Gris", name: "50% BL 50% GR", l: 50.00, c: 20.00, h: 0.00 },
+        { cat: "Noirs & Gris", name: "SBN62.5", l: 52.00, c: 0.50, h: 6.00 },
+        { cat: "Noirs & Gris", name: "GN62.5", l: 51.00, c: 2.00, h: 73.00 },
+        { cat: "Noirs & Gris", name: "SBN60", l: 50.00, c: 2.00, h: 37.00 },
+        { cat: "Noirs & Gris", name: "SBN125", l: 41.50, c: 1.00, h: 276.00 }, 
+        { cat: "Noirs & Gris", name: "GN60", l: 46.00, c: 2.50, h: 64.00 },
+        { cat: "Noirs & Gris", name: "GN125", l: 43.50, c: 0.50, h: 2.00 },
+        { cat: "Noirs & Gris", name: "TPN250", l: 41.50, c: 1.00, h: 299.00 },
+        { cat: "Noirs & Gris", name: "GN250", l: 39.50, c: 0.50, h: 319.00 },
+        { cat: "Noirs & Gris", name: "SBN250", l: 37.50, c: 2.00, h: 293.00 }, 
+        { cat: "Noirs & Gris", name: "GA125", l: 26.50, c: 0.50, h: 351.00 }, 
+        { cat: "Noirs & Gris", name: "SBA125", l: 33.50, c: 2.50, h: 275.00 },
+        { cat: "Noirs & Gris", name: "SBN500", l: 32.50, c: 1.00, h: 355.00 },
+        { cat: "Noirs & Gris", name: "SBA250", l: 28.50, c: 2.00, h: 284.00 }, 
+        { cat: "Noirs & Gris", name: "SBA375", l: 25.00, c: 2.00, h: 282.00 },
+        { cat: "Noirs & Gris", name: "GA250", l: 24.50, c: 2.00, h: 276.00 },
+        { cat: "Noirs & Gris", name: "GA450R50", l: 20.50, c: 1.50, h: 348.00 }, 
+        { cat: "Noirs & Gris", name: "SBA500", l: 16.00, c: 1.00, h: 310.00 }, 
+        { cat: "Noirs & Gris", name: "GN500", l: 29.50, c: 2.00, h: 43.00 }, 
+        { cat: "Noirs & Gris", name: "GA500", l: 16.50, c: 0.50, h: 325.00 }, 
 
-    // NOUVEAU : BIBLIOTHÈQUE DE COULEURS
-    const NUANCIER_COMPLET = [
-        { nom: "Blanc", hex: "#f9fafb" },
-        { nom: "Gris Clair", hex: "#d1d5db" },
-        { nom: "Gris Naturel", hex: "#9ca3af" },
-        { nom: "Gris Foncé", hex: "#4b5563" },
-        { nom: "Anthracite", hex: "#374151" },
-        { nom: "Noir", hex: "#111827" },
-        { nom: "Ton Pierre", hex: "#d6ceb4" },
-        { nom: "Beige", hex: "#f5f5dc" },
-        { nom: "Jaune Sable", hex: "#eab308" },
-        { nom: "Rouge Brique", hex: "#b91c1c" },
-        { nom: "Brun", hex: "#78350f" }
+        { cat: "Jaunes", name: "SBJ8.25", l: 79.00, c: 10.50, h: 85.00 }, 
+        { cat: "Jaunes", name: "SBJ30", l: 74.00, c: 19.50, h: 87.00 }, 
+        { cat: "Jaunes", name: "SBJ62.5", l: 74.50, c: 26.50, h: 92.00 }, 
+        { cat: "Jaunes", name: "SBJ20S15", l: 66.00, c: 19.50, h: 76.00 }, 
+        { cat: "Jaunes", name: "75% TP 25% BL", l: 68.50, c: 29.50, h: 99.00 }, 
+        { cat: "Jaunes", name: "SBJ125", l: 62.50, c: 30.50, h: 83.00 }, 
+        { cat: "Jaunes", name: "SBJ250", l: 68.00, c: 41.00, h: 83.00 }, 
+        { cat: "Jaunes", name: "GJ15", l: 61.50, c: 9.00, h: 94.00 }, 
+        { cat: "Jaunes", name: "GJ30", l: 61.50, c: 12.50, h: 93.00 }, 
+        { cat: "Jaunes", name: "GJ125", l: 54.00, c: 26.00, h: 87.00 }, 
+        { cat: "Jaunes", name: "GJ20S15", l: 58.50, c: 13.00, h: 83.00 }, 
+        { cat: "Jaunes", name: "GJ250", l: 60.50, c: 31.50, h: 85.00 }, 
+        { cat: "Jaunes", name: "SBJ500", l: 61.00, c: 40.50, h: 80.00 }, 
+        { cat: "Jaunes", name: "SBJ375", l: 56.50, c: 38.50, h: 81.00 }, 
+        { cat: "Jaunes", name: "GJ500", l: 53.00, c: 35.00, h: 84.00 }, 
+        { cat: "Jaunes", name: "SBJ62.5N62.5", l: 51.00, c: 11.00, h: 94.00 }, 
+        { cat: "Jaunes", name: "SBJ120N30", l: 67.50, c: 29.00, h: 94.00 }, 
+        { cat: "Jaunes", name: "GJ62.5N62.5", l: 48.00, c: 9.50, h: 94.00 }, 
+
+        { cat: "Marron", name: "GJ10S15", l: 55.00, c: 12.00, h: 76.00 }, 
+        { cat: "Marron", name: "GS15J10", l: 46.00, c: 15.00, h: 87.00 }, 
+        { cat: "Marron", name: "GS15", l: 60.00, c: 10.00, h: 75.00 }, 
+        { cat: "Marron", name: "GN90S35", l: 37.50, c: 6.00, h: 79.00 }, 
+        { cat: "Marron", name: "GJ100R150", l: 46.00, c: 24.50, h: 47.00 }, 
+        { cat: "Marron", name: "GS150N100", l: 45.50, c: 13.50, h: 70.00 }, 
+        { cat: "Marron", name: "GS200N150", l: 45.50, c: 16.50, h: 69.00 }, 
+        { cat: "Marron", name: "GJ90R90N70", l: 44.50, c: 15.00, h: 52.00 }, 
+        { cat: "Marron", name: "GJ10N115", l: 41.00, c: 2.00, h: 66.00 }, 
+        { cat: "Marron", name: "SBJ90R70N90", l: 46.50, c: 12.50, h: 52.00 }, 
+        { cat: "Marron", name: "SBJ90R90N70", l: 40.00, c: 15.50, h: 46.00 }, 
+        { cat: "Marron", name: "GJ180R180N140", l: 39.00, c: 14.50, h: 54.00 }, 
+        { cat: "Marron", name: "GJ20N200", l: 37.50, c: 1.50, h: 52.00 }, 
+        { cat: "Marron", name: "GJ15N150", l: 37.50, c: 1.50, h: 51.00 }, 
+        { cat: "Marron", name: "GS150A100", l: 37.00, c: 7.50, h: 69.00 }, 
+        { cat: "Marron", name: "GS125N250R125", l: 37.50, c: 11.00, h: 49.00 }, 
+        { cat: "Marron", name: "SBJ180R180N140", l: 45.50, c: 16.00, h: 45.00 }, 
+        { cat: "Marron", name: "GS125A125", l: 33.50, c: 4.00, h: 73.00 }, 
+        { cat: "Marron", name: "GS300N200", l: 33.00, c: 13.00, h: 65.00 }, 
+        { cat: "Marron", name: "SBJ180N180R140", l: 33.00, c: 13.50, h: 50.00 }, 
+        { cat: "Marron", name: "GS200A150", l: 32.50, c: 5.50, h: 74.00 }, 
+        { cat: "Marron", name: "GN416S84", l: 27.50, c: 3.50, h: 57.00 }, 
+        { cat: "Marron", name: "GS250A250", l: 30.00, c: 7.00, h: 72.00 }, 
+        { cat: "Marron", name: "GS300N100A100", l: 28.00, c: 8.50, h: 68.00 }, 
+        { cat: "Marron", name: "GS300A200", l: 27.00, c: 7.00, h: 67.00 }, 
+        { cat: "Marron", name: "GJ100R200N50A150", l: 24.50, c: 7.50, h: 37.00 }, 
+        { cat: "Marron", name: "GS150R150A200", l: 23.00, c: 7.00, h: 42.00 }, 
+        { cat: "Marron", name: "GJ100R200A200", l: 21.50, c: 6.50, h: 37.00 }, 
+
+        { cat: "Rouges", name: "GR150J100", l: 51.00, c: 27.00, h: 47.00 }, 
+        { cat: "Rouges", name: "SBR125", l: 51.50, c: 27.00, h: 28.00 }, 
+        { cat: "Rouges", name: "GR125", l: 52.00, c: 21.50, h: 30.00 }, 
+        { cat: "Rouges", name: "GR150S100", l: 54.50, c: 31.50, h: 45.00 }, 
+        { cat: "Rouges", name: "SBR250", l: 48.50, c: 26.50, h: 27.00 }, 
+        { cat: "Rouges", name: "GR100N25", l: 38.00, c: 18.50, h: 39.00 }, 
+        { cat: "Rouges", name: "SBR375", l: 45.00, c: 31.50, h: 27.00 }, 
+        { cat: "Rouges", name: "GR375", l: 35.00, c: 27.50, h: 30.00 }, 
+        { cat: "Rouges", name: "GR20", l: 36.50, c: 19.00, h: 29.00 }, 
+        { cat: "Rouges", name: "GR250", l: 41.50, c: 25.50, h: 29.00 }, 
+        { cat: "Rouges", name: "GJ250R250", l: 36.50, c: 27.00, h: 40.00 }, 
+        { cat: "Rouges", name: "GR250S250", l: 41.50, c: 29.00, h: 39.00 }, 
+        { cat: "Rouges", name: "SBR500", l: 34.00, c: 30.00, h: 30.00 }, 
+        { cat: "Rouges", name: "GS200R300", l: 37.50, c: 29.50, h: 36.00 }, 
+        { cat: "Rouges", name: "GR500", l: 29.00, c: 26.50, h: 33.00 }, 
+
+        { cat: "Saumon", name: "SBS15J20", l: 71.00, c: 27.50, h: 76.00 }, 
+        { cat: "Saumon", name: "SBS62.5", l: 61.00, c: 25.50, h: 61.00 }, 
+        { cat: "Saumon", name: "SBS125", l: 54.00, c: 33.00, h: 58.00 }, 
+        { cat: "Saumon", name: "GS30R30", l: 54.00, c: 16.50, h: 50.00 }, 
+        { cat: "Saumon", name: "GS62.5", l: 55.00, c: 25.00, h: 82.00 }, 
+        { cat: "Saumon", name: "GS125", l: 50.00, c: 23.50, h: 63.00 }, 
+        { cat: "Saumon", name: "GS250", l: 44.50, c: 30.00, h: 60.00 }, 
+        { cat: "Saumon", name: "SBS250", l: 51.50, c: 37.00, h: 56.00 }, 
+        { cat: "Saumon", name: "SBS35N90", l: 48.00, c: 6.00, h: 73.00 }, 
+        { cat: "Saumon", name: "GJ45R45N35", l: 47.50, c: 13.00, h: 55.00 }, 
+        { cat: "Saumon", name: "SBJ45R45N35", l: 46.50, c: 14.00, h: 48.00 }, 
+        { cat: "Saumon", name: "SBS500", l: 51.50, c: 40.50, h: 54.00 }, 
+        { cat: "Saumon", name: "GS500", l: 42.50, c: 31.50, h: 56.00 }, 
+        { cat: "Saumon", name: "SBS250R250", l: 39.00, c: 28.00, h: 41.00 }, 
+        { cat: "Saumon", name: "GS375R125", l: 40.00, c: 30.50, h: 46.00 }, 
+        { cat: "Saumon", name: "SBS125A125", l: 33.50, c: 3.50, h: 75.00 }, 
+
+        { cat: "Lie de vin", name: "GR125N100S25", l: 31.50, c: 11.50, h: 38.00 }, 
+        { cat: "Lie de vin", name: "GR200N50", l: 36.50, c: 19.00, h: 32.00 }, 
+        { cat: "Lie de vin", name: "SBR250N125", l: 35.00, c: 14.00, h: 28.00 }, 
+        { cat: "Lie de vin", name: "GS100R300N100", l: 37.00, c: 19.50, h: 38.00 }, 
+        { cat: "Lie de vin", name: "GR300S100N100", l: 27.50, c: 19.50, h: 38.00 }, 
+        { cat: "Lie de vin", name: "GR200S200N100", l: 40.00, c: 23.00, h: 48.00 }, 
+        { cat: "Lie de vin", name: "GR300N200", l: 31.50, c: 13.50, h: 30.00 }, 
+        { cat: "Lie de vin", name: "GR416N84", l: 35.50, c: 21.50, h: 30.00 } 
     ];
 
-    // DOM Elements
-    const categorySelect = document.getElementById('category');
-    const referenceSelect = document.getElementById('reference');
-    const customDiv = document.getElementById('custom-dimensions');
-    const resultCard = document.getElementById('result-card');
-    const jointInput = document.getElementById('targetJoint');
-    
-    // Images Elements
-    const visualContainer = document.getElementById('product-visual-container');
-    const visualWrapper = document.getElementById('visual-wrapper');
-    const imgPrimary = document.getElementById('img-primary');
-    const imgSecondary = document.getElementById('img-secondary');
-    
-    const coatedAlert = document.getElementById('coated-alert');
-    const coatedCheck = document.getElementById('isCoated');
-    const badgeCoated = document.getElementById('badge-coated');
-    
-    // Containers Sections
-    const mortarSection = document.getElementById('mortar-section');
-    const concreteSection = document.getElementById('concrete-section');
-    const jointSection = document.getElementById('joint-section');
-    
-    // Buttons
-    const btnMainMortar = document.getElementById('btnMainMortar');
-    const btnMainConcrete = document.getElementById('btnMainConcrete');
-    const btnMainJoint = document.getElementById('btnMainJoint');
-    const btnAction = document.getElementById('btnAction');
-    const btnSurface = document.getElementById('btnModeSurface');
-    const btnVolume = document.getElementById('btnModeVolume');
+    let loadedBricks = [null, null, null];
+    let grainTexture = null;
+    let wallLayoutCache = []; 
+    let currentJointColor = null;
+    let isColorPicking = false; 
 
-    // Init
-    window.onload = function() {
-        // Initialisation Gammes
-        for (let key in db) {
-            let option = document.createElement('option');
-            option.value = key;
-            option.text = key;
-            categorySelect.add(option);
+    let cropImg = null;
+    let cropScale = 1;
+    let cropRect = { x: 0, y: 0, w: 0, h: 0 };
+    let isDraggingCrop = false;
+    let cropStartX = 0; let cropStartY = 0;
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let currentSlot = 0;
+    const STORAGE_KEY = 'biamortier_user_lib';
+    
+    // --- GESTION DES PERFORMANCES ---
+    let isRendering = false;
+    function scheduleRender() {
+        if (!isRendering) {
+            isRendering = true;
+            requestAnimationFrame(() => {
+                render();
+                isRendering = false;
+            });
+        }
+    }
+
+    function convertLchPaletteToRgb() {
+        const tempCvs = document.createElement('canvas');
+        tempCvs.width = 1; tempCvs.height = 1;
+        const tCtx = tempCvs.getContext('2d');
+
+        NUANCIER_COMPLET.forEach(item => {
+            if (item.l !== undefined && item.r === undefined) {
+                tCtx.clearRect(0,0,1,1);
+                tCtx.fillStyle = `lch(${item.l}% ${item.c} ${item.h})`;
+                tCtx.fillRect(0, 0, 1, 1);
+                const p = tCtx.getImageData(0, 0, 1, 1).data;
+                item.r = p[0]; item.g = p[1]; item.b = p[2];
+            }
+        });
+    }
+
+    function generateProceduralGrain() {
+        const size = 512;
+        const cvs = document.createElement('canvas');
+        cvs.width = size; cvs.height = size;
+        const tCtx = cvs.getContext('2d');
+
+        tCtx.fillStyle = "rgb(128, 128, 128)";
+        tCtx.fillRect(0, 0, size, size);
+
+        const imgData = tCtx.getImageData(0, 0, size, size);
+        const data = imgData.data;
+
+        for (let i = 0; i < data.length; i += 4) {
+            const mod = (Math.random() - 0.5) * 12; 
+            data[i] = 128 + mod;
+            data[i+1] = 128 + mod;
+            data[i+2] = 128 + mod;
+            data[i+3] = 255;
         }
 
-        // Initialisation Nuancier de Couleurs
-        const colorSelect = document.getElementById('userColor');
-        NUANCIER_COMPLET.forEach(couleur => {
-            let option = document.createElement('option');
-            option.value = couleur.nom; 
-            option.text = couleur.nom;
-            option.dataset.hex = couleur.hex; // Sauvegarde du code hexadécimal pour l'aperçu visuel
-            colorSelect.add(option);
-        });
+        for(let y = 0; y < size; y++) {
+            for(let x = 0; x < size; x++) {
+                const rand = Math.random();
+                const i = (y * size + x) * 4;
+
+                if(rand > 0.90) {
+                    let intensity = 10 + Math.random() * 15; 
+                    data[i] = Math.min(255, data[i] + intensity);
+                    data[i+1] = Math.min(255, data[i+1] + intensity);
+                    data[i+2] = Math.min(255, data[i+2] + intensity);
+                    if(x < size - 1 && Math.random() > 0.5) {
+                        data[i+4] = Math.min(255, data[i+4] + intensity * 0.5);
+                        data[i+5] = Math.min(255, data[i+5] + intensity * 0.5);
+                        data[i+6] = Math.min(255, data[i+6] + intensity * 0.5);
+                    }
+                } 
+                else if (rand < 0.10) {
+                    let depth = 10 + Math.random() * 15; 
+                    data[i] = Math.max(0, data[i] - depth);
+                    data[i+1] = Math.max(0, data[i+1] - depth);
+                    data[i+2] = Math.max(0, data[i+2] - depth);
+                    if(x < size - 1 && Math.random() > 0.5) { 
+                        data[i+4] = Math.max(0, data[i+4] - depth * 0.5);
+                        data[i+5] = Math.max(0, data[i+5] - depth * 0.5);
+                        data[i+6] = Math.max(0, data[i+6] - depth * 0.5);
+                    }
+                }
+            }
+        }
+
+        tCtx.putImageData(imgData, 0, 0);
+        return tCtx.createPattern(cvs, 'repeat');
+    }
+
+    function generateDefaultBrick() {
+        const cvs = document.createElement('canvas');
+        cvs.width = 440; cvs.height = 120;
+        const ctx = cvs.getContext('2d');
+
+        ctx.fillStyle = "#c25e44";
+        ctx.fillRect(0, 0, cvs.width, cvs.height);
+
+        const imgData = ctx.getImageData(0, 0, cvs.width, cvs.height);
+        const data = imgData.data;
+        for(let i=0; i<data.length; i+=4) {
+            const noise = (Math.random() - 0.5) * 40;
+            data[i] = Math.min(255, Math.max(0, data[i] + noise));
+            data[i+1] = Math.min(255, Math.max(0, data[i+1] + noise));
+            data[i+2] = Math.min(255, Math.max(0, data[i+2] + noise));
+        }
+        ctx.putImageData(imgData, 0, 0);
+
+        ctx.fillStyle = "rgba(0,0,0,0.15)";
+        ctx.fillRect(0, 0, cvs.width, 4);
+        ctx.fillRect(0, 0, 4, cvs.height);
+        ctx.fillStyle = "rgba(255,255,255,0.15)";
+        ctx.fillRect(0, cvs.height-4, cvs.width, 4);
+        ctx.fillRect(cvs.width-4, 0, 4, cvs.height);
+
+        ctx.fillStyle = "rgba(255,255,255,0.4)";
+        ctx.font = "bold 26px 'Segoe UI'";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("Brique d'exemple", cvs.width/2, cvs.height/2);
+
+        return cvs.toDataURL();
+    }
+
+    window.onload = () => {
+        convertLchPaletteToRgb(); 
+        document.getElementById('categorySelect').value = "Standards";
+        filterColors();
+        
+        const sel = document.getElementById('jointColorSelect');
+        for(let i=0; i<sel.options.length; i++) {
+            if(sel.options[i].value) {
+                const c = JSON.parse(sel.options[i].value);
+                if(c.name === "GRIS CLAIR") {
+                    sel.selectedIndex = i;
+                    onJointSelected();
+                    break;
+                }
+            }
+        }
+
+        refreshLibraryUI();
+        grainTexture = generateProceduralGrain(); 
+        
+        const defaultBrickSrc = generateDefaultBrick();
+        const img = new Image();
+        img.isPlaceholder = true; 
+        img.onload = () => { 
+            loadedBricks[0] = img; 
+            updateSlotVisual(0, defaultBrickSrc, true); 
+            updateSlotVisual(1, "", true);
+            updateSlotVisual(2, "", true);
+            forceWallRegen(); 
+        };
+        img.src = defaultBrickSrc;
     };
 
-    // ---------------------------------------------------------
-    // 3. LOGIQUE D'INTERACTION
-    // ---------------------------------------------------------
+    function getUserLibrary() { const s = localStorage.getItem(STORAGE_KEY); return s ? JSON.parse(s) : []; }
     
-    // NOUVEAU : MISE À JOUR PASTILLE DE COULEUR
-    function updateColorPreview() {
-        const select = document.getElementById('userColor');
-        const preview = document.getElementById('colorPreview');
-        const selectedOption = select.options[select.selectedIndex];
-        
-        if (selectedOption.value && selectedOption.dataset.hex) {
-            preview.style.backgroundColor = selectedOption.dataset.hex;
-            preview.style.borderColor = "transparent";
-            preview.style.transform = "scale(1.05)";
-        } else {
-            preview.style.backgroundColor = 'transparent';
-            preview.style.borderColor = "#e2e8f0";
-            preview.style.transform = "scale(1)";
-        }
+    function refreshLibraryUI() {
+        const lib = getUserLibrary();
+        const sel = document.getElementById('userLibrarySelect');
+        sel.innerHTML = '<option value="">-- Projets sauvegardés --</option>';
+        lib.forEach((item, index) => {
+            const opt = document.createElement('option');
+            opt.value = index;
+            opt.innerText = `${item.name} (${new Date(item.date).toLocaleDateString()})`;
+            sel.appendChild(opt);
+        });
     }
 
-    function switchMainType(type) {
-        currentMainType = type;
-        resultCard.style.display = 'none';
-
-        // Reset Buttons
-        btnMainMortar.classList.remove('active');
-        btnMainConcrete.classList.remove('active-concrete');
-        btnMainJoint.classList.remove('active-joint');
-        
-        // Hide all sections
-        mortarSection.classList.add('hidden-field');
-        concreteSection.classList.add('hidden-field');
-        jointSection.classList.add('hidden-field');
-        
-        // Reset classes btn action
-        btnAction.classList.remove('concrete-mode');
-        btnAction.classList.remove('joint-mode');
-
-        if (type === 'mortar') {
-            btnMainMortar.classList.add('active');
-            mortarSection.classList.remove('hidden-field');
-            btnAction.innerText = "CALCULER MA COMMANDE";
-            updateReferences(); 
-
-        } else if (type === 'concrete') {
-            btnMainConcrete.classList.add('active-concrete');
-            concreteSection.classList.remove('hidden-field');
-            btnAction.classList.add('concrete-mode');
-            btnAction.innerText = "CALCULER BÉTON";
-            updateBagVisual(); 
-
-        } else {
-            // JOINT
-            btnMainJoint.classList.add('active-joint');
-            jointSection.classList.remove('hidden-field');
-            btnAction.classList.add('joint-mode');
-            btnAction.innerText = "CALCULER JOINT";
-            updateBagVisual();
-        }
-    }
-
-    function switchMortarMode(mode) {
-        currentMortarMode = mode;
-        resultCard.style.display = 'none';
-        if (mode === 'surface') {
-            document.getElementById('surface-fields').classList.remove('hidden-field');
-            document.getElementById('volume-fields').classList.add('hidden-field');
-            btnSurface.classList.add('active');
-            btnVolume.classList.remove('active');
-            referenceSelect.disabled = false;
-            updateReferences(); 
-        } else {
-            document.getElementById('surface-fields').classList.add('hidden-field');
-            document.getElementById('volume-fields').classList.remove('hidden-field');
-            btnSurface.classList.remove('active');
-            btnVolume.classList.add('active');
-            referenceSelect.disabled = true;
-            coatedAlert.style.display = "none";
-        }
-    }
-    
-    function switchConcreteMode(mode) {
-        currentConcreteMode = mode;
-        resultCard.style.display = 'none';
-        const dimsFields = document.getElementById('concrete-dims-fields');
-        const volFields = document.getElementById('concrete-vol-fields');
-        const btnDims = document.getElementById('btnConcreteDims');
-        const btnVol = document.getElementById('btnConcreteVol');
-
-        if (mode === 'dims') {
-            dimsFields.classList.remove('hidden-field');
-            volFields.classList.add('hidden-field');
-            btnDims.classList.add('concrete-active');
-            btnVol.classList.remove('concrete-active');
-        } else {
-            dimsFields.classList.add('hidden-field');
-            volFields.classList.remove('hidden-field');
-            btnDims.classList.remove('concrete-active');
-            btnVol.classList.add('concrete-active');
-        }
-    }
-
-    function updateReferences() {
-        if (currentMainType !== 'mortar') {
-            updateBagVisual();
-            return;
-        }
-        if (currentMortarMode === 'volume') {
-            updateBagVisual();
-            return;
-        }
-
-        resultCard.style.display = 'none';
-        const selectedCatKey = categorySelect.value;
-        const categoryData = db[selectedCatKey];
-        coatedCheck.checked = false;
-        referenceSelect.innerHTML = '<option value="">-- Sélectionner dimensions --</option>';
-        customDiv.style.display = 'none';
-
-        if (selectedCatKey && categoryData) {
-            referenceSelect.disabled = false;
-            if (selectedCatKey.includes("TERRE CUITE")) {
-                coatedAlert.style.display = "block";
-            } else {
-                coatedAlert.style.display = "none";
-            }
-            const defJoint = categoryData.items[0].jointRef; 
-            jointInput.value = defJoint;
-            
-            categoryData.items.forEach((item, index) => {
-                let option = document.createElement('option');
-                option.value = index;
-                option.text = item.name;
-                referenceSelect.add(option);
-            });
-
-            if (categoryData.allowCustom) {
-                let option = document.createElement('option');
-                option.value = "custom";
-                option.text = "➔ AUTRE FORMAT (Saisie manuelle)";
-                option.style.fontWeight = "800";
-                option.style.color = "#d35400";
-                referenceSelect.add(option);
-            }
-        } else {
-             referenceSelect.disabled = true;
-             coatedAlert.style.display = "none";
-        }
-        updateBagVisual();
-    }
-
-    // ------------------------------------------------------------------
-    // FONCTION MISE A JOUR VISUELS (FOND BLANC + DUAL FIXED)
-    // ------------------------------------------------------------------
-    function updateBagVisual() {
-        const isCoated = coatedCheck.checked;
-        
-        // Reset states
-        imgPrimary.classList.remove('visible');
-        imgSecondary.classList.remove('visible');
-        imgSecondary.classList.add('hidden');
-        visualWrapper.classList.remove('dual-mode');
-
-        // --- CAS BÉTON ---
-        if (currentMainType === 'concrete') {
-             setTimeout(() => {
-                imgPrimary.src = IMG_SAC_BETON;
-                imgPrimary.alt = "Sac Tradi Béton";
-                visualContainer.style.backgroundColor = "#ffffff";
-                visualContainer.style.border = "1px solid #bdc3c7";
-                badgeCoated.style.display = "none";
-                imgPrimary.classList.add('visible'); 
-             }, 100);
-             return;
-        }
-
-        // --- CAS JOINT (DUAL MODE) ---
-        if (currentMainType === 'joint') {
-             setTimeout(() => {
-                imgPrimary.src = IMG_SAC_BIAJOINT;
-                imgPrimary.alt = "Sac Biajoint";
-                imgSecondary.src = IMG_SAC_EASYJOINT;
-                imgSecondary.alt = "Sac Easy Joint";
-                
-                imgSecondary.classList.remove('hidden');
-                visualWrapper.classList.add('dual-mode'); 
-
-                visualContainer.style.backgroundColor = "#ffffff";
-                visualContainer.style.border = "1px solid #8e44ad";
-                badgeCoated.style.display = "none";
-                
-                imgPrimary.classList.add('visible'); 
-                imgSecondary.classList.add('visible');
-             }, 100);
-             return;
-        }
-
-        // --- CAS MORTIER ---
-        const selectedCatKey = categorySelect.value;
-        if (!selectedCatKey) {
-             visualContainer.style.backgroundColor = "#ffffff"; 
-             visualContainer.style.border = "1px dashed #e2e8f0";
-             badgeCoated.style.display = "none";
-             return;
-        }
-
-        setTimeout(() => {
-            if (selectedCatKey.includes("BIACOLOR") || isCoated) {
-                imgPrimary.src = IMG_SAC_BIACOLOR;
-                visualContainer.style.backgroundColor = "#ffffff";
-                if (isCoated) {
-                    badgeCoated.style.display = "block";
-                    visualContainer.style.border = "2px solid #d69e2e";
-                } else {
-                    badgeCoated.style.display = "none";
-                    visualContainer.style.border = "1px dashed #e2e8f0";
-                }
-            } else if (selectedCatKey.includes("TERRE CUITE")) {
-                imgPrimary.src = IMG_SAC_TERRE_CUITE;
-                visualContainer.style.backgroundColor = "#ffffff";
-                badgeCoated.style.display = "none";
-                visualContainer.style.border = "1px dashed #e2e8f0";
-            }
-            imgPrimary.classList.add('visible'); 
-        }, 100);
-    }
-
-    function handleReferenceChange() {
-        const val = referenceSelect.value;
-        if (val === "custom") {
-            customDiv.style.display = 'block';
-            resetJointDefault();
-        } else {
-            customDiv.style.display = 'none';
-            resetJointDefault();
-        }
-        resultCard.style.display = 'none';
-    }
-
-    function resetJointDefault() {
-        const cat = categorySelect.value;
-        if(cat && db[cat]) {
-             jointInput.value = db[cat].items[0].jointRef;
-        }
-    }
-    
-    function updateJointInfo() {
-        resultCard.style.display='none';
-        const type = document.getElementById('jointProductType').value;
-        const desc = document.getElementById('joint-usage-desc');
-        
-        if(type === 'biajoint') {
-            desc.innerHTML = "<strong>Usage :</strong> Rejointoiement traditionnel à la main.";
-        } else {
-            desc.innerHTML = "<strong>Usage :</strong> Rejointoiement à la poche à douille ou à la machine Easyfast.";
-        }
-    }
-
-    // --- ALGORITHMES LOGISTIQUES ---
-    function solveBigBags(weight, maxBagSize = 1400) {
-        let remaining = weight;
-        let solution = { 1400: 0, 1000: 0, 700: 0 };
-
-        if (maxBagSize === 1400) {
-            // Logique standard (Biajoint / Mortier)
-            solution[1400] = Math.floor(remaining / 1400);
-            remaining = remaining % 1400;
-            if (remaining > 0) {
-                if (remaining <= 700) solution[700]++;
-                else if (remaining <= 1000) solution[1000]++;
-                else solution[1400]++; 
-            }
-        } else {
-            // Logique Easy Joint (Max 1000)
-            solution[1000] = Math.floor(remaining / 1000);
-            remaining = remaining % 1000;
-             if (remaining > 0) {
-                if (remaining <= 700) solution[700]++;
-                else solution[1000]++;
-            }
-        }
-        return solution;
-    }
-
-    function solvePallets(weight) {
-        const bagWeight = 25;
-        const bagsPerPallet = 56;
-        const totalBags = Math.ceil(weight / bagWeight);
-        const pallets = Math.floor(totalBags / bagsPerPallet);
-        const extraBags = totalBags % bagsPerPallet;
-        return { totalBags, pallets, extraBags };
-    }
-
-    // ---------------------------------------------------------
-    // 4. FONCTION CALCUL PRINCIPALE
-    // ---------------------------------------------------------
-    function calculate() {
-        let totalMortarKg = 0;
-        let totalVolume = 0;
-        let totalBricks = 0;
-        let infoText = "";
-        let consumptionPerM2 = 0; 
-        let showConsom = false;
-        
-        // Logistique Flag
-        let maxBagSize = 1400; // Par défaut
-
-        // ========================
-        // 1. MODE JOINT
-        // ========================
-        if (currentMainType === 'joint') {
-             const L_mm = parseFloat(document.getElementById('jointL').value);
-             const H_mm = parseFloat(document.getElementById('jointH').value);
-             const W_mm = parseFloat(document.getElementById('jointW').value); 
-             const D_mm = parseFloat(document.getElementById('jointD').value); 
-             const Surf = parseFloat(document.getElementById('jointSurface').value);
-             const productType = document.getElementById('jointProductType').value;
-
-             if(!L_mm || !H_mm || !W_mm || !D_mm || !Surf) {
-                 alert("Veuillez remplir toutes les dimensions et la surface."); return;
-             }
-             
-             // Check produit pour logistique
-             if(productType === 'easyjoint') {
-                 maxBagSize = 1000;
-                 infoText = "Calcul spécifique Easy Joint (Sacs max 1000kg).<br>";
-             } else {
-                 infoText = "Calcul standard Biajoint.<br>";
-             }
-
-             const L = L_mm / 1000; const H = H_mm / 1000; const W = W_mm / 1000; const D = D_mm / 1000;
-             const areaUnitWithJoint = (L + W) * (H + W);
-             const nbUnitsPerM2 = 1 / areaUnitWithJoint;
-             const areaBricksOnly = nbUnitsPerM2 * (L * H);
-             const areaJointOnly = 1 - areaBricksOnly;
-             const volM3PerM2 = areaJointOnly * D;
-             const volTotalM3 = volM3PerM2 * Surf;
-             const volTotalLitres = volTotalM3 * 1000; 
-
-             const realConsumptionCoeff = 2.11; 
-             
-             totalMortarKg = volTotalLitres * realConsumptionCoeff;
-             totalVolume = volTotalLitres;
-             
-             consumptionPerM2 = totalMortarKg / Surf;
-             showConsom = true;
-
-             infoText += "Calibré sur retours chantier (Coef perte/compactage inclus).";
-             document.getElementById('brick-result-line').style.display = 'none';
-        }
-
-        // ========================
-        // 2. MODE BÉTON
-        // ========================
-        else if (currentMainType === 'concrete') {
-            if (currentConcreteMode === 'dims') {
-                const L_cm = parseFloat(document.getElementById('concL').value);
-                const W_cm = parseFloat(document.getElementById('concW').value);
-                const H_cm = parseFloat(document.getElementById('concH').value);
-                if (!L_cm || !W_cm || !H_cm) { alert("Veuillez remplir Longueur, Largeur et Épaisseur en cm."); return; }
-                totalVolume = (L_cm * W_cm * H_cm) / 1000; 
-            } else {
-                let inputVal = parseFloat(document.getElementById('inputConcreteVol').value);
-                let unit = document.getElementById('unitConcreteVol').value;
-                if (!inputVal || inputVal <= 0) { alert("Volume invalide."); return; }
-                if (unit === 'm3') totalVolume = inputVal * 1000;
-                else totalVolume = inputVal;
-            }
-            const kgPerLiter = 25 / 12;
-            totalMortarKg = totalVolume * kgPerLiter;
-            infoText = "Calcul basé sur un rendement de 12 Litres de béton par sac de 25kg.";
-            document.getElementById('brick-result-line').style.display = 'none';
-            showConsom = false; 
-        } 
-        
-        // ========================
-        // 3. MODE MORTIER
-        // ========================
-        else {
-            const catKey = categorySelect.value;
-            const litersPerKg = 16.34 / 25; 
-
-            if (currentMortarMode === 'surface') {
-                if (!catKey) { alert("Veuillez sélectionner une gamme."); return; }
-                const refValue = referenceSelect.value;
-                if (refValue === "") { alert("Veuillez sélectionner une référence."); return; }
-
-                let surfaceRaw = document.getElementById('surface').value.replace(',', '.');
-                const surface = parseFloat(surfaceRaw);
-                const isDouble = document.getElementById('doubleWall').checked;
-                const targetJoint = parseFloat(jointInput.value);
-
-                if (isNaN(surface) || surface <= 0) { alert("Surface invalide."); return; }
-
-                const catData = db[catKey];
-                let calculatedWeightM2 = 0;
-                let calculatedBricksM2 = 0;
-
-                if (refValue !== "custom") {
-                    const product = catData.items[refValue];
-                    let ratio = targetJoint / product.jointRef;
-                    
-                    // --- LOGIQUE MUR DOUBLE VIA CSV ---
-                    let baseWeight = product.weightM2;
-                    
-                    if (isDouble) {
-                        if (product.weightDoubleM2) {
-                            baseWeight = product.weightDoubleM2;
-                        } else {
-                            // Fallback si la donnée manque dans le CSV (ex: 6x22x22 perforée)
-                            baseWeight = product.weightM2 * 2;
-                        }
-                    }
-
-                    calculatedWeightM2 = Math.ceil(baseWeight * ratio);
-                    calculatedBricksM2 = product.bricksM2;
-
-                } else {
-                    const L_mm = parseFloat(document.getElementById('custL').value);
-                    const W_mm = parseFloat(document.getElementById('custW').value);
-                    const H_mm = parseFloat(document.getElementById('custH').value);
-                    if (!L_mm || !W_mm || !H_mm) { alert("Remplissez les dimensions."); return; }
-
-                    const L = L_mm / 1000; const H = H_mm / 1000; const W = W_mm / 1000; const J = targetJoint / 1000;
-                    calculatedBricksM2 = 1 / ((L + J) * (H + J));
-                    const surfJoint = 1 - (calculatedBricksM2 * L * H);
-                    const volJoint = surfJoint * W;
-                    calculatedWeightM2 = Math.ceil(volJoint * catData.densityFactor);
-                    
-                    if (isDouble) calculatedWeightM2 *= 2;
-                }
-
-                totalMortarKg = calculatedWeightM2 * surface;
-                totalBricks = Math.ceil(calculatedBricksM2 * surface * (isDouble ? 2 : 1));
-                totalVolume = totalMortarKg * litersPerKg;
-                
-                // Calcul Consommation / m2
-                consumptionPerM2 = calculatedWeightM2;
-                showConsom = true;
-
-                infoText = `Calcul basé sur un joint moyen de <strong>${targetJoint}</strong>mm.<br>Inclut les coefficients de perte.`;
-                document.getElementById('brick-result-line').style.display = 'block';
-
-            } else {
-                let volumeRaw = document.getElementById('inputMortarVol').value.replace(',', '.');
-                let unit = document.getElementById('unitMortarVol').value;
-                const inputVolume = parseFloat(volumeRaw);
-                if (isNaN(inputVolume) || inputVolume <= 0) { alert("Volume invalide."); return; }
-                if (unit === 'm3') totalVolume = inputVolume * 1000;
-                else totalVolume = inputVolume;
-                totalMortarKg = totalVolume / litersPerKg;
-                infoText = `Calcul inversé basé sur le volume fourni.<br>Ratio: 1 Sac (25kg) ≈ 16.34L.`;
-                document.getElementById('brick-result-line').style.display = 'none';
-                showConsom = false;
-            }
-        }
-
-        // --- AFFICHAGE RESULTATS ---
-        const bigBagSol = solveBigBags(totalMortarKg, maxBagSize);
-        const palletSol = solvePallets(totalMortarKg);
-
-        document.getElementById('totalWeight').innerText = Math.ceil(totalMortarKg).toLocaleString('fr-FR');
-        document.getElementById('totalVolume').innerText = Math.round(totalVolume).toLocaleString('fr-FR');
-        
-        // Affichage Consommation m2
-        const consomLine = document.getElementById('consumption-result-line');
-        if (showConsom) {
-            document.getElementById('consomVal').innerText = consumptionPerM2.toLocaleString('fr-FR', {maximumFractionDigits: 2});
-            consomLine.style.display = 'block';
-        } else {
-            consomLine.style.display = 'none';
-        }
-
-        if (currentMainType === 'mortar' && currentMortarMode === 'surface') {
-            document.getElementById('totalBricks').innerText = totalBricks.toLocaleString('fr-FR');
-        }
-
-        const bbList = document.getElementById('bigBagList');
-        bbList.innerHTML = "";
-        let hasBB = false;
-        const addBBLine = (count, size) => {
-            if (count > 0) {
-                hasBB = true;
-                bbList.innerHTML += `<li><span>Big Bag <strong>${size}kg</strong></span> <span class="highlight-number">${count}</span></li>`;
-            }
+    function saveToUserLibrary() {
+        const name = document.getElementById('input-brick-name').value;
+        if(!name || name.trim() === "") { alert("Veuillez nommer le projet."); return; }
+        const config = {
+            id: Date.now(), date: new Date().toISOString(), name: name,
+            dims: { l: document.getElementById('input-longueur').value, h: document.getElementById('input-hauteur').value, ep: document.getElementById('slider-epaisseur').value },
+            calib: { b: document.getElementById('calib-brightness').value, c: document.getElementById('calib-contrast').value, s: document.getElementById('calib-saturation').value, h: document.getElementById('calib-hue').value },
+            joint: currentJointColor,
+            images: loadedBricks.map(img => img && img.src.startsWith('data:image') && !img.isPlaceholder ? img.src : null)
         };
-        addBBLine(bigBagSol[1400], 1400);
-        addBBLine(bigBagSol[1000], 1000);
-        addBBLine(bigBagSol[700], 700);
-        if(!hasBB) bbList.innerHTML = "<li><span style='color:#999'>Poids insuffisant pour du vrac</span></li>";
+        try {
+            const lib = getUserLibrary(); lib.push(config);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(lib));
+            alert("✅ Configuration sauvegardée !");
+        } catch (e) {
+            config.images = [null, null, null];
+            const lib = getUserLibrary(); lib.push(config);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(lib));
+            alert("⚠️ Sauvegardé sans images (mémoire pleine).");
+        }
+        refreshLibraryUI();
+    }
 
-        document.getElementById('nbPallets').innerText = palletSol.pallets;
-        document.getElementById('nbExtraBags').innerText = palletSol.extraBags;
-        document.getElementById('totalBagsCount').innerText = palletSol.totalBags;
-        document.getElementById('tech-info-text').innerHTML = infoText;
+    function deleteFromUserLibrary() {
+        const idx = document.getElementById('userLibrarySelect').value;
+        if(idx==="") return;
+        if(confirm("Supprimer ce projet ?")) {
+            const lib = getUserLibrary(); lib.splice(idx, 1);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(lib)); refreshLibraryUI();
+        }
+    }
 
-        resultCard.style.display = 'block';
-        resultCard.scrollIntoView({ behavior: 'smooth' });
+    function loadUserPreset() {
+        const idx = document.getElementById('userLibrarySelect').value;
+        if(idx==="") return;
+        const p = getUserLibrary()[idx];
+        if(!p) return;
+
+        document.getElementById('input-brick-name').value = p.name;
+        document.getElementById('input-longueur').value = p.dims.l;
+        document.getElementById('input-hauteur').value = p.dims.h;
+        document.getElementById('slider-epaisseur').value = p.dims.ep;
+        document.getElementById('val-ep').innerText = p.dims.ep;
+        document.getElementById('calib-brightness').value = p.calib.b;
+        document.getElementById('calib-contrast').value = p.calib.c;
+        document.getElementById('calib-saturation').value = p.calib.s || 100;
+        document.getElementById('calib-hue').value = p.calib.h || 0;
+
+        if(p.joint) {
+            currentJointColor = p.joint;
+            document.getElementById('categorySelect').value = p.joint.cat;
+            filterColors();
+            const sel = document.getElementById('jointColorSelect');
+            for(let i=0; i<sel.options.length; i++){
+                 if(sel.options[i].value && JSON.parse(sel.options[i].value).name === p.joint.name) {
+                     sel.selectedIndex = i;
+                     onJointSelected();
+                 }
+            }
+        }
+        if(p.images) {
+            p.images.forEach((src, i) => {
+                if(src) {
+                    const img = new Image();
+                    img.isPlaceholder = false;
+                    img.onload = () => { 
+                        loadedBricks[i] = img; 
+                        updateSlotVisual(i, src, false); 
+                        if(i===p.images.length-1) forceWallRegen(); 
+                    };
+                    img.src = src;
+                }
+            });
+        }
+    }
+
+    // --- NOUVELLE FONCTION EMAIL AUTOMATIQUE ---
+    function submitToAdmin() {
+        const bName = document.getElementById('input-brick-name').value || "Non renseigné";
+        const l = document.getElementById('input-longueur').value;
+        const h = document.getElementById('input-hauteur').value;
+        
+        const bri = document.getElementById('calib-brightness').value;
+        const con = document.getElementById('calib-contrast').value;
+        const sat = document.getElementById('calib-saturation').value;
+        const hue = document.getElementById('calib-hue').value;
+        
+        const jointName = currentJointColor ? currentJointColor.name : "Aucun joint sélectionné";
+        const ep = document.getElementById('slider-epaisseur').value;
+
+        const userName = document.getElementById('input-user-name').value || "Non renseigné";
+        const companyName = document.getElementById('input-company-name').value || "Non renseigné";
+
+        const subject = encodeURIComponent(`Demande de référencement : ${bName}`);
+        
+        let body = `Bonjour,%0D%0A%0D%0A`;
+        body += `Je souhaite faire une demande de référencement pour une nouvelle brique.%0D%0A%0D%0A`;
+        
+        body += `👤 CONTACT :%0D%0A`;
+        body += `- Nom / Prénom : ${userName}%0D%0A`;
+        body += `- Entreprise : ${companyName}%0D%0A%0D%0A`;
+        
+        body += `🧱 INFORMATIONS BRIQUE :%0D%0A`;
+        body += `- Référence : ${bName}%0D%0A`;
+        body += `- Dimensions : ${l} mm x ${h} mm%0D%0A%0D%0A`;
+        
+        body += `🎨 RÉGLAGES CALIBRAGE :%0D%0A`;
+        body += `- Lumière : ${bri} %%0D%0A`;
+        body += `- Contraste : ${con} %%0D%0A`;
+        body += `- Saturation : ${sat} %%0D%0A`;
+        body += `- Teinte : ${hue}°%0D%0A%0D%0A`;
+        
+        body += `🧪 JOINT SÉLECTIONNÉ :%0D%0A`;
+        body += `- Teinte : ${jointName}%0D%0A`;
+        body += `- Épaisseur : ${ep} mm%0D%0A%0D%0A`;
+        
+        body += `---%0D%0A`;
+        body += `⚠️ Pensez à joindre à cet email :%0D%0A`;
+        body += `1. La photo de la brique d'origine%0D%0A`;
+        body += `2. L'export JPG ou PDF de votre simulation%0D%0A`;
+
+        window.location.href = `mailto:rcoene@biallais.fr?subject=${subject}&body=${body}`;
+    }
+
+    function triggerUpload(i) { currentSlot = i; document.getElementById('hidden-file-input').click(); }
+
+    document.getElementById('hidden-file-input').onchange = function(e) {
+        const file = e.target.files[0]; if(!file) return;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            const img = new Image();
+            img.onload = () => { openCropModal(img); };
+            img.src = evt.target.result;
+        }
+        reader.readAsDataURL(file); e.target.value = ''; 
+    };
+
+    function openCropModal(img) {
+        cropImg = img;
+        const modal = document.getElementById('crop-modal');
+        const cropCvs = document.getElementById('crop-canvas');
+        
+        const maxW = window.innerWidth * 0.9;
+        const maxH = window.innerHeight * 0.6;
+        cropScale = Math.min(maxW / img.width, maxH / img.height, 1);
+
+        cropCvs.width = img.width * cropScale;
+        cropCvs.height = img.height * cropScale;
+
+        const L = parseFloat(document.getElementById('input-longueur').value) || 220;
+        const H = parseFloat(document.getElementById('input-hauteur').value) || 60;
+        const targetRatio = L / H;
+
+        let initW = cropCvs.width * 0.8;
+        let initH = initW / targetRatio;
+        if(initH > cropCvs.height * 0.8) {
+            initH = cropCvs.height * 0.8;
+            initW = initH * targetRatio;
+        }
+
+        cropRect = { x: (cropCvs.width - initW) / 2, y: (cropCvs.height - initH) / 2, w: initW, h: initH };
+
+        modal.style.display = 'flex';
+        drawCropView();
+    }
+
+    function closeCropModal() {
+        document.getElementById('crop-modal').style.display = 'none';
+        cropImg = null;
+    }
+
+    function drawCropView() {
+        if(!cropImg) return;
+        const cropCvs = document.getElementById('crop-canvas');
+        const cCtx = cropCvs.getContext('2d');
+
+        cCtx.drawImage(cropImg, 0, 0, cropCvs.width, cropCvs.height);
+        cCtx.fillStyle = 'rgba(0, 0, 0, 0.65)';
+        cCtx.fillRect(0, 0, cropCvs.width, cropCvs.height);
+
+        cCtx.clearRect(cropRect.x, cropRect.y, cropRect.w, cropRect.h);
+        cCtx.drawImage(cropImg,
+            cropRect.x / cropScale, cropRect.y / cropScale, cropRect.w / cropScale, cropRect.h / cropScale,
+            cropRect.x, cropRect.y, cropRect.w, cropRect.h
+        );
+
+        cCtx.strokeStyle = '#3399ff';
+        cCtx.lineWidth = 2;
+        cCtx.setLineDash([6, 6]);
+        cCtx.strokeRect(cropRect.x, cropRect.y, cropRect.w, cropRect.h);
+        cCtx.setLineDash([]);
+    }
+
+    const cropCanvasElement = document.getElementById('crop-canvas');
+    function getPointerPos(e) {
+        const rect = cropCanvasElement.getBoundingClientRect();
+        let clientX = e.clientX; let clientY = e.clientY;
+        if(e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX; clientY = e.touches[0].clientY;
+        }
+        return { x: clientX - rect.left, y: clientY - rect.top };
+    }
+
+    function onCropStart(e) {
+        e.preventDefault();
+        isDraggingCrop = true;
+        const pos = getPointerPos(e);
+        cropStartX = pos.x; cropStartY = pos.y;
+        cropRect = { x: cropStartX, y: cropStartY, w: 0, h: 0 };
+        drawCropView();
+    }
+
+    function onCropMove(e) {
+        if(!isDraggingCrop) return;
+        e.preventDefault();
+        const pos = getPointerPos(e);
+        const L = parseFloat(document.getElementById('input-longueur').value) || 220;
+        const H = parseFloat(document.getElementById('input-hauteur').value) || 60;
+        const targetRatio = L / H;
+
+        let diffX = pos.x - cropStartX;
+        let diffY = pos.y - cropStartY;
+        let w = Math.abs(diffX);
+        let h = Math.abs(diffY);
+
+        if (w / h > targetRatio) { h = w / targetRatio; } else { w = h * targetRatio; }
+
+        cropRect.w = w;
+        cropRect.h = h;
+        cropRect.x = diffX < 0 ? cropStartX - w : cropStartX;
+        cropRect.y = diffY < 0 ? cropStartY - h : cropStartY;
+        
+        drawCropView();
+    }
+
+    function onCropEnd(e) {
+        if(!isDraggingCrop) return;
+        isDraggingCrop = false;
+        if(cropRect.w < 10 || cropRect.h < 10) { 
+            const L = parseFloat(document.getElementById('input-longueur').value) || 220;
+            const H = parseFloat(document.getElementById('input-hauteur').value) || 60;
+            const targetRatio = L / H;
+            let initW = cropCanvasElement.width * 0.8;
+            let initH = initW / targetRatio;
+            if(initH > cropCanvasElement.height * 0.8) {
+                initH = cropCanvasElement.height * 0.8;
+                initW = initH * targetRatio;
+            }
+            cropRect = { x: (cropCanvasElement.width - initW) / 2, y: (cropCanvasElement.height - initH) / 2, w: initW, h: initH };
+            drawCropView();
+        }
+    }
+
+    cropCanvasElement.addEventListener('mousedown', onCropStart);
+    cropCanvasElement.addEventListener('mousemove', onCropMove);
+    window.addEventListener('mouseup', onCropEnd);
+    cropCanvasElement.addEventListener('touchstart', onCropStart, {passive: false});
+    cropCanvasElement.addEventListener('touchmove', onCropMove, {passive: false});
+    window.addEventListener('touchend', onCropEnd);
+
+    function validateCrop() {
+        if(!cropImg || cropRect.w < 10 || cropRect.h < 10) { alert("Sélection invalide."); return; }
+        
+        const origX = cropRect.x / cropScale;
+        const origY = cropRect.y / cropScale;
+        const origW = cropRect.w / cropScale;
+        const origH = cropRect.h / cropScale;
+
+        const cvs = document.createElement('canvas');
+        const outScale = Math.min(1500 / origW, 1); 
+        cvs.width = origW * outScale;
+        cvs.height = origH * outScale;
+
+        const tCtx = cvs.getContext('2d');
+        tCtx.drawImage(cropImg, origX, origY, origW, origH, 0, 0, cvs.width, cvs.height);
+
+        const opt = cvs.toDataURL('image/jpeg', 0.95);
+        const final = new Image();
+        final.isPlaceholder = false; 
+        final.onload = () => {
+            loadedBricks[currentSlot] = final;
+            updateSlotVisual(currentSlot, opt, false);
+            forceWallRegen();
+            closeCropModal();
+        };
+        final.src = opt;
+    }
+
+    function resetCalibration() {
+        document.getElementById('calib-brightness').value = 100;
+        document.getElementById('calib-contrast').value = 100;
+        document.getElementById('calib-saturation').value = 100;
+        document.getElementById('calib-hue').value = 0;
+        render();
+    }
+
+    function triggerAutoDetection() {
+        const best = analyzeFilteredColorAndSuggest();
+        if (best) {
+            currentJointColor = best;
+            document.getElementById('categorySelect').value = best.cat;
+            filterColors();
+            const sel = document.getElementById('jointColorSelect');
+            for(let i=0; i<sel.options.length; i++) {
+                if(sel.options[i].value && JSON.parse(sel.options[i].value).name === best.name) {
+                    sel.selectedIndex = i;
+                    onJointSelected();
+                }
+            }
+        } else { 
+            alert("Veuillez d'abord charger une brique."); 
+        }
+    }
+
+    function analyzeFilteredColorAndSuggest() {
+        const cvs = document.createElement('canvas'); cvs.width = 50; cvs.height = 50;
+        const ctxA = cvs.getContext('2d');
+        let tR=0, tG=0, tB=0, cnt=0;
+        const bri = document.getElementById('calib-brightness').value;
+        const con = document.getElementById('calib-contrast').value;
+        const sat = document.getElementById('calib-saturation').value;
+        const hue = document.getElementById('calib-hue').value;
+        ctxA.filter = `brightness(${bri}%) contrast(${con}%) saturate(${sat}%) hue-rotate(${hue}deg)`;
+
+        const validBricks = loadedBricks.filter(b => b && !b.isPlaceholder);
+        if(validBricks.length === 0) return null;
+
+        validBricks.forEach(img => {
+            ctxA.drawImage(img, 0, 0, 50, 50);
+            const data = ctxA.getImageData(0,0,50,50).data;
+            for(let i=0; i<data.length; i+=4) { tR+=data[i]; tG+=data[i+1]; tB+=data[i+2]; cnt++; }
+        });
+        
+        if(cnt===0) return null;
+        const r = tR/cnt, g = tG/cnt, b = tB/cnt;
+        let minD = Infinity, best = null;
+        
+        NUANCIER_COMPLET.forEach(j => {
+            if (j.r !== undefined) {
+                const dist = Math.sqrt((j.r-r)**2 + (j.g-g)**2 + (j.b-b)**2);
+                if(dist < minD) { minD = dist; best = j; }
+            }
+        });
+        return best;
+    }
+
+    function updateSlotVisual(idx, src, isPlace) {
+        const d = document.getElementById(`slot-${idx}`);
+        
+        if (src === "") {
+            d.innerHTML = "";
+        } else {
+            d.innerHTML = `<img src="${src}" style="width:100%;height:100%;object-fit:cover;">`;
+        }
+        
+        if(!isPlace) {
+            d.classList.add('active');
+            const b = document.createElement('div'); b.className='remove-btn'; b.innerHTML='x';
+            b.onclick=(e)=>{e.stopPropagation(); removeBrick(idx);}; d.appendChild(b);
+        } else {
+            d.classList.remove('active');
+            const label = document.createElement('div');
+            label.innerHTML = `<span>+ Charger<br>Photo ${idx+1}</span>`;
+            label.style.position = 'absolute';
+            label.style.background = 'rgba(248, 249, 250, 0.85)';
+            label.style.width = '100%';
+            label.style.height = '100%';
+            label.style.display = 'flex';
+            label.style.alignItems = 'center';
+            label.style.justifyContent = 'center';
+            label.style.color = '#007bff';
+            label.style.fontWeight = 'bold';
+            d.appendChild(label);
+        }
+    }
+
+    function removeBrick(i) {
+        const userBricks = loadedBricks.filter(b => b && !b.isPlaceholder);
+        
+        if(userBricks.length <= 1) { 
+            const defaultBrickSrc = generateDefaultBrick();
+            const img = new Image();
+            img.isPlaceholder = true;
+            img.onload = () => {
+                loadedBricks[i] = img;
+                updateSlotVisual(i, defaultBrickSrc, true);
+                forceWallRegen();
+            };
+            img.src = defaultBrickSrc;
+            return; 
+        }
+        
+        loadedBricks[i] = null;
+        updateSlotVisual(i, "", true);
+        forceWallRegen();
+    }
+
+    function toggleColorPicker() {
+        const btn = document.getElementById('btn-pipette-color');
+        if (!isColorPicking) {
+            isColorPicking = true;
+            btn.style.background = '#0d6efd';
+            btn.innerText = '👉 Cliquez sur la couleur souhaitée sur la brique';
+            canvas.style.cursor = 'crosshair';
+            render(); 
+        } else {
+            isColorPicking = false;
+            btn.style.background = 'linear-gradient(135deg, #6610f2, #5f3dc4)';
+            btn.innerText = '🧪 Cible (Pipette)';
+            canvas.style.cursor = 'default';
+            render(); 
+        }
+    }
+
+    canvas.addEventListener('click', function(e) {
+        if (!isColorPicking) return;
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const x = Math.floor((e.clientX - rect.left) * scaleX);
+        const y = Math.floor((e.clientY - rect.top) * scaleY);
+
+        const pixel = ctx.getImageData(x, y, 1, 1).data;
+        const r = pixel[0], g = pixel[1], b = pixel[2];
+
+        let minD = Infinity, best = null;
+        NUANCIER_COMPLET.forEach(j => {
+            if (j.r !== undefined) {
+                const dist = Math.sqrt((j.r-r)**2 + (j.g-g)**2 + (j.b-b)**2);
+                if(dist < minD) { minD = dist; best = j; }
+            }
+        });
+
+        if (best) {
+            currentJointColor = best;
+            document.getElementById('categorySelect').value = best.cat;
+            filterColors();
+            const sel = document.getElementById('jointColorSelect');
+            for(let i=0; i<sel.options.length; i++) {
+                if(sel.options[i].value && JSON.parse(sel.options[i].value).name === best.name) {
+                    sel.selectedIndex = i;
+                    onJointSelected();
+                }
+            }
+        }
+        toggleColorPicker(); 
+    });
+
+    function filterColors() {
+        const cat = document.getElementById('categorySelect').value;
+        const sel = document.getElementById('jointColorSelect');
+        sel.innerHTML = '<option value="" style="background:#fff; color:#000;">-- Choisir une teinte --</option>';
+        
+        const list = cat === 'all' ? NUANCIER_COMPLET : NUANCIER_COMPLET.filter(c => c.cat === cat);
+        
+        list.forEach(c => {
+            const o = document.createElement('option');
+            o.value = JSON.stringify(c); 
+            o.textContent = c.name;
+            if(c.r !== undefined) {
+                o.style.backgroundColor = `rgb(${c.r}, ${c.g}, ${c.b})`;
+                const luminance = 0.299 * c.r + 0.587 * c.g + 0.114 * c.b;
+                o.style.color = luminance > 130 ? '#000000' : '#ffffff';
+                o.style.fontWeight = "bold";
+            }
+            sel.appendChild(o);
+        });
+        
+        updatePreviewDot();
+        render();
+    }
+
+    function onJointSelected() {
+        const v = document.getElementById('jointColorSelect').value;
+        if(v) {
+            currentJointColor = JSON.parse(v);
+        } else {
+            currentJointColor = null;
+        }
+        updatePreviewDot();
+        render();
     }
     
-    // ---------------------------------------------------------
-    // 5. FONCTION MAIL DEVIS (MISE A JOUR V31)
-    // ---------------------------------------------------------
-    function sendQuoteEmail() {
-        // --- VALIDATION DU FORMULAIRE DE CONTACT ---
-        const company = document.getElementById('userCompany').value.trim();
-        const contact = document.getElementById('userContact').value.trim();
-        const dealer = document.getElementById('userDealer').value.trim();
-        const color = document.getElementById('userColor').value.trim(); 
-        const refChantier = document.getElementById('userRef').value.trim();
+    function updatePreviewDot() {
+        const dot = document.getElementById('joint-preview-dot');
+        if(currentJointColor) {
+            dot.style.backgroundColor = `rgb(${currentJointColor.r},${currentJointColor.g},${currentJointColor.b})`;
+        } else { 
+            dot.style.backgroundColor = '#f4f4f4'; 
+        }
+    }
 
-        if (!company || !contact || !dealer || !color) {
-            alert("Veuillez remplir tous les champs obligatoires (Entreprise, Contact, Négociant, Couleur) !");
-            document.querySelector('.contact-form-wrapper').scrollIntoView({behavior: 'smooth'});
+    function forceWallRegen() {
+        let valid = loadedBricks.filter(b => b && !b.isPlaceholder);
+        if(!valid.length) {
+            valid = [loadedBricks[0]]; 
+        }
+        if(!valid[0]) return;
+
+        wallLayoutCache = [];
+        for(let r=0; r<200; r++) {
+            let row = [];
+            for(let c=0; c<100; c++) row.push(Math.floor(Math.random() * valid.length));
+            wallLayoutCache.push(row);
+        }
+        render();
+    }
+
+    // --- LE MOTEUR DE RENDU HAUTE PERFORMANCE ---
+    function render() {
+        let valid = loadedBricks.filter(b => b && !b.isPlaceholder);
+        if(!valid.length) {
+            valid = [loadedBricks[0]];
+        }
+        if(!valid[0]) return;
+        
+        if(!wallLayoutCache.length) forceWallRegen();
+
+        ctx.clearRect(0,0, canvas.width, canvas.height);
+        
+        const L_mm = parseInt(document.getElementById('input-longueur').value)||220;
+        const H_mm = parseInt(document.getElementById('input-hauteur').value)||60;
+        const J_mm = parseInt(document.getElementById('slider-epaisseur').value)||12;
+        const zoom = parseFloat(document.getElementById('slider-zoom').value);
+        
+        const pxPerMM = zoom;
+        const L_px = L_mm * pxPerMM;
+        const H_px = H_mm * pxPerMM;
+        const J_px = J_mm * pxPerMM;
+
+        const W = 1200; const H = 800; const Footer = 110;
+        canvas.width = W; canvas.height = H + Footer;
+        document.getElementById('scale-info').innerText = `1m = ${Math.round(1000*pxPerMM)}px`;
+
+        const bri = document.getElementById('calib-brightness').value;
+        const con = document.getElementById('calib-contrast').value;
+        const sat = document.getElementById('calib-saturation').value;
+        const hue = document.getElementById('calib-hue').value;
+
+        const pad = 15 * zoom; 
+        const preRenderedBricks = valid.map(img => {
+            const tempCvs = document.createElement('canvas');
+            tempCvs.width = L_px + pad * 2;
+            tempCvs.height = H_px + pad * 2;
+            const tCtx = tempCvs.getContext('2d');
+            
+            if (!isColorPicking) {
+                tCtx.shadowColor = "rgba(0,0,0,0.6)";
+                tCtx.shadowBlur = 4 * (zoom/1.5);
+                tCtx.shadowOffsetX = 1 * (zoom/1.5); 
+                tCtx.shadowOffsetY = 2 * (zoom/1.5);
+            }
+            
+            tCtx.filter = `brightness(${bri}%) contrast(${con}%) saturate(${sat}%) hue-rotate(${hue}deg)`;
+            tCtx.drawImage(img, pad, pad, L_px, H_px);
+            return tempCvs;
+        });
+
+        if (isColorPicking) {
+            ctx.fillStyle = "#ffffff"; 
+            ctx.fillRect(0, 0, W, H);
+            
+            let y = 0; let rIdx = 0;
+            while(y < H) {
+                let x = (rIdx % 2 !== 0) ? -(L_px/2) - (J_px/2) : 0;
+                let cIdx = 0;
+                while(x < W) {
+                    const sR = rIdx % wallLayoutCache.length;
+                    const sC = cIdx % wallLayoutCache[0].length;
+                    const bIdx = wallLayoutCache[sR][sC];
+                    ctx.drawImage(preRenderedBricks[bIdx], x - pad, y - pad);
+                    x += L_px + J_px; cIdx++;
+                }
+                y += H_px + J_px; rIdx++;
+            }
+
+            ctx.fillStyle = "rgba(0,0,0,0.8)";
+            ctx.fillRect(0, 0, W, 60);
+            ctx.fillStyle = "white";
+            ctx.font = "bold 20px 'Segoe UI'";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("🧪 MODE PIPETTE : Cliquez sur la couleur de la brique que vous souhaitez copier", W/2, 30);
             return; 
         }
 
-        // 1. Récupération des données du calcul affiché
-        const totalWeightText = document.getElementById('totalWeight').innerText; 
-        const totalVolume = document.getElementById('totalVolume').innerText;
-        const totalPallets = document.getElementById('nbPallets').innerText;
-        const totalBags = document.getElementById('totalBagsCount').innerText;
-        
-        // --- RE-CALCUL PRÉCIS POUR LES BIG BAGS DANS LE MAIL ---
-        let weightVal = parseFloat(totalWeightText.replace(/\s/g, '').replace(',', '.'));
-        let maxBB = 1400;
-        if(currentMainType === 'joint' && document.getElementById('jointProductType').value === 'easyjoint') {
-            maxBB = 1000;
-        }
-
-        let bbSol = solveBigBags(weightVal, maxBB);
-        let bbDetails = "";
-        let hasBB = false;
-        if(bbSol[1400] > 0) { bbDetails += `- ${bbSol[1400]} Big Bag(s) de 1400kg\n`; hasBB = true; }
-        if(bbSol[1000] > 0) { bbDetails += `- ${bbSol[1000]} Big Bag(s) de 1000kg\n`; hasBB = true; }
-        if(bbSol[700] > 0)  { bbDetails += `- ${bbSol[700]} Big Bag(s) de 700kg\n`; hasBB = true; }
-        if(!hasBB) bbDetails = "- Quantité insuffisante pour du vrac\n";
-
-        // 2. Construction du détail Produit
-        let productDetails = "";
-        let subjectRef = `Demande de prix - ${company}`; 
-
-        if(currentMainType === 'concrete') {
-            subjectRef += " - Tradi Béton";
-            productDetails = "Produit : Tradi Béton (Sac 25kg)\n";
-            if(currentConcreteMode === 'dims') {
-                const L = document.getElementById('concL').value;
-                const W = document.getElementById('concW').value;
-                const H = document.getElementById('concH').value;
-                productDetails += `Dimensions Dalle : ${L} x ${W} x ${H} cm\n`;
-            } else {
-                productDetails += `Volume souhaité : ${document.getElementById('inputConcreteVol').value} ${document.getElementById('unitConcreteVol').value}\n`;
-            }
-
-        } else if(currentMainType === 'joint') {
-            const productType = document.getElementById('jointProductType').value;
-            const formattedProduct = (productType === 'biajoint') ? 'BIAJOINT' : 'EASY JOINT';
-            const surface = document.getElementById('jointSurface').value;
-            
-            subjectRef += ` - ${formattedProduct}`;
-            productDetails = `Produit : ${formattedProduct}\n`;
-            productDetails += `Couleur demandée : ${color.toUpperCase()}\n`; // Ajout Couleur
-            productDetails += `Surface à jointer : ${surface} m²\n`;
-            productDetails += `Dimensions plaquette : ${document.getElementById('jointL').value}x${document.getElementById('jointH').value} mm\n`;
-            productDetails += `Joint : ${document.getElementById('jointW').value}mm (Largeur) x ${document.getElementById('jointD').value}mm (Profondeur)\n`;
-
+        if(currentJointColor) {
+            ctx.fillStyle = `rgb(${currentJointColor.r}, ${currentJointColor.g}, ${currentJointColor.b})`;
         } else {
-            // Mortier
-            const cat = categorySelect.value;
-            const refIndex = referenceSelect.value;
-            let refName = "Inconnue";
-            
-            if(refIndex === "custom") {
-                refName = "Sur mesure";
-            } else if (cat && db[cat] && db[cat].items[refIndex]) {
-                refName = db[cat].items[refIndex].name;
-            }
-
-            const surface = document.getElementById('surface').value;
-            
-            // --- LOGIQUE M5 vs M10 (V31) ---
-            const isCoated = document.getElementById('isCoated').checked;
-            const prodName = isCoated ? "BIAMORTIER M10 (Gamme Coated)" : "BIAMORTIER M5 (Standard)";
-
-            subjectRef += ` - ${prodName}`;
-            productDetails = `Produit : ${prodName}\n`;
-            productDetails += `Couleur demandée : ${color.toUpperCase()}\n`; // Ajout Couleur
-            productDetails += `Gamme brique : ${cat}\n`;
-            productDetails += `Format Brique : ${refName}\n`;
-            if(currentMortarMode === 'surface') {
-                productDetails += `Surface mur : ${surface} m²\n`;
-            } else {
-                productDetails += `Volume brut demandé.\n`;
-            }
+            ctx.fillStyle = "#e0e0e0"; 
         }
+        ctx.fillRect(0, 0, W, H);
 
-        // 3. Construction du Corps du mail
-        const emailBody = `Bonjour BIALLAIS Industries,\n\n` +
-            `Voici une demande de prix pour le chantier suivant :\n\n` +
-            `==============================\n` +
-            `COORDONNÉES CLIENT\n` +
-            `==============================\n` +
-            `Entreprise : ${company}\n` +
-            `Contact : ${contact}\n` +
-            `Négociant souhaité : ${dealer}\n` +
-            `Référence Chantier : ${refChantier}\n\n` +
-            `==============================\n` +
-            `DÉTAILS TECHNIQUES\n` +
-            `==============================\n` +
-            `${productDetails}\n` +
-            `--- QUANTITÉS ESTIMÉES ---\n` +
-            `Poids Total : ${totalWeightText} kg\n` +
-            `(Volume approx. : ${totalVolume} Litres)\n\n` +
-            `==============================\n` +
-            `CONDITIONNEMENT SOUHAITÉ\n` +
-            `==============================\n` +
-            `Merci de chiffrer l'une ou les deux options :\n\n` +
-            `OPTION A : CONDITIONNEMENT SAC (25kg)\n` +
-            `- ${totalPallets} Palette(s)\n` +
-            `- ${document.getElementById('nbExtraBags').innerText} Sac(s) de reliquat\n` +
-            `(Soit un total de ${totalBags} sacs)\n\n` +
-            `OPTION B : CONDITIONNEMENT VRAC (Big Bag)\n` +
-            `${bbDetails}\n` +
-            `Merci de me recontacter pour finaliser cette demande.\n\n` +
-            `Cordialement,`;
+        ctx.globalCompositeOperation = 'overlay'; 
+        ctx.fillStyle = grainTexture;
+        ctx.fillRect(0, 0, W, H);
+        ctx.globalCompositeOperation = 'source-over'; 
 
-        // 4. Encodage et Ouverture
-        const destination = "contact@biallais.fr"; 
-        const mailtoLink = `mailto:${destination}?subject=${encodeURIComponent(subjectRef)}&body=${encodeURIComponent(emailBody)}`;
+        ctx.save();
+        ctx.beginPath(); ctx.rect(0,0,W,H); ctx.clip();
+
+        let y = 0; let rIdx = 0;
         
-        window.location.href = mailtoLink;
+        while(y < H) {
+            let x = (rIdx % 2 !== 0) ? -(L_px/2) - (J_px/2) : 0;
+            let cIdx = 0;
+            while(x < W) {
+                const sR = rIdx % wallLayoutCache.length;
+                const sC = cIdx % wallLayoutCache[0].length;
+                const bIdx = wallLayoutCache[sR][sC];
+                ctx.drawImage(preRenderedBricks[bIdx], x - pad, y - pad);
+                x += L_px + J_px; cIdx++;
+            }
+            y += H_px + J_px; rIdx++;
+        }
+        ctx.restore();
+
+        ctx.fillStyle = "white"; ctx.fillRect(0, H, W, Footer);
+        ctx.strokeStyle = "#ddd"; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(0,H); ctx.lineTo(W,H); ctx.stroke();
+        
+        ctx.textBaseline = "middle";
+        const Y_txt = H + 40;
+        ctx.textAlign = "left"; ctx.fillStyle = "#222"; ctx.font = "bold 22px 'Segoe UI'";
+        ctx.fillText(`JOINT : ${currentJointColor ? currentJointColor.name : "Aucun"}`, 30, Y_txt);
+        
+        ctx.textAlign = "center"; ctx.fillStyle = "#555"; ctx.font = "20px 'Segoe UI'";
+        ctx.fillText(`Ep. ${J_mm}mm | V88`, W/2, Y_txt);
+
+        ctx.textAlign = "right"; ctx.fillStyle = "#222"; ctx.font = "bold 22px 'Segoe UI'";
+        const bName = document.getElementById('input-brick-name').value || "Brique";
+        ctx.fillText(`PROJET : ${bName}`, W-30, Y_txt);
+    }
+
+    function downloadImage() {
+        const valid = loadedBricks.filter(b => b && !b.isPlaceholder);
+        if(!valid.length) { alert("Veuillez d'abord charger une brique avant d'exporter."); return; }
+        const link = document.createElement('a');
+        link.download = `Projet_V88_LCh.jpg`;
+        link.href = canvas.toDataURL('image/jpeg', 0.92);
+        link.click();
+    }
+    
+    function downloadPDF() {
+        const valid = loadedBricks.filter(b => b && !b.isPlaceholder);
+        if(!valid.length) { alert("Veuillez d'abord charger une brique avant d'exporter."); return; }
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'landscape' });
+        const img = canvas.toDataURL('image/jpeg', 0.92);
+        const props = doc.getImageProperties(img);
+        const w = doc.internal.pageSize.getWidth();
+        const h = (props.height * w) / props.width;
+        doc.addImage(img, 'JPEG', 0, 10, w, h);
+        doc.save('Projet_V88.pdf');
     }
 </script>
-
 </body>
 </html>
