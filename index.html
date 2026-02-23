@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Simulateur Biamortier V88 - Formulaire d'Envoi</title>
+    <title>Simulateur Biamortier V97 - Nuancier Exact</title>
+    
+    <link rel="icon" type="image/png" href="logo-512.png">
+    <link rel="apple-touch-icon" href="logo-512.png">
+    <meta name="theme-color" content="#0d47a1">
+    <link rel="manifest" href="manifest.json">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         * { box-sizing: border-box; }
@@ -39,6 +44,10 @@
         .calibration-slider input[type="range"] { flex:1; }
         .reset-calib-btn { position: absolute; top: 10px; right: 10px; background: #fff; border: 1px solid #e0c46c; border-radius: 4px; font-size: 0.7rem; padding: 2px 6px; cursor: pointer; color: #856404; }
         
+        .dev-box { background: #e2e3e5; border: 1px solid #d6d8db; padding: 10px; border-radius: 8px; margin-top: 10px; margin-bottom: 10px; }
+        .dev-box h4 { margin:0 0 10px 0; font-size:0.85rem; color:#383d41; display:flex; justify-content:space-between; align-items:center; }
+        .val-badge { background: #fff; padding: 2px 5px; border-radius: 4px; font-size: 0.7rem; border: 1px solid #ccc; width:45px; text-align:center; display:inline-block; }
+
         .btn-group { display: flex; gap: 10px; margin-top: 10px; }
         button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .btn-jpg { background: #198754; color: white; }
@@ -83,10 +92,22 @@
     </div>
 </div>
 
+<div id="export-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-content" style="width: 600px; max-width: 90vw;">
+        <h2 style="margin: 0 0 10px 0; color: #0d47a1;">📥 Code du Nuancier Mis à Jour</h2>
+        <p style="font-size: 0.85rem; color: #555; margin-bottom: 15px;">Copiez ce texte et remplacez l'ancien bloc <b>NUANCIER_COMPLET</b> dans votre code HTML.</p>
+        <textarea id="export-text" style="width: 100%; height: 300px; font-family: monospace; font-size: 0.8rem; padding: 10px; border-radius: 4px; border: 1px solid #ccc;" readonly></textarea>
+        <div class="btn-group" style="margin-top:20px;">
+            <button onclick="document.getElementById('export-modal').style.display='none'" style="background:#6c757d; color:white;">Fermer</button>
+            <button onclick="copyExportText()" style="background:#0d6efd; color:white;">📋 Copier le code</button>
+        </div>
+    </div>
+</div>
+
 <div class="controls">
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid #f0f2f5; padding-bottom:10px; margin-bottom:5px;">
         <h2>🛠️ Configurateur</h2>
-        <span style="font-size:0.7rem; color:#888;">V88 - Envoi Intégré</span>
+        <span style="font-size:0.7rem; color:#888;">V97 - Mode Calibrage Actif</span>
     </div>
 
     <div class="library-box">
@@ -176,6 +197,28 @@
             <select id="jointColorSelect" onchange="onJointSelected();" style="margin-top:5px;"></select>
         </div>
 
+        <div class="dev-box" id="dev-box" style="display: none;">
+            <h4>⚙️ Mode Calibrage (BDD) 
+                <button onclick="resetCurrentDevColor()" style="background: #fff; border: 1px solid #dc3545; border-radius: 4px; font-size: 0.7rem; padding: 2px 6px; cursor: pointer; color: #dc3545; font-weight: normal;">↺ R.A.Z Couleur</button>
+            </h4>
+            <div class="calibration-slider">
+                <label style="color:#383d41;">Lumi. (L)</label>
+                <input type="range" id="dev-l" min="10" max="95" step="0.5" value="50" oninput="updateAdminColor()">
+                <span class="val-badge" id="val-l">50</span>
+            </div>
+            <div class="calibration-slider">
+                <label style="color:#383d41;">Satur. (C)</label>
+                <input type="range" id="dev-c" min="0" max="60" step="0.5" value="20" oninput="updateAdminColor()">
+                <span class="val-badge" id="val-c">20</span>
+            </div>
+            <div class="calibration-slider">
+                <label style="color:#383d41;">Teinte (H)</label>
+                <input type="range" id="dev-h" min="0" max="360" step="1" value="0" oninput="updateAdminColor()">
+                <span class="val-badge" id="val-h">0</span>
+            </div>
+            <button onclick="generateExportCode()" style="margin-top:10px; width:100%; background:#343a40; color:white; padding:8px; border-radius:4px; font-size:0.8rem; cursor:pointer; border:none;">📥 Exporter le Nuancier mis à jour</button>
+        </div>
+
         <div class="input-row" style="margin-top:15px; align-items: flex-end;">
             <div class="input-group" style="flex: 0.8;">
                 <label>Ep. (mm) : <span id="val-ep" style="color:#007bff;">12</span></label>
@@ -225,128 +268,138 @@
 
 <script>
     let NUANCIER_COMPLET = [
-        { cat: "Standards", name: "SUPER BLANC", l: 86.00, c: 3.50, h: 73.00 },
-        { cat: "Standards", name: "BLANC", l: 82.00, c: 5.50, h: 85.00 },
-        { cat: "Standards", name: "TON PIERRE", l: 76.50, c: 21.00, h: 89.00 },
-        { cat: "Standards", name: "GRIS CLAIR", l: 60.00, c: 3.00, h: 92.00 },
+        // --- STANDARDS ---
+        { cat: "Standards", name: "SUPER BLANC", l: 79.50, c: 7.50, h: 91.00 },
+        { cat: "Standards", name: "BLANC", l: 74.50, c: 10.50, h: 85.00 },
+        { cat: "Standards", name: "TON PIERRE", l: 76.50, c: 22.50, h: 87.00 },
+        { cat: "Standards", name: "GRIS CLAIR", l: 61.50, c: 11.00, h: 90.00 },
 
+        // --- AUTRES ---
         { cat: "Autres", name: "SBV60", l: 68.00, c: 6.50, h: 111.00 },
         { cat: "Autres", name: "SBV125", l: 65.50, c: 9.00, h: 121.00 },
         { cat: "Autres", name: "SBB125", l: 63.00, c: 3.50, h: 219.00 },
         { cat: "Autres", name: "SBV250", l: 62.00, c: 11.00, h: 128.00 },
         { cat: "Autres", name: "SBB250", l: 58.50, c: 9.00, h: 241.00 },
 
-        { cat: "Noirs & Gris", name: "50% BL 50% GR", l: 50.00, c: 20.00, h: 0.00 },
+        // --- NOIRS & GRIS ---
+        { cat: "Noirs & Gris", name: "50% BL 50% GR", l: 70.50, c: 10.50, h: 84.00 },
         { cat: "Noirs & Gris", name: "SBN62.5", l: 52.00, c: 0.50, h: 6.00 },
         { cat: "Noirs & Gris", name: "GN62.5", l: 51.00, c: 2.00, h: 73.00 },
         { cat: "Noirs & Gris", name: "SBN60", l: 50.00, c: 2.00, h: 37.00 },
-        { cat: "Noirs & Gris", name: "SBN125", l: 41.50, c: 1.00, h: 276.00 }, 
+        { cat: "Noirs & Gris", name: "SBN125", l: 56.00, c: 3.00, h: 94.00 },
         { cat: "Noirs & Gris", name: "GN60", l: 46.00, c: 2.50, h: 64.00 },
         { cat: "Noirs & Gris", name: "GN125", l: 43.50, c: 0.50, h: 2.00 },
         { cat: "Noirs & Gris", name: "TPN250", l: 41.50, c: 1.00, h: 299.00 },
         { cat: "Noirs & Gris", name: "GN250", l: 39.50, c: 0.50, h: 319.00 },
-        { cat: "Noirs & Gris", name: "SBN250", l: 37.50, c: 2.00, h: 293.00 }, 
-        { cat: "Noirs & Gris", name: "GA125", l: 26.50, c: 0.50, h: 351.00 }, 
+        { cat: "Noirs & Gris", name: "SBN250", l: 48.50, c: 2.50, h: 82.00 },
+        { cat: "Noirs & Gris", name: "GA125", l: 36.00, c: 2.00, h: 85.00 },
         { cat: "Noirs & Gris", name: "SBA125", l: 33.50, c: 2.50, h: 275.00 },
         { cat: "Noirs & Gris", name: "SBN500", l: 32.50, c: 1.00, h: 355.00 },
-        { cat: "Noirs & Gris", name: "SBA250", l: 28.50, c: 2.00, h: 284.00 }, 
+        { cat: "Noirs & Gris", name: "SBA250", l: 31.50, c: 0.00, h: 270.00 },
         { cat: "Noirs & Gris", name: "SBA375", l: 25.00, c: 2.00, h: 282.00 },
         { cat: "Noirs & Gris", name: "GA250", l: 24.50, c: 2.00, h: 276.00 },
-        { cat: "Noirs & Gris", name: "GA450R50", l: 20.50, c: 1.50, h: 348.00 }, 
-        { cat: "Noirs & Gris", name: "SBA500", l: 16.00, c: 1.00, h: 310.00 }, 
-        { cat: "Noirs & Gris", name: "GN500", l: 29.50, c: 2.00, h: 43.00 }, 
-        { cat: "Noirs & Gris", name: "GA500", l: 16.50, c: 0.50, h: 325.00 }, 
+        { cat: "Noirs & Gris", name: "GA450R50", l: 25.50, c: 2.00, h: 63.00 },
+        { cat: "Noirs & Gris", name: "SBA500", l: 14.00, c: 0.50, h: 20.00 },
+        { cat: "Noirs & Gris", name: "GN500", l: 45.00, c: 2.00, h: 75.00 },
+        { cat: "Noirs & Gris", name: "GA500", l: 26.50, c: 1.00, h: 20.00 },
 
-        { cat: "Jaunes", name: "SBJ8.25", l: 79.00, c: 10.50, h: 85.00 }, 
-        { cat: "Jaunes", name: "SBJ30", l: 74.00, c: 19.50, h: 87.00 }, 
-        { cat: "Jaunes", name: "SBJ62.5", l: 74.50, c: 26.50, h: 92.00 }, 
-        { cat: "Jaunes", name: "SBJ20S15", l: 66.00, c: 19.50, h: 76.00 }, 
-        { cat: "Jaunes", name: "75% TP 25% BL", l: 68.50, c: 29.50, h: 99.00 }, 
-        { cat: "Jaunes", name: "SBJ125", l: 62.50, c: 30.50, h: 83.00 }, 
-        { cat: "Jaunes", name: "SBJ250", l: 68.00, c: 41.00, h: 83.00 }, 
-        { cat: "Jaunes", name: "GJ15", l: 61.50, c: 9.00, h: 94.00 }, 
-        { cat: "Jaunes", name: "GJ30", l: 61.50, c: 12.50, h: 93.00 }, 
-        { cat: "Jaunes", name: "GJ125", l: 54.00, c: 26.00, h: 87.00 }, 
-        { cat: "Jaunes", name: "GJ20S15", l: 58.50, c: 13.00, h: 83.00 }, 
-        { cat: "Jaunes", name: "GJ250", l: 60.50, c: 31.50, h: 85.00 }, 
-        { cat: "Jaunes", name: "SBJ500", l: 61.00, c: 40.50, h: 80.00 }, 
-        { cat: "Jaunes", name: "SBJ375", l: 56.50, c: 38.50, h: 81.00 }, 
-        { cat: "Jaunes", name: "GJ500", l: 53.00, c: 35.00, h: 84.00 }, 
-        { cat: "Jaunes", name: "SBJ62.5N62.5", l: 51.00, c: 11.00, h: 94.00 }, 
-        { cat: "Jaunes", name: "SBJ120N30", l: 67.50, c: 29.00, h: 94.00 }, 
-        { cat: "Jaunes", name: "GJ62.5N62.5", l: 48.00, c: 9.50, h: 94.00 }, 
+        // --- JAUNES ---
+        { cat: "Jaunes", name: "SBJ8.25", l: 77.50, c: 16.00, h: 87.00 },
+        { cat: "Jaunes", name: "SBJ30", l: 77.50, c: 16.00, h: 87.00 },
+        { cat: "Jaunes", name: "SBJ62.5", l: 75.00, c: 30.00, h: 84.00 },
+        { cat: "Jaunes", name: "SBJ20S15", l: 66.00, c: 19.50, h: 76.00 },
+        { cat: "Jaunes", name: "75% TP 25% BL", l: 74.50, c: 21.50, h: 87.00 },
+        { cat: "Jaunes", name: "SBJ125", l: 62.50, c: 30.50, h: 83.00 },
+        { cat: "Jaunes", name: "SBJ250", l: 69.00, c: 53.00, h: 82.00 },
+        { cat: "Jaunes", name: "GJ15", l: 61.50, c: 9.00, h: 94.00 },
+        { cat: "Jaunes", name: "GJ30", l: 61.50, c: 12.50, h: 93.00 },
+        { cat: "Jaunes", name: "GJ125", l: 60.00, c: 30.00, h: 83.00 },
+        { cat: "Jaunes", name: "GJ20S15", l: 58.50, c: 13.00, h: 83.00 },
+        { cat: "Jaunes", name: "GJ250", l: 64.50, c: 39.00, h: 83.00 },
+        { cat: "Jaunes", name: "SBJ500", l: 67.00, c: 58.50, h: 82.00 },
+        { cat: "Jaunes", name: "SBJ375", l: 56.50, c: 38.50, h: 81.00 },
+        { cat: "Jaunes", name: "GJ500", l: 62.00, c: 53.50, h: 82.00 },
+        { cat: "Jaunes", name: "SBJ62.5N62.5", l: 51.00, c: 11.00, h: 94.00 },
+        { cat: "Jaunes", name: "SBJ120N30", l: 65.50, c: 31.00, h: 86.00 },
+        { cat: "Jaunes", name: "GJ62.5N62.5", l: 48.00, c: 9.50, h: 94.00 },
 
-        { cat: "Marron", name: "GJ10S15", l: 55.00, c: 12.00, h: 76.00 }, 
-        { cat: "Marron", name: "GS15J10", l: 46.00, c: 15.00, h: 87.00 }, 
-        { cat: "Marron", name: "GS15", l: 60.00, c: 10.00, h: 75.00 }, 
-        { cat: "Marron", name: "GN90S35", l: 37.50, c: 6.00, h: 79.00 }, 
-        { cat: "Marron", name: "GJ100R150", l: 46.00, c: 24.50, h: 47.00 }, 
-        { cat: "Marron", name: "GS150N100", l: 45.50, c: 13.50, h: 70.00 }, 
-        { cat: "Marron", name: "GS200N150", l: 45.50, c: 16.50, h: 69.00 }, 
-        { cat: "Marron", name: "GJ90R90N70", l: 44.50, c: 15.00, h: 52.00 }, 
-        { cat: "Marron", name: "GJ10N115", l: 41.00, c: 2.00, h: 66.00 }, 
-        { cat: "Marron", name: "SBJ90R70N90", l: 46.50, c: 12.50, h: 52.00 }, 
-        { cat: "Marron", name: "SBJ90R90N70", l: 40.00, c: 15.50, h: 46.00 }, 
-        { cat: "Marron", name: "GJ180R180N140", l: 39.00, c: 14.50, h: 54.00 }, 
-        { cat: "Marron", name: "GJ20N200", l: 37.50, c: 1.50, h: 52.00 }, 
-        { cat: "Marron", name: "GJ15N150", l: 37.50, c: 1.50, h: 51.00 }, 
-        { cat: "Marron", name: "GS150A100", l: 37.00, c: 7.50, h: 69.00 }, 
-        { cat: "Marron", name: "GS125N250R125", l: 37.50, c: 11.00, h: 49.00 }, 
-        { cat: "Marron", name: "SBJ180R180N140", l: 45.50, c: 16.00, h: 45.00 }, 
-        { cat: "Marron", name: "GS125A125", l: 33.50, c: 4.00, h: 73.00 }, 
-        { cat: "Marron", name: "GS300N200", l: 33.00, c: 13.00, h: 65.00 }, 
-        { cat: "Marron", name: "SBJ180N180R140", l: 33.00, c: 13.50, h: 50.00 }, 
-        { cat: "Marron", name: "GS200A150", l: 32.50, c: 5.50, h: 74.00 }, 
-        { cat: "Marron", name: "GN416S84", l: 27.50, c: 3.50, h: 57.00 }, 
-        { cat: "Marron", name: "GS250A250", l: 30.00, c: 7.00, h: 72.00 }, 
-        { cat: "Marron", name: "GS300N100A100", l: 28.00, c: 8.50, h: 68.00 }, 
-        { cat: "Marron", name: "GS300A200", l: 27.00, c: 7.00, h: 67.00 }, 
-        { cat: "Marron", name: "GJ100R200N50A150", l: 24.50, c: 7.50, h: 37.00 }, 
-        { cat: "Marron", name: "GS150R150A200", l: 23.00, c: 7.00, h: 42.00 }, 
-        { cat: "Marron", name: "GJ100R200A200", l: 21.50, c: 6.50, h: 37.00 }, 
+        // --- MARRON ---
+        { cat: "Marron", name: "GJ10S15", l: 55.00, c: 12.00, h: 76.00 },
+        { cat: "Marron", name: "GS15J10", l: 63.50, c: 16.00, h: 79.00 },
+        { cat: "Marron", name: "GS15", l: 60.00, c: 10.00, h: 75.00 },
+        { cat: "Marron", name: "GN90S35", l: 50.00, c: 11.50, h: 78.00 },
+        { cat: "Marron", name: "GJ100R150", l: 46.00, c: 24.50, h: 47.00 },
+        { cat: "Marron", name: "GS150N100", l: 61.50, c: 21.00, h: 74.00 },
+        { cat: "Marron", name: "GS200N150", l: 43.00, c: 21.50, h: 68.00 },
+        { cat: "Marron", name: "GJ90R90N70", l: 44.50, c: 15.00, h: 52.00 },
+        { cat: "Marron", name: "GJ10N115", l: 41.00, c: 2.00, h: 66.00 },
+        { cat: "Marron", name: "SBJ90R70N90", l: 50.00, c: 24.50, h: 63.00 },
+        { cat: "Marron", name: "SBJ90R90N70", l: 40.00, c: 15.50, h: 46.00 },
+        { cat: "Marron", name: "GJ180R180N140", l: 39.00, c: 14.50, h: 54.00 },
+        { cat: "Marron", name: "GJ20N200", l: 37.50, c: 1.50, h: 52.00 },
+        { cat: "Marron", name: "GJ15N150", l: 37.50, c: 1.50, h: 51.00 },
+        { cat: "Marron", name: "GS150A100", l: 34.00, c: 11.00, h: 76.00 },
+        { cat: "Marron", name: "GS125N250R125", l: 42.50, c: 28.00, h: 59.00 },
+        { cat: "Marron", name: "SBJ180R180N140", l: 42.50, c: 28.00, h: 59.00 },
+        { cat: "Marron", name: "GS125A125", l: 33.50, c: 4.00, h: 73.00 },
+        { cat: "Marron", name: "GS300N200", l: 33.00, c: 13.00, h: 65.00 },
+        { cat: "Marron", name: "SBJ180N180R140", l: 33.00, c: 13.50, h: 50.00 },
+        { cat: "Marron", name: "GS200A150", l: 32.50, c: 5.50, h: 74.00 },
+        { cat: "Marron", name: "GN416S84", l: 29.00, c: 8.50, h: 75.00 },
+        { cat: "Marron", name: "GS250A250", l: 27.00, c: 7.00, h: 76.00 },
+        { cat: "Marron", name: "GS300N100A100", l: 28.00, c: 8.50, h: 68.00 },
+        { cat: "Marron", name: "GS300A200", l: 27.00, c: 11.00, h: 73.00 },
+        { cat: "Marron", name: "GJ100R200N50A150", l: 24.50, c: 7.50, h: 37.00 },
+        { cat: "Marron", name: "GS150R150A200", l: 23.00, c: 7.00, h: 42.00 },
+        { cat: "Marron", name: "GJ100R200A200", l: 21.50, c: 6.50, h: 37.00 },
 
-        { cat: "Rouges", name: "GR150J100", l: 51.00, c: 27.00, h: 47.00 }, 
-        { cat: "Rouges", name: "SBR125", l: 51.50, c: 27.00, h: 28.00 }, 
-        { cat: "Rouges", name: "GR125", l: 52.00, c: 21.50, h: 30.00 }, 
-        { cat: "Rouges", name: "GR150S100", l: 54.50, c: 31.50, h: 45.00 }, 
-        { cat: "Rouges", name: "SBR250", l: 48.50, c: 26.50, h: 27.00 }, 
-        { cat: "Rouges", name: "GR100N25", l: 38.00, c: 18.50, h: 39.00 }, 
-        { cat: "Rouges", name: "SBR375", l: 45.00, c: 31.50, h: 27.00 }, 
-        { cat: "Rouges", name: "GR375", l: 35.00, c: 27.50, h: 30.00 }, 
-        { cat: "Rouges", name: "GR20", l: 36.50, c: 19.00, h: 29.00 }, 
-        { cat: "Rouges", name: "GR250", l: 41.50, c: 25.50, h: 29.00 }, 
-        { cat: "Rouges", name: "GJ250R250", l: 36.50, c: 27.00, h: 40.00 }, 
-        { cat: "Rouges", name: "GR250S250", l: 41.50, c: 29.00, h: 39.00 }, 
-        { cat: "Rouges", name: "SBR500", l: 34.00, c: 30.00, h: 30.00 }, 
-        { cat: "Rouges", name: "GS200R300", l: 37.50, c: 29.50, h: 36.00 }, 
-        { cat: "Rouges", name: "GR500", l: 29.00, c: 26.50, h: 33.00 }, 
+        // --- ROUGES ---
+        { cat: "Rouges", name: "GR150J100", l: 49.00, c: 38.00, h: 54.00 },
+        { cat: "Rouges", name: "SBR125", l: 59.00, c: 35.00, h: 42.00 },
+        { cat: "Rouges", name: "GR125", l: 52.00, c: 29.00, h: 44.00 },
+        { cat: "Rouges", name: "GR150S100", l: 54.00, c: 37.50, h: 50.00 },
+        { cat: "Rouges", name: "SBR250", l: 57.00, c: 38.00, h: 42.00 },
+        { cat: "Rouges", name: "GR100N25", l: 44.00, c: 25.00, h: 44.00 },
+        { cat: "Rouges", name: "SBR375", l: 40.50, c: 45.00, h: 39.00 },
+        { cat: "Rouges", name: "GR375", l: 35.00, c: 41.50, h: 39.00 },
+        { cat: "Rouges", name: "GR20", l: 36.50, c: 19.00, h: 29.00 },
+        { cat: "Rouges", name: "GR250", l: 48.50, c: 36.50, h: 42.00 },
+        { cat: "Rouges", name: "GJ250R250", l: 36.50, c: 27.00, h: 40.00 },
+        { cat: "Rouges", name: "GR250S250", l: 41.50, c: 45.50, h: 47.00 },
+        { cat: "Rouges", name: "SBR500", l: 34.00, c: 30.00, h: 30.00 },
+        { cat: "Rouges", name: "GS200R300", l: 37.00, c: 43.00, h: 43.00 },
+        { cat: "Rouges", name: "GR500", l: 29.00, c: 26.50, h: 33.00 },
 
-        { cat: "Saumon", name: "SBS15J20", l: 71.00, c: 27.50, h: 76.00 }, 
-        { cat: "Saumon", name: "SBS62.5", l: 61.00, c: 25.50, h: 61.00 }, 
-        { cat: "Saumon", name: "SBS125", l: 54.00, c: 33.00, h: 58.00 }, 
-        { cat: "Saumon", name: "GS30R30", l: 54.00, c: 16.50, h: 50.00 }, 
-        { cat: "Saumon", name: "GS62.5", l: 55.00, c: 25.00, h: 82.00 }, 
-        { cat: "Saumon", name: "GS125", l: 50.00, c: 23.50, h: 63.00 }, 
-        { cat: "Saumon", name: "GS250", l: 44.50, c: 30.00, h: 60.00 }, 
-        { cat: "Saumon", name: "SBS250", l: 51.50, c: 37.00, h: 56.00 }, 
-        { cat: "Saumon", name: "SBS35N90", l: 48.00, c: 6.00, h: 73.00 }, 
-        { cat: "Saumon", name: "GJ45R45N35", l: 47.50, c: 13.00, h: 55.00 }, 
-        { cat: "Saumon", name: "SBJ45R45N35", l: 46.50, c: 14.00, h: 48.00 }, 
-        { cat: "Saumon", name: "SBS500", l: 51.50, c: 40.50, h: 54.00 }, 
-        { cat: "Saumon", name: "GS500", l: 42.50, c: 31.50, h: 56.00 }, 
-        { cat: "Saumon", name: "SBS250R250", l: 39.00, c: 28.00, h: 41.00 }, 
-        { cat: "Saumon", name: "GS375R125", l: 40.00, c: 30.50, h: 46.00 }, 
-        { cat: "Saumon", name: "SBS125A125", l: 33.50, c: 3.50, h: 75.00 }, 
+        // --- SAUMON ---
+        { cat: "Saumon", name: "SBS15J20", l: 76.00, c: 25.00, h: 78.00 },
+        { cat: "Saumon", name: "SBS62.5", l: 72.00, c: 30.00, h: 65.00 },
+        { cat: "Saumon", name: "SBS125", l: 64.50, c: 44.00, h: 61.00 },
+        { cat: "Saumon", name: "GS30R30", l: 54.00, c: 16.50, h: 50.00 },
+        { cat: "Saumon", name: "GS62.5", l: 61.00, c: 30.00, h: 72.00 },
+        { cat: "Saumon", name: "GS125", l: 51.00, c: 32.00, h: 63.00 },
+        { cat: "Saumon", name: "GS250", l: 54.00, c: 41.00, h: 62.00 },
+        { cat: "Saumon", name: "SBS250", l: 61.00, c: 48.00, h: 59.00 },
+        { cat: "Saumon", name: "SBS35N90", l: 48.00, c: 6.00, h: 73.00 },
+        { cat: "Saumon", name: "GJ45R45N35", l: 47.50, c: 13.00, h: 55.00 },
+        { cat: "Saumon", name: "SBJ45R45N35", l: 57.00, c: 20.00, h: 63.00 },
+        { cat: "Saumon", name: "SBS500", l: 56.00, c: 53.00, h: 58.00 },
+        { cat: "Saumon", name: "GS500", l: 45.00, c: 46.50, h: 57.00 },
+        { cat: "Saumon", name: "SBS250R250", l: 39.00, c: 28.00, h: 41.00 },
+        { cat: "Saumon", name: "GS375R125", l: 45.00, c: 43.00, h: 50.00 },
+        { cat: "Saumon", name: "SBS125A125", l: 33.50, c: 3.50, h: 75.00 },
 
-        { cat: "Lie de vin", name: "GR125N100S25", l: 31.50, c: 11.50, h: 38.00 }, 
-        { cat: "Lie de vin", name: "GR200N50", l: 36.50, c: 19.00, h: 32.00 }, 
-        { cat: "Lie de vin", name: "SBR250N125", l: 35.00, c: 14.00, h: 28.00 }, 
-        { cat: "Lie de vin", name: "GS100R300N100", l: 37.00, c: 19.50, h: 38.00 }, 
-        { cat: "Lie de vin", name: "GR300S100N100", l: 27.50, c: 19.50, h: 38.00 }, 
-        { cat: "Lie de vin", name: "GR200S200N100", l: 40.00, c: 23.00, h: 48.00 }, 
-        { cat: "Lie de vin", name: "GR300N200", l: 31.50, c: 13.50, h: 30.00 }, 
-        { cat: "Lie de vin", name: "GR416N84", l: 35.50, c: 21.50, h: 30.00 } 
+        // --- LIE DE VIN ---
+        { cat: "Lie de vin", name: "GR125N100S25", l: 47.00, c: 19.50, h: 44.00 },
+        { cat: "Lie de vin", name: "GR200N50", l: 48.50, c: 26.00, h: 44.00 },
+        { cat: "Lie de vin", name: "SBR250N125", l: 42.00, c: 22.00, h: 39.00 },
+        { cat: "Lie de vin", name: "GS100R300N100", l: 37.00, c: 19.50, h: 38.00 },
+        { cat: "Lie de vin", name: "GR300S100N100", l: 43.00, c: 32.50, h: 47.00 },
+        { cat: "Lie de vin", name: "GR200S200N100", l: 57.50, c: 32.00, h: 53.00 },
+        { cat: "Lie de vin", name: "GR300N200", l: 31.50, c: 13.50, h: 30.00 },
+        { cat: "Lie de vin", name: "GR416N84", l: 44.00, c: 36.00, h: 39.00 }
     ];
+
+    let ORIGINAL_NUANCIER = [];
 
     let loadedBricks = [null, null, null];
     let grainTexture = null;
@@ -365,7 +418,6 @@
     let currentSlot = 0;
     const STORAGE_KEY = 'biamortier_user_lib';
     
-    // --- GESTION DES PERFORMANCES ---
     let isRendering = false;
     function scheduleRender() {
         if (!isRendering) {
@@ -483,6 +535,9 @@
 
     window.onload = () => {
         convertLchPaletteToRgb(); 
+        
+        ORIGINAL_NUANCIER = JSON.parse(JSON.stringify(NUANCIER_COMPLET));
+
         document.getElementById('categorySelect').value = "Standards";
         filterColors();
         
@@ -604,7 +659,6 @@
         }
     }
 
-    // --- NOUVELLE FONCTION EMAIL AUTOMATIQUE ---
     function submitToAdmin() {
         const bName = document.getElementById('input-brick-name').value || "Non renseigné";
         const l = document.getElementById('input-longueur').value;
@@ -821,7 +875,7 @@
         document.getElementById('calib-contrast').value = 100;
         document.getElementById('calib-saturation').value = 100;
         document.getElementById('calib-hue').value = 0;
-        render();
+        scheduleRender();
     }
 
     function triggerAutoDetection() {
@@ -932,13 +986,13 @@
             btn.style.background = '#0d6efd';
             btn.innerText = '👉 Cliquez sur la couleur souhaitée sur la brique';
             canvas.style.cursor = 'crosshair';
-            render(); 
+            scheduleRender(); 
         } else {
             isColorPicking = false;
             btn.style.background = 'linear-gradient(135deg, #6610f2, #5f3dc4)';
             btn.innerText = '🧪 Cible (Pipette)';
             canvas.style.cursor = 'default';
-            render(); 
+            scheduleRender(); 
         }
     }
 
@@ -996,21 +1050,85 @@
             sel.appendChild(o);
         });
         
+        document.getElementById('dev-box').style.display = 'none';
         updatePreviewDot();
-        render();
+        scheduleRender();
     }
 
     function onJointSelected() {
         const v = document.getElementById('jointColorSelect').value;
         if(v) {
-            currentJointColor = JSON.parse(v);
+            const c = JSON.parse(v);
+            currentJointColor = c;
+            document.getElementById('dev-box').style.display = 'block';
+            document.getElementById('dev-l').value = c.l !== undefined ? c.l : 50;
+            document.getElementById('dev-c').value = c.c !== undefined ? c.c : 20;
+            document.getElementById('dev-h').value = c.h !== undefined ? c.h : 0;
+            updateAdminBadges();
         } else {
             currentJointColor = null;
+            document.getElementById('dev-box').style.display = 'none';
         }
         updatePreviewDot();
-        render();
+        scheduleRender();
     }
     
+    function updateAdminBadges() {
+        document.getElementById('val-l').innerText = document.getElementById('dev-l').value;
+        document.getElementById('val-c').innerText = document.getElementById('dev-c').value;
+        document.getElementById('val-h').innerText = document.getElementById('dev-h').value;
+    }
+
+    function updateAdminColor() {
+        if(!currentJointColor) return;
+        updateAdminBadges();
+        
+        const l = parseFloat(document.getElementById('dev-l').value);
+        const c = parseFloat(document.getElementById('dev-c').value);
+        const h = parseFloat(document.getElementById('dev-h').value);
+        
+        const itemIndex = NUANCIER_COMPLET.findIndex(x => x.name === currentJointColor.name);
+        if(itemIndex !== -1) {
+            NUANCIER_COMPLET[itemIndex].l = l;
+            NUANCIER_COMPLET[itemIndex].c = c;
+            NUANCIER_COMPLET[itemIndex].h = h;
+            
+            const tempCvs = document.createElement('canvas');
+            tempCvs.width = 1; tempCvs.height = 1;
+            const tCtx = tempCvs.getContext('2d');
+            tCtx.fillStyle = `lch(${l}% ${c} ${h})`;
+            tCtx.fillRect(0, 0, 1, 1);
+            const p = tCtx.getImageData(0, 0, 1, 1).data;
+            
+            NUANCIER_COMPLET[itemIndex].r = p[0];
+            NUANCIER_COMPLET[itemIndex].g = p[1];
+            NUANCIER_COMPLET[itemIndex].b = p[2];
+            
+            currentJointColor = NUANCIER_COMPLET[itemIndex];
+            
+            const sel = document.getElementById('jointColorSelect');
+            const opt = sel.options[sel.selectedIndex];
+            opt.value = JSON.stringify(currentJointColor);
+            opt.style.backgroundColor = `rgb(${p[0]}, ${p[1]}, ${p[2]})`;
+            const luminance = 0.299 * p[0] + 0.587 * p[1] + 0.114 * p[2];
+            opt.style.color = luminance > 130 ? '#000000' : '#ffffff';
+            
+            updatePreviewDot();
+            scheduleRender(); 
+        }
+    }
+
+    function resetCurrentDevColor() {
+        if (!currentJointColor) return;
+        const originalColor = ORIGINAL_NUANCIER.find(c => c.name === currentJointColor.name);
+        if (originalColor) {
+            document.getElementById('dev-l').value = originalColor.l !== undefined ? originalColor.l : 50;
+            document.getElementById('dev-c').value = originalColor.c !== undefined ? originalColor.c : 20;
+            document.getElementById('dev-h').value = originalColor.h !== undefined ? originalColor.h : 0;
+            updateAdminColor();
+        }
+    }
+
     function updatePreviewDot() {
         const dot = document.getElementById('joint-preview-dot');
         if(currentJointColor) {
@@ -1020,67 +1138,82 @@
         }
     }
 
+    function generateExportCode() {
+        let code = "    let NUANCIER_COMPLET = [\n";
+        let currentCat = "";
+        NUANCIER_COMPLET.forEach((item, index) => {
+            if (item.cat !== currentCat) {
+                if (index !== 0) code += "\n";
+                code += `        // --- ${item.cat.toUpperCase()} ---\n`;
+                currentCat = item.cat;
+            }
+            if (item.l !== undefined && item.c !== undefined && item.h !== undefined) {
+                code += `        { cat: "${item.cat}", name: "${item.name}", l: ${Number(item.l).toFixed(2)}, c: ${Number(item.c).toFixed(2)}, h: ${Number(item.h).toFixed(2)} }`;
+            } else {
+                code += `        { cat: "${item.cat}", name: "${item.name}", r: ${Math.round(item.r)}, g: ${Math.round(item.g)}, b: ${Math.round(item.b)} }`;
+            }
+            if (index < NUANCIER_COMPLET.length - 1) code += ",\n";
+            else code += "\n";
+        });
+        code += "\n    ];";
+        document.getElementById('export-text').value = code;
+        document.getElementById('export-modal').style.display = 'flex';
+    }
+    
+    function copyExportText() {
+        const copyText = document.getElementById("export-text");
+        copyText.select();
+        copyText.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(copyText.value);
+        alert("✅ Code copié dans le presse-papier !");
+    }
+
     function forceWallRegen() {
         let valid = loadedBricks.filter(b => b && !b.isPlaceholder);
-        if(!valid.length) {
-            valid = [loadedBricks[0]]; 
-        }
+        if(!valid.length) { valid = [loadedBricks[0]]; }
         if(!valid[0]) return;
-
         wallLayoutCache = [];
         for(let r=0; r<200; r++) {
             let row = [];
             for(let c=0; c<100; c++) row.push(Math.floor(Math.random() * valid.length));
             wallLayoutCache.push(row);
         }
-        render();
+        scheduleRender();
     }
 
-    // --- LE MOTEUR DE RENDU HAUTE PERFORMANCE ---
     function render() {
         let valid = loadedBricks.filter(b => b && !b.isPlaceholder);
-        if(!valid.length) {
-            valid = [loadedBricks[0]];
-        }
+        if(!valid.length) { valid = [loadedBricks[0]]; }
         if(!valid[0]) return;
-        
         if(!wallLayoutCache.length) forceWallRegen();
-
         ctx.clearRect(0,0, canvas.width, canvas.height);
-        
         const L_mm = parseInt(document.getElementById('input-longueur').value)||220;
         const H_mm = parseInt(document.getElementById('input-hauteur').value)||60;
         const J_mm = parseInt(document.getElementById('slider-epaisseur').value)||12;
         const zoom = parseFloat(document.getElementById('slider-zoom').value);
-        
         const pxPerMM = zoom;
         const L_px = L_mm * pxPerMM;
         const H_px = H_mm * pxPerMM;
         const J_px = J_mm * pxPerMM;
-
         const W = 1200; const H = 800; const Footer = 110;
         canvas.width = W; canvas.height = H + Footer;
         document.getElementById('scale-info').innerText = `1m = ${Math.round(1000*pxPerMM)}px`;
-
         const bri = document.getElementById('calib-brightness').value;
         const con = document.getElementById('calib-contrast').value;
         const sat = document.getElementById('calib-saturation').value;
         const hue = document.getElementById('calib-hue').value;
-
         const pad = 15 * zoom; 
         const preRenderedBricks = valid.map(img => {
             const tempCvs = document.createElement('canvas');
             tempCvs.width = L_px + pad * 2;
             tempCvs.height = H_px + pad * 2;
             const tCtx = tempCvs.getContext('2d');
-            
             if (!isColorPicking) {
                 tCtx.shadowColor = "rgba(0,0,0,0.6)";
                 tCtx.shadowBlur = 4 * (zoom/1.5);
                 tCtx.shadowOffsetX = 1 * (zoom/1.5); 
                 tCtx.shadowOffsetY = 2 * (zoom/1.5);
             }
-            
             tCtx.filter = `brightness(${bri}%) contrast(${con}%) saturate(${sat}%) hue-rotate(${hue}deg)`;
             tCtx.drawImage(img, pad, pad, L_px, H_px);
             return tempCvs;
@@ -1089,7 +1222,6 @@
         if (isColorPicking) {
             ctx.fillStyle = "#ffffff"; 
             ctx.fillRect(0, 0, W, H);
-            
             let y = 0; let rIdx = 0;
             while(y < H) {
                 let x = (rIdx % 2 !== 0) ? -(L_px/2) - (J_px/2) : 0;
@@ -1103,7 +1235,6 @@
                 }
                 y += H_px + J_px; rIdx++;
             }
-
             ctx.fillStyle = "rgba(0,0,0,0.8)";
             ctx.fillRect(0, 0, W, 60);
             ctx.fillStyle = "white";
@@ -1120,17 +1251,13 @@
             ctx.fillStyle = "#e0e0e0"; 
         }
         ctx.fillRect(0, 0, W, H);
-
         ctx.globalCompositeOperation = 'overlay'; 
         ctx.fillStyle = grainTexture;
         ctx.fillRect(0, 0, W, H);
         ctx.globalCompositeOperation = 'source-over'; 
-
         ctx.save();
         ctx.beginPath(); ctx.rect(0,0,W,H); ctx.clip();
-
         let y = 0; let rIdx = 0;
-        
         while(y < H) {
             let x = (rIdx % 2 !== 0) ? -(L_px/2) - (J_px/2) : 0;
             let cIdx = 0;
@@ -1144,18 +1271,14 @@
             y += H_px + J_px; rIdx++;
         }
         ctx.restore();
-
         ctx.fillStyle = "white"; ctx.fillRect(0, H, W, Footer);
         ctx.strokeStyle = "#ddd"; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(0,H); ctx.lineTo(W,H); ctx.stroke();
-        
         ctx.textBaseline = "middle";
         const Y_txt = H + 40;
         ctx.textAlign = "left"; ctx.fillStyle = "#222"; ctx.font = "bold 22px 'Segoe UI'";
         ctx.fillText(`JOINT : ${currentJointColor ? currentJointColor.name : "Aucun"}`, 30, Y_txt);
-        
         ctx.textAlign = "center"; ctx.fillStyle = "#555"; ctx.font = "20px 'Segoe UI'";
-        ctx.fillText(`Ep. ${J_mm}mm | V88`, W/2, Y_txt);
-
+        ctx.fillText(`Ep. ${J_mm}mm | V97 HD`, W/2, Y_txt);
         ctx.textAlign = "right"; ctx.fillStyle = "#222"; ctx.font = "bold 22px 'Segoe UI'";
         const bName = document.getElementById('input-brick-name').value || "Brique";
         ctx.fillText(`PROJET : ${bName}`, W-30, Y_txt);
@@ -1165,7 +1288,7 @@
         const valid = loadedBricks.filter(b => b && !b.isPlaceholder);
         if(!valid.length) { alert("Veuillez d'abord charger une brique avant d'exporter."); return; }
         const link = document.createElement('a');
-        link.download = `Projet_V88_LCh.jpg`;
+        link.download = `Projet_V97_LCh.jpg`;
         link.href = canvas.toDataURL('image/jpeg', 0.92);
         link.click();
     }
@@ -1180,7 +1303,7 @@
         const w = doc.internal.pageSize.getWidth();
         const h = (props.height * w) / props.width;
         doc.addImage(img, 'JPEG', 0, 10, w, h);
-        doc.save('Projet_V88.pdf');
+        doc.save('Projet_V97.pdf');
     }
 </script>
 </body>
