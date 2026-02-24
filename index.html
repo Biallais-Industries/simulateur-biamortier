@@ -568,7 +568,6 @@
         }
     }
 
-    // --- MISE À JOUR FONCTION ENVOI EMAIL ---
     function submitToAdmin() {
         const bNameInput = document.getElementById('input-brick-name').value.trim();
         const userName = document.getElementById('input-user-name').value.trim();
@@ -876,17 +875,22 @@
     }
 
     function convertLchPaletteToRgb() {
-        const tempCvs = document.createElement('canvas'); tempCvs.width = 1; tempCvs.height = 1;
-        const tCtx = tempCvs.getContext('2d');
+        const tempDiv = document.createElement('div');
+        tempDiv.style.display = 'none';
+        document.body.appendChild(tempDiv);
         NUANCIER_COMPLET.forEach(item => {
             if (item.l !== undefined && item.r === undefined) {
-                tCtx.clearRect(0,0,1,1);
-                tCtx.fillStyle = `lch(${item.l}% ${item.c} ${item.h})`;
-                tCtx.fillRect(0, 0, 1, 1);
-                const p = tCtx.getImageData(0, 0, 1, 1).data;
-                item.r = p[0]; item.g = p[1]; item.b = p[2];
+                tempDiv.style.color = `lch(${item.l}% ${item.c} ${item.h})`;
+                const rgb = window.getComputedStyle(tempDiv).color;
+                const match = rgb.match(/\d+/g);
+                if (match) {
+                    item.r = parseInt(match[0]);
+                    item.g = parseInt(match[1]);
+                    item.b = parseInt(match[2]);
+                }
             }
         });
+        document.body.removeChild(tempDiv);
     }
 
     function render() {
