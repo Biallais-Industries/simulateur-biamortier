@@ -702,17 +702,29 @@
     }
 
     function analyzeFilteredColorAndSuggest() {
-        const W = canvas.width;
-        const H = canvas.height - 110;
-        const cvs = document.createElement('canvas'); cvs.width = 100; cvs.height = 100;
-        const ctxA = cvs.getContext('2d');
-        // Capture du centre du rendu actuel (incluant la calibration brique)
-        ctxA.drawImage(canvas, W/2 - 50, H/2 - 50, 100, 100, 0, 0, 100, 100);
-        const data = ctxA.getImageData(0,0,100,100).data;
+        // On crée un canvas temporaire pour appliquer les filtres à une brique test isolée
+        const validBricks = loadedBricks.filter(b => b && !b.isPlaceholder);
+        const targetImg = validBricks.length > 0 ? validBricks[0] : loadedBricks[0];
+        
+        const tempCvs = document.createElement('canvas');
+        tempCvs.width = 100; tempCvs.height = 100;
+        const tCtx = tempCvs.getContext('2d');
+        
+        // On applique les MÊMES filtres que le rendu principal pour avoir la couleur "réelle" de la brique calibrée
+        tCtx.filter = `brightness(${document.getElementById('calib-brightness').value}%) contrast(${document.getElementById('calib-contrast').value}%) saturate(${document.getElementById('calib-saturation').value}%) hue-rotate(${document.getElementById('calib-hue').value}deg)`;
+        tCtx.drawImage(targetImg, 0, 0, 100, 100);
+        
+        const data = tCtx.getImageData(0, 0, 100, 100).data;
         let tR=0, tG=0, tB=0, cnt=0;
-        for(let i=0; i<data.length; i+=4) { tR+=data[i]; tG+=data[i+1]; tB+=data[i+2]; cnt++; }
+        
+        for(let i=0; i<data.length; i+=4) {
+            tR += data[i]; tG += data[i+1]; tB += data[i+2]; cnt++;
+        }
+        
         const r = tR/cnt, g = tG/cnt, b = tB/cnt;
         let minD = Infinity, best = null;
+        
+        // Comparaison précise avec le nuancier figé
         NUANCIER_COMPLET.forEach(j => {
             if (j.r !== undefined) {
                 const dist = Math.sqrt((j.r-r)**2 + (j.g-g)**2 + (j.b-b)**2);
@@ -904,7 +916,7 @@
         let jb = currentJointColor ? currentJointColor.b : 224;
 
         if (isMobile) {
-            // Assombrissement de 10% sur mobile pour compenser la brillance OLED
+            // Assombrissement progressif sur mobile pour compenser la brillance OLED
             jr = Math.round(jr * 0.9);
             jg = Math.round(jg * 0.9);
             jb = Math.round(jb * 0.9);
