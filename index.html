@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Simulateur Biamortier V97 - Nuancier Exact</title>
+    <title>Simulateur Biamortier V1 - Lancement</title>
     
     <link rel="icon" type="image/png" href="logo-512.png">
     <link rel="apple-touch-icon" href="logo-512.png">
@@ -60,6 +60,7 @@
         .submit-btn { background: #0d47a1; color: white; width: 100%; margin-top: 15px; padding: 12px; border-radius: 6px; border:none; cursor: pointer; font-weight: bold; display:flex; align-items:center; justify-content:center; gap:8px; }
         .library-box { background: #e3f2fd; border: 1px solid #90caf9; padding: 15px; border-radius: 8px; margin-bottom: 5px; }
         .lib-controls { display: flex; gap: 5px; margin-top: 10px; }
+        .btn-rotate { background: #ff9800; color: white; font-size: 0.9rem; margin-bottom: 10px; border:none; padding:8px; border-radius:6px; cursor:pointer; font-weight:bold;}
         .btn-save-lib { background: #0d6efd; color: white; flex: 2; font-size: 0.8rem; padding: 8px; }
         .btn-del-lib { background: #dc3545; color: white; flex: 1; font-size: 0.8rem; padding: 8px; }
         .fixed-value-box { width: 100%; padding: 8px; background: #e9ecef; border: 1px solid #ced4da; border-radius: 6px; font-size: 0.85rem; color: #495057; text-align: center; font-weight: bold;}
@@ -82,6 +83,7 @@
     <div class="modal-content">
         <h2 style="margin: 0; color: #0d47a1;">✂️ Recadrer la brique</h2>
         <p style="font-size: 0.9rem; color: #555; margin-bottom: 5px;">Tracez un rectangle. <b>Les proportions sont automatiquement verrouillées.</b></p>
+        <button class="btn-rotate" onclick="rotateImageInCrop()">🔄 Pivoter 90°</button>
         <div class="crop-canvas-container">
             <canvas id="crop-canvas"></canvas>
         </div>
@@ -107,7 +109,7 @@
 <div class="controls">
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid #f0f2f5; padding-bottom:10px; margin-bottom:5px;">
         <h2>🛠️ Configurateur</h2>
-        <span style="font-size:0.7rem; color:#888;">V97 - Mode Calibrage Actif</span>
+        <span style="font-size:0.7rem; color:#888;">V1 - Lancement</span>
     </div>
 
     <div class="library-box">
@@ -124,7 +126,7 @@
     <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
         <h3>1. Configuration Brique</h3>
         <div style="margin-bottom: 10px;">
-            <label>Nom du projet / Référence :</label>
+            <label>Nom de la brique (Fabricant + Type) <span style="color:red;">*</span> :</label>
             <input type="text" id="input-brick-name" placeholder="Ex: Brique Moulée Main Rouge" oninput="scheduleRender()">
         </div>
         
@@ -184,7 +186,6 @@
                 <select id="categorySelect" onchange="filterColors()" style="flex:1;">
                     <option value="all">-- Tout afficher --</option>
                     <option value="Standards">Standards</option>
-                    <option value="Autres">Autres</option>
                     <option value="Noirs & Gris">Noirs & Gris</option>
                     <option value="Jaunes">Jaunes</option>
                     <option value="Marron">Marron & Terre</option>
@@ -226,20 +227,35 @@
             </div>
             <div class="input-group" style="flex: 1.2;">
                 <label>Texture Simulée :</label>
-                <div class="fixed-value-box">Joint Fin Nuancé</div>
+                <div class="fixed-value-box">Joint Grain Fin</div>
             </div>
         </div>
         
         <div style="background: #e9ecef; padding: 12px; border-radius: 8px; margin-top: 20px; border: 1px solid #ced4da;">
-            <h4 style="margin:0 0 10px 0; font-size:0.85rem; color:#495057;">👤 Vos Coordonnées</h4>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h4 style="margin:0 0 10px 0; font-size:0.85rem; color:#495057;">👤 Vos Coordonnées & Chantier</h4>
+                <span onclick="toggleDevBox()" style="color:#adb5bd; font-size:0.6rem; cursor:pointer; opacity: 0.6;">Admin</span>
+            </div>
+            
+            <div style="background: #fff; border: 1px dashed #0d47a1; padding: 8px; border-radius: 6px; margin-bottom: 12px; font-size: 0.75rem; color: #0d47a1; line-height: 1.3;">
+                <strong>📩 Étape importante :</strong><br>
+                Avant d'envoyer votre demande, cliquez sur <b>JPG</b> ou <b>PDF</b> (section 3) pour enregistrer votre visuel. Vous devrez le joindre manuellement à l'email.
+            </div>
+
             <div style="margin-bottom: 8px;">
                 <input type="text" id="input-user-name" placeholder="Votre Nom et Prénom" style="width:100%; padding:8px; border:1px solid #ced4da; border-radius:6px; font-size:0.85rem;">
             </div>
-            <div>
+            <div style="margin-bottom: 8px;">
+                <input type="text" id="input-user-phone" placeholder="Votre Numéro de Téléphone" style="width:100%; padding:8px; border:1px solid #ced4da; border-radius:6px; font-size:0.85rem;">
+            </div>
+            <div style="margin-bottom: 8px;">
                 <input type="text" id="input-company-name" placeholder="Nom de votre entreprise" style="width:100%; padding:8px; border:1px solid #ced4da; border-radius:6px; font-size:0.85rem;">
             </div>
+            <div>
+                <input type="text" id="input-project-ref" placeholder="Référence du chantier" style="width:100%; padding:8px; border:1px solid #ced4da; border-radius:6px; font-size:0.85rem;">
+            </div>
             <button class="submit-btn" onclick="submitToAdmin()" style="margin-top: 12px;">
-                📤 Demande de référencement
+                📤 Demande d'échantillon
             </button>
         </div>
     </div>
@@ -267,140 +283,73 @@
 </div>
 
 <script>
+    // --- LISTE DES COULEURS (NUANCIER_COMPLET) ---
     let NUANCIER_COMPLET = [
-        // --- STANDARDS ---
-        { cat: "Standards", name: "SUPER BLANC", l: 79.50, c: 7.50, h: 91.00 },
-        { cat: "Standards", name: "BLANC", l: 74.50, c: 10.50, h: 85.00 },
-        { cat: "Standards", name: "TON PIERRE", l: 76.50, c: 22.50, h: 87.00 },
-        { cat: "Standards", name: "GRIS CLAIR", l: 61.50, c: 11.00, h: 90.00 },
-
-        // --- AUTRES ---
-        { cat: "Autres", name: "SBV60", l: 68.00, c: 6.50, h: 111.00 },
-        { cat: "Autres", name: "SBV125", l: 65.50, c: 9.00, h: 121.00 },
-        { cat: "Autres", name: "SBB125", l: 63.00, c: 3.50, h: 219.00 },
-        { cat: "Autres", name: "SBV250", l: 62.00, c: 11.00, h: 128.00 },
-        { cat: "Autres", name: "SBB250", l: 58.50, c: 9.00, h: 241.00 },
-
-        // --- NOIRS & GRIS ---
-        { cat: "Noirs & Gris", name: "50% BL 50% GR", l: 70.50, c: 10.50, h: 84.00 },
-        { cat: "Noirs & Gris", name: "SBN62.5", l: 52.00, c: 0.50, h: 6.00 },
-        { cat: "Noirs & Gris", name: "GN62.5", l: 51.00, c: 2.00, h: 73.00 },
-        { cat: "Noirs & Gris", name: "SBN60", l: 50.00, c: 2.00, h: 37.00 },
-        { cat: "Noirs & Gris", name: "SBN125", l: 56.00, c: 3.00, h: 94.00 },
-        { cat: "Noirs & Gris", name: "GN60", l: 46.00, c: 2.50, h: 64.00 },
-        { cat: "Noirs & Gris", name: "GN125", l: 43.50, c: 0.50, h: 2.00 },
-        { cat: "Noirs & Gris", name: "TPN250", l: 41.50, c: 1.00, h: 299.00 },
-        { cat: "Noirs & Gris", name: "GN250", l: 39.50, c: 0.50, h: 319.00 },
-        { cat: "Noirs & Gris", name: "SBN250", l: 48.50, c: 2.50, h: 82.00 },
-        { cat: "Noirs & Gris", name: "GA125", l: 36.00, c: 2.00, h: 85.00 },
-        { cat: "Noirs & Gris", name: "SBA125", l: 33.50, c: 2.50, h: 275.00 },
-        { cat: "Noirs & Gris", name: "SBN500", l: 32.50, c: 1.00, h: 355.00 },
-        { cat: "Noirs & Gris", name: "SBA250", l: 31.50, c: 0.00, h: 270.00 },
-        { cat: "Noirs & Gris", name: "SBA375", l: 25.00, c: 2.00, h: 282.00 },
-        { cat: "Noirs & Gris", name: "GA250", l: 24.50, c: 2.00, h: 276.00 },
-        { cat: "Noirs & Gris", name: "GA450R50", l: 25.50, c: 2.00, h: 63.00 },
-        { cat: "Noirs & Gris", name: "SBA500", l: 14.00, c: 0.50, h: 20.00 },
-        { cat: "Noirs & Gris", name: "GN500", l: 45.00, c: 2.00, h: 75.00 },
-        { cat: "Noirs & Gris", name: "GA500", l: 26.50, c: 1.00, h: 20.00 },
-
-        // --- JAUNES ---
-        { cat: "Jaunes", name: "SBJ8.25", l: 77.50, c: 16.00, h: 87.00 },
-        { cat: "Jaunes", name: "SBJ30", l: 77.50, c: 16.00, h: 87.00 },
-        { cat: "Jaunes", name: "SBJ62.5", l: 75.00, c: 30.00, h: 84.00 },
-        { cat: "Jaunes", name: "SBJ20S15", l: 66.00, c: 19.50, h: 76.00 },
-        { cat: "Jaunes", name: "75% TP 25% BL", l: 74.50, c: 21.50, h: 87.00 },
-        { cat: "Jaunes", name: "SBJ125", l: 62.50, c: 30.50, h: 83.00 },
-        { cat: "Jaunes", name: "SBJ250", l: 69.00, c: 53.00, h: 82.00 },
-        { cat: "Jaunes", name: "GJ15", l: 61.50, c: 9.00, h: 94.00 },
-        { cat: "Jaunes", name: "GJ30", l: 61.50, c: 12.50, h: 93.00 },
-        { cat: "Jaunes", name: "GJ125", l: 60.00, c: 30.00, h: 83.00 },
-        { cat: "Jaunes", name: "GJ20S15", l: 58.50, c: 13.00, h: 83.00 },
-        { cat: "Jaunes", name: "GJ250", l: 64.50, c: 39.00, h: 83.00 },
-        { cat: "Jaunes", name: "SBJ500", l: 67.00, c: 58.50, h: 82.00 },
-        { cat: "Jaunes", name: "SBJ375", l: 56.50, c: 38.50, h: 81.00 },
-        { cat: "Jaunes", name: "GJ500", l: 62.00, c: 53.50, h: 82.00 },
-        { cat: "Jaunes", name: "SBJ62.5N62.5", l: 51.00, c: 11.00, h: 94.00 },
-        { cat: "Jaunes", name: "SBJ120N30", l: 65.50, c: 31.00, h: 86.00 },
-        { cat: "Jaunes", name: "GJ62.5N62.5", l: 48.00, c: 9.50, h: 94.00 },
-
-        // --- MARRON ---
-        { cat: "Marron", name: "GJ10S15", l: 55.00, c: 12.00, h: 76.00 },
-        { cat: "Marron", name: "GS15J10", l: 63.50, c: 16.00, h: 79.00 },
-        { cat: "Marron", name: "GS15", l: 60.00, c: 10.00, h: 75.00 },
-        { cat: "Marron", name: "GN90S35", l: 50.00, c: 11.50, h: 78.00 },
-        { cat: "Marron", name: "GJ100R150", l: 46.00, c: 24.50, h: 47.00 },
-        { cat: "Marron", name: "GS150N100", l: 61.50, c: 21.00, h: 74.00 },
-        { cat: "Marron", name: "GS200N150", l: 43.00, c: 21.50, h: 68.00 },
-        { cat: "Marron", name: "GJ90R90N70", l: 44.50, c: 15.00, h: 52.00 },
-        { cat: "Marron", name: "GJ10N115", l: 41.00, c: 2.00, h: 66.00 },
-        { cat: "Marron", name: "SBJ90R70N90", l: 50.00, c: 24.50, h: 63.00 },
-        { cat: "Marron", name: "SBJ90R90N70", l: 40.00, c: 15.50, h: 46.00 },
-        { cat: "Marron", name: "GJ180R180N140", l: 39.00, c: 14.50, h: 54.00 },
-        { cat: "Marron", name: "GJ20N200", l: 37.50, c: 1.50, h: 52.00 },
-        { cat: "Marron", name: "GJ15N150", l: 37.50, c: 1.50, h: 51.00 },
-        { cat: "Marron", name: "GS150A100", l: 34.00, c: 11.00, h: 76.00 },
-        { cat: "Marron", name: "GS125N250R125", l: 42.50, c: 28.00, h: 59.00 },
-        { cat: "Marron", name: "SBJ180R180N140", l: 42.50, c: 28.00, h: 59.00 },
-        { cat: "Marron", name: "GS125A125", l: 33.50, c: 4.00, h: 73.00 },
-        { cat: "Marron", name: "GS300N200", l: 33.00, c: 13.00, h: 65.00 },
-        { cat: "Marron", name: "SBJ180N180R140", l: 33.00, c: 13.50, h: 50.00 },
-        { cat: "Marron", name: "GS200A150", l: 32.50, c: 5.50, h: 74.00 },
-        { cat: "Marron", name: "GN416S84", l: 29.00, c: 8.50, h: 75.00 },
-        { cat: "Marron", name: "GS250A250", l: 27.00, c: 7.00, h: 76.00 },
-        { cat: "Marron", name: "GS300N100A100", l: 28.00, c: 8.50, h: 68.00 },
-        { cat: "Marron", name: "GS300A200", l: 27.00, c: 11.00, h: 73.00 },
-        { cat: "Marron", name: "GJ100R200N50A150", l: 24.50, c: 7.50, h: 37.00 },
-        { cat: "Marron", name: "GS150R150A200", l: 23.00, c: 7.00, h: 42.00 },
-        { cat: "Marron", name: "GJ100R200A200", l: 21.50, c: 6.50, h: 37.00 },
-
-        // --- ROUGES ---
-        { cat: "Rouges", name: "GR150J100", l: 49.00, c: 38.00, h: 54.00 },
-        { cat: "Rouges", name: "SBR125", l: 59.00, c: 35.00, h: 42.00 },
-        { cat: "Rouges", name: "GR125", l: 52.00, c: 29.00, h: 44.00 },
-        { cat: "Rouges", name: "GR150S100", l: 54.00, c: 37.50, h: 50.00 },
-        { cat: "Rouges", name: "SBR250", l: 57.00, c: 38.00, h: 42.00 },
-        { cat: "Rouges", name: "GR100N25", l: 44.00, c: 25.00, h: 44.00 },
-        { cat: "Rouges", name: "SBR375", l: 40.50, c: 45.00, h: 39.00 },
-        { cat: "Rouges", name: "GR375", l: 35.00, c: 41.50, h: 39.00 },
-        { cat: "Rouges", name: "GR20", l: 36.50, c: 19.00, h: 29.00 },
-        { cat: "Rouges", name: "GR250", l: 48.50, c: 36.50, h: 42.00 },
-        { cat: "Rouges", name: "GJ250R250", l: 36.50, c: 27.00, h: 40.00 },
-        { cat: "Rouges", name: "GR250S250", l: 41.50, c: 45.50, h: 47.00 },
-        { cat: "Rouges", name: "SBR500", l: 34.00, c: 30.00, h: 30.00 },
-        { cat: "Rouges", name: "GS200R300", l: 37.00, c: 43.00, h: 43.00 },
-        { cat: "Rouges", name: "GR500", l: 29.00, c: 26.50, h: 33.00 },
-
-        // --- SAUMON ---
-        { cat: "Saumon", name: "SBS15J20", l: 76.00, c: 25.00, h: 78.00 },
-        { cat: "Saumon", name: "SBS62.5", l: 72.00, c: 30.00, h: 65.00 },
-        { cat: "Saumon", name: "SBS125", l: 64.50, c: 44.00, h: 61.00 },
-        { cat: "Saumon", name: "GS30R30", l: 54.00, c: 16.50, h: 50.00 },
-        { cat: "Saumon", name: "GS62.5", l: 61.00, c: 30.00, h: 72.00 },
-        { cat: "Saumon", name: "GS125", l: 51.00, c: 32.00, h: 63.00 },
-        { cat: "Saumon", name: "GS250", l: 54.00, c: 41.00, h: 62.00 },
-        { cat: "Saumon", name: "SBS250", l: 61.00, c: 48.00, h: 59.00 },
-        { cat: "Saumon", name: "SBS35N90", l: 48.00, c: 6.00, h: 73.00 },
-        { cat: "Saumon", name: "GJ45R45N35", l: 47.50, c: 13.00, h: 55.00 },
-        { cat: "Saumon", name: "SBJ45R45N35", l: 57.00, c: 20.00, h: 63.00 },
-        { cat: "Saumon", name: "SBS500", l: 56.00, c: 53.00, h: 58.00 },
-        { cat: "Saumon", name: "GS500", l: 45.00, c: 46.50, h: 57.00 },
-        { cat: "Saumon", name: "SBS250R250", l: 39.00, c: 28.00, h: 41.00 },
-        { cat: "Saumon", name: "GS375R125", l: 45.00, c: 43.00, h: 50.00 },
-        { cat: "Saumon", name: "SBS125A125", l: 33.50, c: 3.50, h: 75.00 },
-
-        // --- LIE DE VIN ---
-        { cat: "Lie de vin", name: "GR125N100S25", l: 47.00, c: 19.50, h: 44.00 },
-        { cat: "Lie de vin", name: "GR200N50", l: 48.50, c: 26.00, h: 44.00 },
-        { cat: "Lie de vin", name: "SBR250N125", l: 42.00, c: 22.00, h: 39.00 },
-        { cat: "Lie de vin", name: "GS100R300N100", l: 37.00, c: 19.50, h: 38.00 },
-        { cat: "Lie de vin", name: "GR300S100N100", l: 43.00, c: 32.50, h: 47.00 },
-        { cat: "Lie de vin", name: "GR200S200N100", l: 57.50, c: 32.00, h: 53.00 },
-        { cat: "Lie de vin", name: "GR300N200", l: 31.50, c: 13.50, h: 30.00 },
-        { cat: "Lie de vin", name: "GR416N84", l: 44.00, c: 36.00, h: 39.00 }
+        { cat: "Standards", name: "SUPER BLANC", l: 78.00, c: 7.50, h: 83.00 },
+        { cat: "Standards", name: "BLANC", l: 76.50, c: 10.00, h: 86.00 },
+        { cat: "Standards", name: "TON PIERRE", l: 74.00, c: 24.00, h: 87.00 },
+        { cat: "Standards", name: "GRIS CLAIR", l: 60.50, c: 13.50, h: 91.00 },
+        { cat: "Noirs & Gris", name: "50% BL 50% GR", l: 71.50, c: 10.00, h: 86.00 },
+        { cat: "Noirs & Gris", name: "GS15", l: 74.50, c: 10.00, h: 81.00 },
+        { cat: "Noirs & Gris", name: "SBN125", l: 61.00, c: 3.50, h: 90.00 },
+        { cat: "Noirs & Gris", name: "SBN250", l: 52.00, c: 3.50, h: 90.00 },
+        { cat: "Noirs & Gris", name: "GA125", l: 40.50, c: 1.50, h: 91.00 },
+        { cat: "Noirs & Gris", name: "SBA250", l: 35.50, c: 0.50, h: 110.00 },
+        { cat: "Noirs & Gris", name: "GA450R50", l: 26.00, c: 1.50, h: 91.00 },
+        { cat: "Noirs & Gris", name: "SBA500", l: 19.00, c: 0.50, h: 20.00 },
+        { cat: "Noirs & Gris", name: "GN500", l: 44.50, c: 2.00, h: 85.00 },
+        { cat: "Noirs & Gris", name: "GA500", l: 26.50, c: 1.00, h: 75.00 },
+        { cat: "Jaunes", name: "SBJ8.25", l: 78.00, c: 15.50, h: 83.00 },
+        { cat: "Jaunes", name: "SBJ30", l: 80.00, c: 21.50, h: 87.00 },
+        { cat: "Jaunes", name: "SBJ62.5", l: 75.50, c: 31.00, h: 87.00 },
+        { cat: "Jaunes", name: "75% TP 25% BL", l: 76.50, c: 20.00, h: 88.00 },
+        { cat: "Jaunes", name: "SBJ250", l: 71.00, c: 55.50, h: 84.00 },
+        { cat: "Jaunes", name: "GJ250", l: 61.50, c: 42.00, h: 84.00 },
+        { cat: "Jaunes", name: "SBJ500", l: 66.50, c: 60.00, h: 82.00 },
+        { cat: "Jaunes", name: "GJ500", l: 58.00, c: 53.50, h: 80.00 },
+        { cat: "Jaunes", name: "SBJ120N30", l: 63.00, c: 33.50, h: 87.00 },
+        { cat: "Marron", name: "GS15J10", l: 65.00, c: 19.00, h: 81.00 },
+        { cat: "Marron", name: "GN90S35", l: 48.00, c: 11.00, h: 74.00 },
+        { cat: "Marron", name: "GS150N100", l: 62.50, c: 21.00, h: 74.00 },
+        { cat: "Marron", name: "GS200N150", l: 49.00, c: 21.50, h: 71.00 },
+        { cat: "Marron", name: "SBJ90R70N90", l: 57.00, c: 24.00, h: 67.00 },
+        { cat: "Marron", name: "GS150A100", l: 48.00, c: 12.00, h: 81.00 },
+        { cat: "Marron", name: "GS125N250R125", l: 48.50, c: 19.00, h: 58.00 },
+        { cat: "Marron", name: "SBJ180R180N140", l: 54.50, c: 27.50, h: 64.00 },
+        { cat: "Marron", name: "GN416S84", l: 29.00, c: 7.50, h: 78.00 },
+        { cat: "Marron", name: "GS250A250", l: 34.00, c: 8.00, h: 78.00 },
+        { cat: "Marron", name: "GS300A200", l: 33.00, c: 12.00, h: 72.00 },
+        { cat: "Rouges", name: "GR150J100", l: 53.50, c: 39.00, h: 57.00 },
+        { cat: "Rouges", name: "SBR125", l: 63.50, c: 34.50, h: 45.00 },
+        { cat: "Rouges", name: "GR125", l: 50.50, c: 29.00, h: 47.00 },
+        { cat: "Rouges", name: "GR150S100", l: 55.00, c: 39.50, h: 53.00 },
+        { cat: "Rouges", name: "SBR250", l: 60.00, c: 37.50, h: 42.00 },
+        { cat: "Rouges", name: "GR100N25", l: 48.00, c: 24.50, h: 48.00 },
+        { cat: "Rouges", name: "SBR375", l: 52.00, c: 45.00, h: 42.00 },
+        { cat: "Rouges", name: "GR375", l: 43.50, c: 43.50, h: 44.00 },
+        { cat: "Rouges", name: "GR250", l: 53.00, c: 36.50, h: 45.00 },
+        { cat: "Rouges", name: "GR250S250", l: 49.00, c: 49.00, h: 52.00 },
+        { cat: "Rouges", name: "GR300S200", l: 42.50, c: 46.00, h: 47.00 },
+        { cat: "Saumon", name: "SBS15J20", l: 75.50, c: 27.50, h: 77.00 },
+        { cat: "Saumon", name: "SBS62.5", l: 72.00, c: 28.00, h: 69.00 },
+        { cat: "Saumon", name: "SBS125", l: 64.00, c: 42.50, h: 64.00 },
+        { cat: "Saumon", name: "GS62.5", l: 63.50, c: 30.00, h: 72.00 },
+        { cat: "Saumon", name: "GS125", l: 54.50, c: 32.50, h: 67.00 },
+        { cat: "Saumon", name: "GS250", l: 57.50, c: 39.50, h: 66.00 },
+        { cat: "Saumon", name: "SBS250", l: 59.00, c: 47.50, h: 62.00 },
+        { cat: "Saumon", name: "SBJ45R45N35", l: 58.00, c: 22.50, h: 66.00 },
+        { cat: "Saumon", name: "SBS500", l: 57.00, c: 52.00, h: 61.00 },
+        { cat: "Saumon", name: "GS500", l: 49.00, c: 46.50, h: 58.00 },
+        { cat: "Saumon", name: "GS375R125", l: 45.00, c: 44.00, h: 53.00 },
+        { cat: "Lie de vin", name: "GR125N100S25", l: 51.50, c: 20.00, h: 50.00 },
+        { cat: "Lie de vin", name: "GR200N50", l: 52.00, c: 26.00, h: 47.00 },
+        { cat: "Lie de vin", name: "SBR250N125", l: 42.50, c: 22.50, h: 42.00 },
+        { cat: "Lie de vin", name: "GR300S100N100", l: 42.50, c: 32.00, h: 47.00 },
+        { cat: "Lie de vin", name: "GR200S200N100", l: 53.00, c: 32.00, h: 52.00 },
+        { cat: "Lie de vin", name: "GR416N84", l: 42.00, c: 35.00, h: 40.00 }
     ];
 
     let ORIGINAL_NUANCIER = [];
-
     let loadedBricks = [null, null, null];
     let grainTexture = null;
     let wallLayoutCache = []; 
@@ -429,20 +378,32 @@
         }
     }
 
-    function convertLchPaletteToRgb() {
-        const tempCvs = document.createElement('canvas');
-        tempCvs.width = 1; tempCvs.height = 1;
-        const tCtx = tempCvs.getContext('2d');
+    // --- FONCTION ADMIN AVEC MOT DE PASSE ---
+    function toggleDevBox() {
+        const box = document.getElementById('dev-box');
+        if (box.style.display === 'block') {
+            box.style.display = 'none';
+            return;
+        }
+        const password = prompt("Saisir le mot de passe administrateur :");
+        if (password === "RAPCOM47T") {
+            box.style.display = 'block';
+        } else {
+            alert("Accès refusé.");
+        }
+    }
 
-        NUANCIER_COMPLET.forEach(item => {
-            if (item.l !== undefined && item.r === undefined) {
-                tCtx.clearRect(0,0,1,1);
-                tCtx.fillStyle = `lch(${item.l}% ${item.c} ${item.h})`;
-                tCtx.fillRect(0, 0, 1, 1);
-                const p = tCtx.getImageData(0, 0, 1, 1).data;
-                item.r = p[0]; item.g = p[1]; item.b = p[2];
-            }
-        });
+    function rotateImageInCrop() {
+        if(!cropImg) return;
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = cropImg.height; tempCanvas.height = cropImg.width;
+        const tCtx = tempCanvas.getContext('2d');
+        tCtx.translate(tempCanvas.width/2, tempCanvas.height/2);
+        tCtx.rotate(Math.PI / 2);
+        tCtx.drawImage(cropImg, -cropImg.width/2, -cropImg.height/2);
+        const rotatedImg = new Image();
+        rotatedImg.onload = () => { cropImg = rotatedImg; openCropModal(cropImg); };
+        rotatedImg.src = tempCanvas.toDataURL('image/jpeg', 0.95);
     }
 
     function generateProceduralGrain() {
@@ -450,51 +411,17 @@
         const cvs = document.createElement('canvas');
         cvs.width = size; cvs.height = size;
         const tCtx = cvs.getContext('2d');
-
         tCtx.fillStyle = "rgb(128, 128, 128)";
         tCtx.fillRect(0, 0, size, size);
-
         const imgData = tCtx.getImageData(0, 0, size, size);
         const data = imgData.data;
-
         for (let i = 0; i < data.length; i += 4) {
-            const mod = (Math.random() - 0.5) * 12; 
+            const mod = (Math.random() - 0.5) * 40; 
             data[i] = 128 + mod;
             data[i+1] = 128 + mod;
             data[i+2] = 128 + mod;
             data[i+3] = 255;
         }
-
-        for(let y = 0; y < size; y++) {
-            for(let x = 0; x < size; x++) {
-                const rand = Math.random();
-                const i = (y * size + x) * 4;
-
-                if(rand > 0.90) {
-                    let intensity = 10 + Math.random() * 15; 
-                    data[i] = Math.min(255, data[i] + intensity);
-                    data[i+1] = Math.min(255, data[i+1] + intensity);
-                    data[i+2] = Math.min(255, data[i+2] + intensity);
-                    if(x < size - 1 && Math.random() > 0.5) {
-                        data[i+4] = Math.min(255, data[i+4] + intensity * 0.5);
-                        data[i+5] = Math.min(255, data[i+5] + intensity * 0.5);
-                        data[i+6] = Math.min(255, data[i+6] + intensity * 0.5);
-                    }
-                } 
-                else if (rand < 0.10) {
-                    let depth = 10 + Math.random() * 15; 
-                    data[i] = Math.max(0, data[i] - depth);
-                    data[i+1] = Math.max(0, data[i+1] - depth);
-                    data[i+2] = Math.max(0, data[i+2] - depth);
-                    if(x < size - 1 && Math.random() > 0.5) { 
-                        data[i+4] = Math.max(0, data[i+4] - depth * 0.5);
-                        data[i+5] = Math.max(0, data[i+5] - depth * 0.5);
-                        data[i+6] = Math.max(0, data[i+6] - depth * 0.5);
-                    }
-                }
-            }
-        }
-
         tCtx.putImageData(imgData, 0, 0);
         return tCtx.createPattern(cvs, 'repeat');
     }
@@ -503,10 +430,8 @@
         const cvs = document.createElement('canvas');
         cvs.width = 440; cvs.height = 120;
         const ctx = cvs.getContext('2d');
-
         ctx.fillStyle = "#c25e44";
         ctx.fillRect(0, 0, cvs.width, cvs.height);
-
         const imgData = ctx.getImageData(0, 0, cvs.width, cvs.height);
         const data = imgData.data;
         for(let i=0; i<data.length; i+=4) {
@@ -516,31 +441,19 @@
             data[i+2] = Math.min(255, Math.max(0, data[i+2] + noise));
         }
         ctx.putImageData(imgData, 0, 0);
-
-        ctx.fillStyle = "rgba(0,0,0,0.15)";
-        ctx.fillRect(0, 0, cvs.width, 4);
-        ctx.fillRect(0, 0, 4, cvs.height);
-        ctx.fillStyle = "rgba(255,255,255,0.15)";
-        ctx.fillRect(0, cvs.height-4, cvs.width, 4);
-        ctx.fillRect(cvs.width-4, 0, 4, cvs.height);
-
         ctx.fillStyle = "rgba(255,255,255,0.4)";
         ctx.font = "bold 26px 'Segoe UI'";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText("Brique d'exemple", cvs.width/2, cvs.height/2);
-
         return cvs.toDataURL();
     }
 
     window.onload = () => {
         convertLchPaletteToRgb(); 
-        
         ORIGINAL_NUANCIER = JSON.parse(JSON.stringify(NUANCIER_COMPLET));
-
         document.getElementById('categorySelect').value = "Standards";
         filterColors();
-        
         const sel = document.getElementById('jointColorSelect');
         for(let i=0; i<sel.options.length; i++) {
             if(sel.options[i].value) {
@@ -552,10 +465,8 @@
                 }
             }
         }
-
         refreshLibraryUI();
         grainTexture = generateProceduralGrain(); 
-        
         const defaultBrickSrc = generateDefaultBrick();
         const img = new Image();
         img.isPlaceholder = true; 
@@ -601,7 +512,7 @@
             config.images = [null, null, null];
             const lib = getUserLibrary(); lib.push(config);
             localStorage.setItem(STORAGE_KEY, JSON.stringify(lib));
-            alert("⚠️ Sauvegardé sans images (mémoire pleine).");
+            alert("⚠️ Sauvegardé sans images.");
         }
         refreshLibraryUI();
     }
@@ -620,7 +531,6 @@
         if(idx==="") return;
         const p = getUserLibrary()[idx];
         if(!p) return;
-
         document.getElementById('input-brick-name').value = p.name;
         document.getElementById('input-longueur').value = p.dims.l;
         document.getElementById('input-hauteur').value = p.dims.h;
@@ -630,7 +540,6 @@
         document.getElementById('calib-contrast').value = p.calib.c;
         document.getElementById('calib-saturation').value = p.calib.s || 100;
         document.getElementById('calib-hue').value = p.calib.h || 0;
-
         if(p.joint) {
             currentJointColor = p.joint;
             document.getElementById('categorySelect').value = p.joint.cat;
@@ -659,51 +568,35 @@
         }
     }
 
+    // --- MISE À JOUR FONCTION ENVOI EMAIL ---
     function submitToAdmin() {
-        const bName = document.getElementById('input-brick-name').value || "Non renseigné";
-        const l = document.getElementById('input-longueur').value;
-        const h = document.getElementById('input-hauteur').value;
-        
-        const bri = document.getElementById('calib-brightness').value;
-        const con = document.getElementById('calib-contrast').value;
-        const sat = document.getElementById('calib-saturation').value;
-        const hue = document.getElementById('calib-hue').value;
-        
-        const jointName = currentJointColor ? currentJointColor.name : "Aucun joint sélectionné";
-        const ep = document.getElementById('slider-epaisseur').value;
+        const bNameInput = document.getElementById('input-brick-name').value.trim();
+        const userName = document.getElementById('input-user-name').value.trim();
+        const userPhone = document.getElementById('input-user-phone').value.trim(); // AJOUT TEL
+        const companyName = document.getElementById('input-company-name').value.trim();
+        const projectRef = document.getElementById('input-project-ref').value.trim();
 
-        const userName = document.getElementById('input-user-name').value || "Non renseigné";
-        const companyName = document.getElementById('input-company-name').value || "Non renseigné";
+        if (!bNameInput || !userName) {
+            alert("⚠️ Veuillez renseigner au moins le nom de la brique et votre nom.");
+            return;
+        }
+        
+        if(!confirm("⚠️ Avez-vous enregistré votre visuel (JPG ou PDF) ? Il est indispensable de le joindre manuellement.")) return;
 
-        const subject = encodeURIComponent(`Demande de référencement : ${bName}`);
+        const jointName = currentJointColor ? currentJointColor.name : "Non sélectionné";
+        const subject = encodeURIComponent(`DEMANDE ÉCHANTILLON : ${jointName} / ${bNameInput}`);
         
-        let body = `Bonjour,%0D%0A%0D%0A`;
-        body += `Je souhaite faire une demande de référencement pour une nouvelle brique.%0D%0A%0D%0A`;
-        
-        body += `👤 CONTACT :%0D%0A`;
-        body += `- Nom / Prénom : ${userName}%0D%0A`;
-        body += `- Entreprise : ${companyName}%0D%0A%0D%0A`;
-        
-        body += `🧱 INFORMATIONS BRIQUE :%0D%0A`;
-        body += `- Référence : ${bName}%0D%0A`;
-        body += `- Dimensions : ${l} mm x ${h} mm%0D%0A%0D%0A`;
-        
-        body += `🎨 RÉGLAGES CALIBRAGE :%0D%0A`;
-        body += `- Lumière : ${bri} %%0D%0A`;
-        body += `- Contraste : ${con} %%0D%0A`;
-        body += `- Saturation : ${sat} %%0D%0A`;
-        body += `- Teinte : ${hue}°%0D%0A%0D%0A`;
-        
-        body += `🧪 JOINT SÉLECTIONNÉ :%0D%0A`;
-        body += `- Teinte : ${jointName}%0D%0A`;
-        body += `- Épaisseur : ${ep} mm%0D%0A%0D%0A`;
-        
-        body += `---%0D%0A`;
-        body += `⚠️ Pensez à joindre à cet email :%0D%0A`;
-        body += `1. La photo de la brique d'origine%0D%0A`;
-        body += `2. L'export JPG ou PDF de votre simulation%0D%0A`;
+        let body = `Bonjour l'équipe Biallais,%0D%0A%0D%0A`;
+        body += `Voici une nouvelle demande d'échantillon configurée :%0D%0A%0D%0A`;
+        body += `👤 CLIENT : ${userName}%0D%0A`;
+        body += `📞 TEL : ${userPhone || "Non renseigné"}%0D%0A`; // AJOUT TEL DANS MAIL
+        body += `🏢 ENTREPRISE : ${companyName || "Non renseigné"}%0D%0A`;
+        body += `📍 RÉF. CHANTIER : ${projectRef || "Non renseigné"}%0D%0A%0D%0A`;
+        body += `🧱 BRIQUE : ${bNameInput}%0D%0A`;
+        body += `🧪 JOINT : ${jointName}%0D%0A%0D%0A`;
+        body += `👉 MERCI DE JOINDRE LE FICHIER PDF OU JPEG GÉNÉRÉ À CET EMAIL 👈`;
 
-        window.location.href = `mailto:rcoene@biallais.fr?subject=${subject}&body=${body}`;
+        window.location.href = `mailto:contact@biallais.fr?subject=${subject}&body=${body}`;
     }
 
     function triggerUpload(i) { currentSlot = i; document.getElementById('hidden-file-input').click(); }
@@ -723,54 +616,35 @@
         cropImg = img;
         const modal = document.getElementById('crop-modal');
         const cropCvs = document.getElementById('crop-canvas');
-        
         const maxW = window.innerWidth * 0.9;
-        const maxH = window.innerHeight * 0.6;
+        const maxH = window.innerHeight * 0.55;
         cropScale = Math.min(maxW / img.width, maxH / img.height, 1);
-
         cropCvs.width = img.width * cropScale;
         cropCvs.height = img.height * cropScale;
-
-        const L = parseFloat(document.getElementById('input-longueur').value) || 220;
-        const H = parseFloat(document.getElementById('input-hauteur').value) || 60;
-        const targetRatio = L / H;
-
+        const targetRatio = (parseFloat(document.getElementById('input-longueur').value) || 220) / (parseFloat(document.getElementById('input-hauteur').value) || 60);
         let initW = cropCvs.width * 0.8;
         let initH = initW / targetRatio;
-        if(initH > cropCvs.height * 0.8) {
-            initH = cropCvs.height * 0.8;
-            initW = initH * targetRatio;
-        }
-
+        if(initH > cropCvs.height * 0.8) { initH = cropCvs.height * 0.8; initW = initH * targetRatio; }
         cropRect = { x: (cropCvs.width - initW) / 2, y: (cropCvs.height - initH) / 2, w: initW, h: initH };
-
         modal.style.display = 'flex';
         drawCropView();
     }
 
-    function closeCropModal() {
-        document.getElementById('crop-modal').style.display = 'none';
-        cropImg = null;
-    }
+    function closeCropModal() { document.getElementById('crop-modal').style.display = 'none'; cropImg = null; }
 
     function drawCropView() {
         if(!cropImg) return;
         const cropCvs = document.getElementById('crop-canvas');
         const cCtx = cropCvs.getContext('2d');
-
         cCtx.drawImage(cropImg, 0, 0, cropCvs.width, cropCvs.height);
         cCtx.fillStyle = 'rgba(0, 0, 0, 0.65)';
         cCtx.fillRect(0, 0, cropCvs.width, cropCvs.height);
-
         cCtx.clearRect(cropRect.x, cropRect.y, cropRect.w, cropRect.h);
         cCtx.drawImage(cropImg,
             cropRect.x / cropScale, cropRect.y / cropScale, cropRect.w / cropScale, cropRect.h / cropScale,
             cropRect.x, cropRect.y, cropRect.w, cropRect.h
         );
-
-        cCtx.strokeStyle = '#3399ff';
-        cCtx.lineWidth = 2;
-        cCtx.setLineDash([6, 6]);
+        cCtx.strokeStyle = '#3399ff'; cCtx.lineWidth = 2; cCtx.setLineDash([6, 6]);
         cCtx.strokeRect(cropRect.x, cropRect.y, cropRect.w, cropRect.h);
         cCtx.setLineDash([]);
     }
@@ -779,120 +653,60 @@
     function getPointerPos(e) {
         const rect = cropCanvasElement.getBoundingClientRect();
         let clientX = e.clientX; let clientY = e.clientY;
-        if(e.touches && e.touches.length > 0) {
-            clientX = e.touches[0].clientX; clientY = e.touches[0].clientY;
-        }
+        if(e.touches && e.touches.length > 0) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
         return { x: clientX - rect.left, y: clientY - rect.top };
     }
 
     function onCropStart(e) {
-        e.preventDefault();
-        isDraggingCrop = true;
-        const pos = getPointerPos(e);
-        cropStartX = pos.x; cropStartY = pos.y;
-        cropRect = { x: cropStartX, y: cropStartY, w: 0, h: 0 };
-        drawCropView();
+        e.preventDefault(); isDraggingCrop = true;
+        const pos = getPointerPos(e); cropStartX = pos.x; cropStartY = pos.y;
+        cropRect = { x: cropStartX, y: cropStartY, w: 0, h: 0 }; drawCropView();
     }
 
     function onCropMove(e) {
-        if(!isDraggingCrop) return;
-        e.preventDefault();
+        if(!isDraggingCrop) return; e.preventDefault();
         const pos = getPointerPos(e);
-        const L = parseFloat(document.getElementById('input-longueur').value) || 220;
-        const H = parseFloat(document.getElementById('input-hauteur').value) || 60;
-        const targetRatio = L / H;
-
-        let diffX = pos.x - cropStartX;
-        let diffY = pos.y - cropStartY;
-        let w = Math.abs(diffX);
-        let h = Math.abs(diffY);
-
+        const targetRatio = (parseFloat(document.getElementById('input-longueur').value) || 220) / (parseFloat(document.getElementById('input-hauteur').value) || 60);
+        let w = Math.abs(pos.x - cropStartX); let h = Math.abs(pos.y - cropStartY);
         if (w / h > targetRatio) { h = w / targetRatio; } else { w = h * targetRatio; }
-
-        cropRect.w = w;
-        cropRect.h = h;
-        cropRect.x = diffX < 0 ? cropStartX - w : cropStartX;
-        cropRect.y = diffY < 0 ? cropStartY - h : cropStartY;
-        
+        cropRect.w = w; cropRect.h = h;
+        cropRect.x = (pos.x - cropStartX) < 0 ? cropStartX - w : cropStartX;
+        cropRect.y = (pos.y - cropStartY) < 0 ? cropStartY - h : cropStartY;
         drawCropView();
     }
 
-    function onCropEnd(e) {
-        if(!isDraggingCrop) return;
-        isDraggingCrop = false;
-        if(cropRect.w < 10 || cropRect.h < 10) { 
-            const L = parseFloat(document.getElementById('input-longueur').value) || 220;
-            const H = parseFloat(document.getElementById('input-hauteur').value) || 60;
-            const targetRatio = L / H;
-            let initW = cropCanvasElement.width * 0.8;
-            let initH = initW / targetRatio;
-            if(initH > cropCanvasElement.height * 0.8) {
-                initH = cropCanvasElement.height * 0.8;
-                initW = initH * targetRatio;
-            }
-            cropRect = { x: (cropCanvasElement.width - initW) / 2, y: (cropCanvasElement.height - initH) / 2, w: initW, h: initH };
-            drawCropView();
-        }
-    }
-
-    cropCanvasElement.addEventListener('mousedown', onCropStart);
-    cropCanvasElement.addEventListener('mousemove', onCropMove);
+    function onCropEnd() { isDraggingCrop = false; }
+    cropCanvasElement.addEventListener('mousedown', onCropStart); cropCanvasElement.addEventListener('mousemove', onCropMove);
     window.addEventListener('mouseup', onCropEnd);
-    cropCanvasElement.addEventListener('touchstart', onCropStart, {passive: false});
-    cropCanvasElement.addEventListener('touchmove', onCropMove, {passive: false});
-    window.addEventListener('touchend', onCropEnd);
+    cropCanvasElement.addEventListener('touchstart', onCropStart, {passive: false}); cropCanvasElement.addEventListener('touchmove', onCropMove, {passive: false});
 
     function validateCrop() {
-        if(!cropImg || cropRect.w < 10 || cropRect.h < 10) { alert("Sélection invalide."); return; }
-        
-        const origX = cropRect.x / cropScale;
-        const origY = cropRect.y / cropScale;
-        const origW = cropRect.w / cropScale;
-        const origH = cropRect.h / cropScale;
-
+        if(!cropImg || cropRect.w < 10 || cropRect.h < 10) return;
         const cvs = document.createElement('canvas');
-        const outScale = Math.min(1500 / origW, 1); 
-        cvs.width = origW * outScale;
-        cvs.height = origH * outScale;
-
+        const outScale = Math.min(1500 / (cropRect.w / cropScale), 1); 
+        cvs.width = (cropRect.w / cropScale) * outScale; cvs.height = (cropRect.h / cropScale) * outScale;
         const tCtx = cvs.getContext('2d');
-        tCtx.drawImage(cropImg, origX, origY, origW, origH, 0, 0, cvs.width, cvs.height);
-
+        tCtx.drawImage(cropImg, cropRect.x / cropScale, cropRect.y / cropScale, cropRect.w / cropScale, cropRect.h / cropScale, 0, 0, cvs.width, cvs.height);
         const opt = cvs.toDataURL('image/jpeg', 0.95);
-        const final = new Image();
-        final.isPlaceholder = false; 
-        final.onload = () => {
-            loadedBricks[currentSlot] = final;
-            updateSlotVisual(currentSlot, opt, false);
-            forceWallRegen();
-            closeCropModal();
-        };
+        const final = new Image(); final.isPlaceholder = false; 
+        final.onload = () => { loadedBricks[currentSlot] = final; updateSlotVisual(currentSlot, opt, false); forceWallRegen(); closeCropModal(); };
         final.src = opt;
     }
 
     function resetCalibration() {
-        document.getElementById('calib-brightness').value = 100;
-        document.getElementById('calib-contrast').value = 100;
-        document.getElementById('calib-saturation').value = 100;
-        document.getElementById('calib-hue').value = 0;
+        document.getElementById('calib-brightness').value = 100; document.getElementById('calib-contrast').value = 100;
+        document.getElementById('calib-saturation').value = 100; document.getElementById('calib-hue').value = 0;
         scheduleRender();
     }
 
     function triggerAutoDetection() {
         const best = analyzeFilteredColorAndSuggest();
         if (best) {
-            currentJointColor = best;
-            document.getElementById('categorySelect').value = best.cat;
-            filterColors();
+            document.getElementById('categorySelect').value = best.cat; filterColors();
             const sel = document.getElementById('jointColorSelect');
             for(let i=0; i<sel.options.length; i++) {
-                if(sel.options[i].value && JSON.parse(sel.options[i].value).name === best.name) {
-                    sel.selectedIndex = i;
-                    onJointSelected();
-                }
+                if(sel.options[i].value && JSON.parse(sel.options[i].value).name === best.name) { sel.selectedIndex = i; onJointSelected(); }
             }
-        } else { 
-            alert("Veuillez d'abord charger une brique."); 
         }
     }
 
@@ -900,25 +714,15 @@
         const cvs = document.createElement('canvas'); cvs.width = 50; cvs.height = 50;
         const ctxA = cvs.getContext('2d');
         let tR=0, tG=0, tB=0, cnt=0;
-        const bri = document.getElementById('calib-brightness').value;
-        const con = document.getElementById('calib-contrast').value;
-        const sat = document.getElementById('calib-saturation').value;
-        const hue = document.getElementById('calib-hue').value;
-        ctxA.filter = `brightness(${bri}%) contrast(${con}%) saturate(${sat}%) hue-rotate(${hue}deg)`;
-
         const validBricks = loadedBricks.filter(b => b && !b.isPlaceholder);
         if(validBricks.length === 0) return null;
-
         validBricks.forEach(img => {
             ctxA.drawImage(img, 0, 0, 50, 50);
             const data = ctxA.getImageData(0,0,50,50).data;
             for(let i=0; i<data.length; i+=4) { tR+=data[i]; tG+=data[i+1]; tB+=data[i+2]; cnt++; }
         });
-        
-        if(cnt===0) return null;
         const r = tR/cnt, g = tG/cnt, b = tB/cnt;
         let minD = Infinity, best = null;
-        
         NUANCIER_COMPLET.forEach(j => {
             if (j.r !== undefined) {
                 const dist = Math.sqrt((j.r-r)**2 + (j.g-g)**2 + (j.b-b)**2);
@@ -930,101 +734,55 @@
 
     function updateSlotVisual(idx, src, isPlace) {
         const d = document.getElementById(`slot-${idx}`);
-        
-        if (src === "") {
-            d.innerHTML = "";
-        } else {
-            d.innerHTML = `<img src="${src}" style="width:100%;height:100%;object-fit:cover;">`;
-        }
-        
+        if (src === "") d.innerHTML = "";
+        else d.innerHTML = `<img src="${src}" style="width:100%;height:100%;object-fit:cover;">`;
         if(!isPlace) {
             d.classList.add('active');
             const b = document.createElement('div'); b.className='remove-btn'; b.innerHTML='x';
             b.onclick=(e)=>{e.stopPropagation(); removeBrick(idx);}; d.appendChild(b);
         } else {
             d.classList.remove('active');
-            const label = document.createElement('div');
-            label.innerHTML = `<span>+ Charger<br>Photo ${idx+1}</span>`;
-            label.style.position = 'absolute';
-            label.style.background = 'rgba(248, 249, 250, 0.85)';
-            label.style.width = '100%';
-            label.style.height = '100%';
-            label.style.display = 'flex';
-            label.style.alignItems = 'center';
-            label.style.justifyContent = 'center';
-            label.style.color = '#007bff';
-            label.style.fontWeight = 'bold';
-            d.appendChild(label);
+            d.innerHTML += `<div style="position:absolute; background:rgba(248,249,250,0.85); width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#007bff; font-weight:bold; font-size:0.8rem; pointer-events:none; text-align:center; line-height:1.2;">+ Photo ${idx+1}</div>`;
         }
     }
 
     function removeBrick(i) {
         const userBricks = loadedBricks.filter(b => b && !b.isPlaceholder);
-        
         if(userBricks.length <= 1) { 
             const defaultBrickSrc = generateDefaultBrick();
-            const img = new Image();
-            img.isPlaceholder = true;
-            img.onload = () => {
-                loadedBricks[i] = img;
-                updateSlotVisual(i, defaultBrickSrc, true);
-                forceWallRegen();
-            };
-            img.src = defaultBrickSrc;
-            return; 
+            const img = new Image(); img.isPlaceholder = true;
+            img.onload = () => { loadedBricks[i] = img; updateSlotVisual(i, defaultBrickSrc, true); forceWallRegen(); };
+            img.src = defaultBrickSrc; return; 
         }
-        
-        loadedBricks[i] = null;
-        updateSlotVisual(i, "", true);
-        forceWallRegen();
+        loadedBricks[i] = null; updateSlotVisual(i, "", true); forceWallRegen();
     }
 
     function toggleColorPicker() {
+        isColorPicking = !isColorPicking;
         const btn = document.getElementById('btn-pipette-color');
-        if (!isColorPicking) {
-            isColorPicking = true;
-            btn.style.background = '#0d6efd';
-            btn.innerText = '👉 Cliquez sur la couleur souhaitée sur la brique';
-            canvas.style.cursor = 'crosshair';
-            scheduleRender(); 
-        } else {
-            isColorPicking = false;
-            btn.style.background = 'linear-gradient(135deg, #6610f2, #5f3dc4)';
-            btn.innerText = '🧪 Cible (Pipette)';
-            canvas.style.cursor = 'default';
-            scheduleRender(); 
-        }
+        btn.style.background = isColorPicking ? '#0d6efd' : 'linear-gradient(135deg, #6610f2, #5f3dc4)';
+        btn.innerText = isColorPicking ? '👉 Cliquez sur la brique' : '🧪 Cible (Pipette)';
+        canvas.style.cursor = isColorPicking ? 'crosshair' : 'default'; scheduleRender();
     }
 
     canvas.addEventListener('click', function(e) {
         if (!isColorPicking) return;
         const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        const x = Math.floor((e.clientX - rect.left) * scaleX);
-        const y = Math.floor((e.clientY - rect.top) * scaleY);
-
+        const x = Math.floor((e.clientX - rect.left) * (canvas.width / rect.width));
+        const y = Math.floor((e.clientY - rect.top) * (canvas.height / rect.height));
         const pixel = ctx.getImageData(x, y, 1, 1).data;
-        const r = pixel[0], g = pixel[1], b = pixel[2];
-
         let minD = Infinity, best = null;
         NUANCIER_COMPLET.forEach(j => {
             if (j.r !== undefined) {
-                const dist = Math.sqrt((j.r-r)**2 + (j.g-g)**2 + (j.b-b)**2);
+                const dist = Math.sqrt((j.r-pixel[0])**2 + (j.g-pixel[1])**2 + (j.b-pixel[2])**2);
                 if(dist < minD) { minD = dist; best = j; }
             }
         });
-
         if (best) {
-            currentJointColor = best;
-            document.getElementById('categorySelect').value = best.cat;
-            filterColors();
+            document.getElementById('categorySelect').value = best.cat; filterColors();
             const sel = document.getElementById('jointColorSelect');
             for(let i=0; i<sel.options.length; i++) {
-                if(sel.options[i].value && JSON.parse(sel.options[i].value).name === best.name) {
-                    sel.selectedIndex = i;
-                    onJointSelected();
-                }
+                if(sel.options[i].value && JSON.parse(sel.options[i].value).name === best.name) { sel.selectedIndex = i; onJointSelected(); }
             }
         }
         toggleColorPicker(); 
@@ -1033,44 +791,30 @@
     function filterColors() {
         const cat = document.getElementById('categorySelect').value;
         const sel = document.getElementById('jointColorSelect');
-        sel.innerHTML = '<option value="" style="background:#fff; color:#000;">-- Choisir une teinte --</option>';
-        
+        sel.innerHTML = '<option value="">-- Choisir une teinte --</option>';
         const list = cat === 'all' ? NUANCIER_COMPLET : NUANCIER_COMPLET.filter(c => c.cat === cat);
-        
         list.forEach(c => {
             const o = document.createElement('option');
-            o.value = JSON.stringify(c); 
-            o.textContent = c.name;
+            o.value = JSON.stringify(c); o.textContent = c.name;
             if(c.r !== undefined) {
                 o.style.backgroundColor = `rgb(${c.r}, ${c.g}, ${c.b})`;
-                const luminance = 0.299 * c.r + 0.587 * c.g + 0.114 * c.b;
-                o.style.color = luminance > 130 ? '#000000' : '#ffffff';
-                o.style.fontWeight = "bold";
+                o.style.color = (0.299*c.r + 0.587*c.g + 0.114*c.b) > 130 ? '#000' : '#fff';
             }
             sel.appendChild(o);
         });
-        
-        document.getElementById('dev-box').style.display = 'none';
-        updatePreviewDot();
-        scheduleRender();
+        updatePreviewDot(); scheduleRender();
     }
 
     function onJointSelected() {
         const v = document.getElementById('jointColorSelect').value;
         if(v) {
-            const c = JSON.parse(v);
-            currentJointColor = c;
-            document.getElementById('dev-box').style.display = 'block';
-            document.getElementById('dev-l').value = c.l !== undefined ? c.l : 50;
-            document.getElementById('dev-c').value = c.c !== undefined ? c.c : 20;
-            document.getElementById('dev-h').value = c.h !== undefined ? c.h : 0;
+            const c = JSON.parse(v); currentJointColor = c;
+            document.getElementById('dev-l').value = c.l || 50;
+            document.getElementById('dev-c').value = c.c || 20;
+            document.getElementById('dev-h').value = c.h || 0;
             updateAdminBadges();
-        } else {
-            currentJointColor = null;
-            document.getElementById('dev-box').style.display = 'none';
-        }
-        updatePreviewDot();
-        scheduleRender();
+        } else { currentJointColor = null; }
+        updatePreviewDot(); scheduleRender();
     }
     
     function updateAdminBadges() {
@@ -1080,230 +824,125 @@
     }
 
     function updateAdminColor() {
-        if(!currentJointColor) return;
-        updateAdminBadges();
-        
+        if(!currentJointColor) return; updateAdminBadges();
         const l = parseFloat(document.getElementById('dev-l').value);
         const c = parseFloat(document.getElementById('dev-c').value);
         const h = parseFloat(document.getElementById('dev-h').value);
-        
-        const itemIndex = NUANCIER_COMPLET.findIndex(x => x.name === currentJointColor.name);
-        if(itemIndex !== -1) {
-            NUANCIER_COMPLET[itemIndex].l = l;
-            NUANCIER_COMPLET[itemIndex].c = c;
-            NUANCIER_COMPLET[itemIndex].h = h;
-            
-            const tempCvs = document.createElement('canvas');
-            tempCvs.width = 1; tempCvs.height = 1;
-            const tCtx = tempCvs.getContext('2d');
-            tCtx.fillStyle = `lch(${l}% ${c} ${h})`;
-            tCtx.fillRect(0, 0, 1, 1);
-            const p = tCtx.getImageData(0, 0, 1, 1).data;
-            
-            NUANCIER_COMPLET[itemIndex].r = p[0];
-            NUANCIER_COMPLET[itemIndex].g = p[1];
-            NUANCIER_COMPLET[itemIndex].b = p[2];
-            
-            currentJointColor = NUANCIER_COMPLET[itemIndex];
-            
-            const sel = document.getElementById('jointColorSelect');
-            const opt = sel.options[sel.selectedIndex];
-            opt.value = JSON.stringify(currentJointColor);
-            opt.style.backgroundColor = `rgb(${p[0]}, ${p[1]}, ${p[2]})`;
-            const luminance = 0.299 * p[0] + 0.587 * p[1] + 0.114 * p[2];
-            opt.style.color = luminance > 130 ? '#000000' : '#ffffff';
-            
-            updatePreviewDot();
-            scheduleRender(); 
+        const idx = NUANCIER_COMPLET.findIndex(x => x.name === currentJointColor.name);
+        if(idx !== -1) {
+            const tCvs = document.createElement('canvas'); tCvs.width = 1; tCvs.height = 1;
+            const tCtx = tCvs.getContext('2d');
+            tCtx.fillStyle = `lch(${l}% ${c} ${h})`; tCtx.fillRect(0,0,1,1);
+            const p = tCtx.getImageData(0,0,1,1).data;
+            NUANCIER_COMPLET[idx] = {...NUANCIER_COMPLET[idx], l, c, h, r:p[0], g:p[1], b:p[2]};
+            currentJointColor = NUANCIER_COMPLET[idx]; updatePreviewDot(); scheduleRender(); 
         }
     }
 
     function resetCurrentDevColor() {
         if (!currentJointColor) return;
-        const originalColor = ORIGINAL_NUANCIER.find(c => c.name === currentJointColor.name);
-        if (originalColor) {
-            document.getElementById('dev-l').value = originalColor.l !== undefined ? originalColor.l : 50;
-            document.getElementById('dev-c').value = originalColor.c !== undefined ? originalColor.c : 20;
-            document.getElementById('dev-h').value = originalColor.h !== undefined ? originalColor.h : 0;
+        const orig = ORIGINAL_NUANCIER.find(c => c.name === currentJointColor.name);
+        if (orig) {
+            document.getElementById('dev-l').value = orig.l || 50;
+            document.getElementById('dev-c').value = orig.c || 20;
+            document.getElementById('dev-h').value = orig.h || 0;
             updateAdminColor();
         }
     }
 
     function updatePreviewDot() {
         const dot = document.getElementById('joint-preview-dot');
-        if(currentJointColor) {
-            dot.style.backgroundColor = `rgb(${currentJointColor.r},${currentJointColor.g},${currentJointColor.b})`;
-        } else { 
-            dot.style.backgroundColor = '#f4f4f4'; 
-        }
+        dot.style.backgroundColor = currentJointColor ? `rgb(${currentJointColor.r},${currentJointColor.g},${currentJointColor.b})` : '#f4f4f4';
     }
 
     function generateExportCode() {
         let code = "    let NUANCIER_COMPLET = [\n";
-        let currentCat = "";
-        NUANCIER_COMPLET.forEach((item, index) => {
-            if (item.cat !== currentCat) {
-                if (index !== 0) code += "\n";
-                code += `        // --- ${item.cat.toUpperCase()} ---\n`;
-                currentCat = item.cat;
-            }
-            if (item.l !== undefined && item.c !== undefined && item.h !== undefined) {
-                code += `        { cat: "${item.cat}", name: "${item.name}", l: ${Number(item.l).toFixed(2)}, c: ${Number(item.c).toFixed(2)}, h: ${Number(item.h).toFixed(2)} }`;
-            } else {
-                code += `        { cat: "${item.cat}", name: "${item.name}", r: ${Math.round(item.r)}, g: ${Math.round(item.g)}, b: ${Math.round(item.b)} }`;
-            }
-            if (index < NUANCIER_COMPLET.length - 1) code += ",\n";
-            else code += "\n";
+        NUANCIER_COMPLET.forEach((item, i) => {
+            code += `        { cat: "${item.cat}", name: "${item.name}", l: ${Number(item.l).toFixed(2)}, c: ${Number(item.c).toFixed(2)}, h: ${Number(item.h).toFixed(2)} }${i < NUANCIER_COMPLET.length-1 ? ',' : ''}\n`;
         });
-        code += "\n    ];";
-        document.getElementById('export-text').value = code;
-        document.getElementById('export-modal').style.display = 'flex';
+        code += "    ];"; document.getElementById('export-text').value = code; document.getElementById('export-modal').style.display = 'flex';
     }
     
-    function copyExportText() {
-        const copyText = document.getElementById("export-text");
-        copyText.select();
-        copyText.setSelectionRange(0, 99999);
-        navigator.clipboard.writeText(copyText.value);
-        alert("✅ Code copié dans le presse-papier !");
-    }
+    function copyExportText() { navigator.clipboard.writeText(document.getElementById("export-text").value); alert("✅ Copié !"); }
 
     function forceWallRegen() {
-        let valid = loadedBricks.filter(b => b && !b.isPlaceholder);
-        if(!valid.length) { valid = [loadedBricks[0]]; }
-        if(!valid[0]) return;
         wallLayoutCache = [];
-        for(let r=0; r<200; r++) {
+        for(let r=0; r<100; r++) {
             let row = [];
-            for(let c=0; c<100; c++) row.push(Math.floor(Math.random() * valid.length));
+            for(let c=0; c<50; c++) row.push(Math.floor(Math.random() * 3));
             wallLayoutCache.push(row);
         }
         scheduleRender();
     }
 
+    function convertLchPaletteToRgb() {
+        const tempCvs = document.createElement('canvas'); tempCvs.width = 1; tempCvs.height = 1;
+        const tCtx = tempCvs.getContext('2d');
+        NUANCIER_COMPLET.forEach(item => {
+            if (item.l !== undefined && item.r === undefined) {
+                tCtx.clearRect(0,0,1,1);
+                tCtx.fillStyle = `lch(${item.l}% ${item.c} ${item.h})`;
+                tCtx.fillRect(0, 0, 1, 1);
+                const p = tCtx.getImageData(0, 0, 1, 1).data;
+                item.r = p[0]; item.g = p[1]; item.b = p[2];
+            }
+        });
+    }
+
     function render() {
         let valid = loadedBricks.filter(b => b && !b.isPlaceholder);
-        if(!valid.length) { valid = [loadedBricks[0]]; }
+        if(!valid.length) valid = [loadedBricks[0]];
         if(!valid[0]) return;
-        if(!wallLayoutCache.length) forceWallRegen();
-        ctx.clearRect(0,0, canvas.width, canvas.height);
-        const L_mm = parseInt(document.getElementById('input-longueur').value)||220;
-        const H_mm = parseInt(document.getElementById('input-hauteur').value)||60;
-        const J_mm = parseInt(document.getElementById('slider-epaisseur').value)||12;
         const zoom = parseFloat(document.getElementById('slider-zoom').value);
-        const pxPerMM = zoom;
-        const L_px = L_mm * pxPerMM;
-        const H_px = H_mm * pxPerMM;
-        const J_px = J_mm * pxPerMM;
-        const W = 1200; const H = 800; const Footer = 110;
-        canvas.width = W; canvas.height = H + Footer;
-        document.getElementById('scale-info').innerText = `1m = ${Math.round(1000*pxPerMM)}px`;
-        const bri = document.getElementById('calib-brightness').value;
-        const con = document.getElementById('calib-contrast').value;
-        const sat = document.getElementById('calib-saturation').value;
-        const hue = document.getElementById('calib-hue').value;
-        const pad = 15 * zoom; 
-        const preRenderedBricks = valid.map(img => {
-            const tempCvs = document.createElement('canvas');
-            tempCvs.width = L_px + pad * 2;
-            tempCvs.height = H_px + pad * 2;
-            const tCtx = tempCvs.getContext('2d');
-            if (!isColorPicking) {
-                tCtx.shadowColor = "rgba(0,0,0,0.6)";
-                tCtx.shadowBlur = 4 * (zoom/1.5);
-                tCtx.shadowOffsetX = 1 * (zoom/1.5); 
-                tCtx.shadowOffsetY = 2 * (zoom/1.5);
-            }
-            tCtx.filter = `brightness(${bri}%) contrast(${con}%) saturate(${sat}%) hue-rotate(${hue}deg)`;
-            tCtx.drawImage(img, pad, pad, L_px, H_px);
-            return tempCvs;
+        const L_px = (parseInt(document.getElementById('input-longueur').value)||220) * zoom;
+        const H_px = (parseInt(document.getElementById('input-hauteur').value)||60) * zoom;
+        const J_px = (parseInt(document.getElementById('slider-epaisseur').value)||12) * zoom;
+        const W = 1200; const H = 800;
+        canvas.width = W; canvas.height = H + 110;
+        
+        const preRendered = valid.map(img => {
+            const cvs = document.createElement('canvas'); cvs.width = L_px; cvs.height = H_px;
+            const tCtx = cvs.getContext('2d');
+            tCtx.filter = `brightness(${document.getElementById('calib-brightness').value}%) contrast(${document.getElementById('calib-contrast').value}%) saturate(${document.getElementById('calib-saturation').value}%) hue-rotate(${document.getElementById('calib-hue').value}deg)`;
+            tCtx.drawImage(img, 0, 0, L_px, H_px);
+            return cvs;
         });
 
-        if (isColorPicking) {
-            ctx.fillStyle = "#ffffff"; 
-            ctx.fillRect(0, 0, W, H);
-            let y = 0; let rIdx = 0;
-            while(y < H) {
-                let x = (rIdx % 2 !== 0) ? -(L_px/2) - (J_px/2) : 0;
-                let cIdx = 0;
-                while(x < W) {
-                    const sR = rIdx % wallLayoutCache.length;
-                    const sC = cIdx % wallLayoutCache[0].length;
-                    const bIdx = wallLayoutCache[sR][sC];
-                    ctx.drawImage(preRenderedBricks[bIdx], x - pad, y - pad);
-                    x += L_px + J_px; cIdx++;
-                }
-                y += H_px + J_px; rIdx++;
-            }
-            ctx.fillStyle = "rgba(0,0,0,0.8)";
-            ctx.fillRect(0, 0, W, 60);
-            ctx.fillStyle = "white";
-            ctx.font = "bold 20px 'Segoe UI'";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText("🧪 MODE PIPETTE : Cliquez sur la couleur de la brique que vous souhaitez copier", W/2, 30);
-            return; 
-        }
-
-        if(currentJointColor) {
-            ctx.fillStyle = `rgb(${currentJointColor.r}, ${currentJointColor.g}, ${currentJointColor.b})`;
-        } else {
-            ctx.fillStyle = "#e0e0e0"; 
-        }
+        ctx.fillStyle = currentJointColor ? `rgb(${currentJointColor.r}, ${currentJointColor.g}, ${currentJointColor.b})` : "#e0e0e0";
         ctx.fillRect(0, 0, W, H);
-        ctx.globalCompositeOperation = 'overlay'; 
-        ctx.fillStyle = grainTexture;
-        ctx.fillRect(0, 0, W, H);
-        ctx.globalCompositeOperation = 'source-over'; 
-        ctx.save();
-        ctx.beginPath(); ctx.rect(0,0,W,H); ctx.clip();
+        ctx.globalCompositeOperation = 'overlay'; ctx.fillStyle = grainTexture; ctx.fillRect(0,0,W,H);
+        ctx.globalCompositeOperation = 'source-over';
+        
         let y = 0; let rIdx = 0;
         while(y < H) {
             let x = (rIdx % 2 !== 0) ? -(L_px/2) - (J_px/2) : 0;
             let cIdx = 0;
             while(x < W) {
-                const sR = rIdx % wallLayoutCache.length;
-                const sC = cIdx % wallLayoutCache[0].length;
-                const bIdx = wallLayoutCache[sR][sC];
-                ctx.drawImage(preRenderedBricks[bIdx], x - pad, y - pad);
+                const bIdx = wallLayoutCache[rIdx % 100][cIdx % 50] % preRendered.length;
+                ctx.drawImage(preRendered[bIdx], x, y);
                 x += L_px + J_px; cIdx++;
             }
             y += H_px + J_px; rIdx++;
         }
-        ctx.restore();
-        ctx.fillStyle = "white"; ctx.fillRect(0, H, W, Footer);
-        ctx.strokeStyle = "#ddd"; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(0,H); ctx.lineTo(W,H); ctx.stroke();
-        ctx.textBaseline = "middle";
-        const Y_txt = H + 40;
-        ctx.textAlign = "left"; ctx.fillStyle = "#222"; ctx.font = "bold 22px 'Segoe UI'";
-        ctx.fillText(`JOINT : ${currentJointColor ? currentJointColor.name : "Aucun"}`, 30, Y_txt);
-        ctx.textAlign = "center"; ctx.fillStyle = "#555"; ctx.font = "20px 'Segoe UI'";
-        ctx.fillText(`Ep. ${J_mm}mm | V97 HD`, W/2, Y_txt);
-        ctx.textAlign = "right"; ctx.fillStyle = "#222"; ctx.font = "bold 22px 'Segoe UI'";
-        const bName = document.getElementById('input-brick-name').value || "Brique";
-        ctx.fillText(`PROJET : ${bName}`, W-30, Y_txt);
+        
+        ctx.fillStyle = "white"; ctx.fillRect(0, H, W, 110);
+        ctx.fillStyle = "#222"; ctx.font = "bold 22px 'Segoe UI'"; ctx.textAlign = "left";
+        ctx.fillText(`JOINT : ${currentJointColor ? currentJointColor.name : "Aucun"}`, 30, H+45);
+        ctx.textAlign = "right"; ctx.fillText(`PROJET : ${document.getElementById('input-brick-name').value || "Brique"}`, W-30, H+45);
+        
+        ctx.fillStyle = "#dc3545"; ctx.font = "italic 18px 'Segoe UI'"; ctx.textAlign = "center";
+        ctx.fillText("Document à caractère indicatif. Nuance et aspect à valider impérativement par un essai sur chantier.", W/2, H+85);
     }
 
     function downloadImage() {
-        const valid = loadedBricks.filter(b => b && !b.isPlaceholder);
-        if(!valid.length) { alert("Veuillez d'abord charger une brique avant d'exporter."); return; }
-        const link = document.createElement('a');
-        link.download = `Projet_V97_LCh.jpg`;
-        link.href = canvas.toDataURL('image/jpeg', 0.92);
-        link.click();
+        const link = document.createElement('a'); link.download = 'Projet_Biamortier.jpg';
+        link.href = canvas.toDataURL('image/jpeg', 0.92); link.click();
     }
     
     function downloadPDF() {
-        const valid = loadedBricks.filter(b => b && !b.isPlaceholder);
-        if(!valid.length) { alert("Veuillez d'abord charger une brique avant d'exporter."); return; }
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({ orientation: 'landscape' });
-        const img = canvas.toDataURL('image/jpeg', 0.92);
-        const props = doc.getImageProperties(img);
-        const w = doc.internal.pageSize.getWidth();
-        const h = (props.height * w) / props.width;
-        doc.addImage(img, 'JPEG', 0, 10, w, h);
-        doc.save('Projet_V97.pdf');
+        const { jsPDF } = window.jspdf; const doc = new jsPDF('l', 'mm', 'a4');
+        doc.addImage(canvas.toDataURL('image/jpeg', 0.90), 'JPEG', 10, 10, 277, 190);
+        doc.save('Projet_Biamortier.pdf');
     }
 </script>
 </body>
