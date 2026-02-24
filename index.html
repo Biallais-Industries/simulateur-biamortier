@@ -572,7 +572,7 @@
     function submitToAdmin() {
         const bNameInput = document.getElementById('input-brick-name').value.trim();
         const userName = document.getElementById('input-user-name').value.trim();
-        const userPhone = document.getElementById('input-user-phone').value.trim(); // AJOUT TEL
+        const userPhone = document.getElementById('input-user-phone').value.trim(); 
         const companyName = document.getElementById('input-company-name').value.trim();
         const projectRef = document.getElementById('input-project-ref').value.trim();
 
@@ -589,7 +589,7 @@
         let body = `Bonjour l'équipe Biallais,%0D%0A%0D%0A`;
         body += `Voici une nouvelle demande d'échantillon configurée :%0D%0A%0D%0A`;
         body += `👤 CLIENT : ${userName}%0D%0A`;
-        body += `📞 TEL : ${userPhone || "Non renseigné"}%0D%0A`; // AJOUT TEL DANS MAIL
+        body += `📞 TEL : ${userPhone || "Non renseigné"}%0D%0A`; 
         body += `🏢 ENTREPRISE : ${companyName || "Non renseigné"}%0D%0A`;
         body += `📍 RÉF. CHANTIER : ${projectRef || "Non renseigné"}%0D%0A%0D%0A`;
         body += `🧱 BRIQUE : ${bNameInput}%0D%0A`;
@@ -882,7 +882,7 @@
             if (item.l !== undefined && item.r === undefined) {
                 tCtx.clearRect(0,0,1,1);
                 tCtx.fillStyle = `lch(${item.l}% ${item.c} ${item.h})`;
-                tCtx.fillRect(0, 1, 1, 1);
+                tCtx.fillRect(0, 0, 1, 1);
                 const p = tCtx.getImageData(0, 0, 1, 1).data;
                 item.r = p[0]; item.g = p[1]; item.b = p[2];
             }
