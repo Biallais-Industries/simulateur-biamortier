@@ -1,6 +1,6 @@
 {
-  "name": "Simulateur Biamortier V97",
-  "short_name": "Biamortier",
+  "name": "Simulateur Biamortier V1",
+  "short_name": "Biamortier V1",
   "description": "Simulateur de rejointoiement réaliste Biamortier, Biajoint, Easyjoint",
   "start_url": "index.html",
   "display": "standalone",
