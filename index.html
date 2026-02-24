@@ -16,7 +16,7 @@
         .controls { width: 380px; min-width: 380px; background: white; height: 100%; overflow-y: auto; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 10; display: flex; flex-direction: column; gap: 15px; }
         .preview-container { flex: 1; background: #dce1e8; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; position: relative; height: 100%; }
         .canvas-wrapper { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; max-height: 90vh; }
-        canvas { display: block; max-width: 100%; max-height: 100%; width: auto; height: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3); background: white; cursor: default; }
+        canvas { display: block; max-width: 100%; max-height: 100%; width: auto; height: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3); background: white; cursor: default; image-rendering: auto; }
         h2 { margin: 0 0 5px 0; color: #1a1a1a; font-size: 1.2rem; }
         label { display: block; font-size: 0.85rem; color: #343a40; margin-bottom: 4px; font-weight: 600; }
         .input-row { display: flex; gap: 10px; }
@@ -283,7 +283,10 @@
 </div>
 
 <script>
-    // --- LISTE DES COULEURS AVEC VALEURS RGB FIGÉES POUR FIDÉLITÉ ABSOLUE ---
+    // --- DÉTECTION MOBILE POUR CORRECTION GAMMA ---
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+    // --- LISTE DES COULEURS AVEC VALEURS RGB FIGÉES ---
     let NUANCIER_COMPLET = [
         { cat: "Standards", name: "SUPER BLANC", l: 78.00, c: 7.50, h: 83.00, r: 204, g: 194, b: 182 },
         { cat: "Standards", name: "BLANC", l: 76.50, c: 10.00, h: 86.00, r: 202, g: 190, b: 173 },
@@ -363,7 +366,7 @@
     let cropStartX = 0; let cropStartY = 0;
 
     const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d', { colorSpace: 'srgb' }); // Force sRGB pour garantir la fidélité
+    const ctx = canvas.getContext('2d', { colorSpace: 'srgb' }); 
     let currentSlot = 0;
     const STORAGE_KEY = 'biamortier_user_lib';
     
@@ -378,19 +381,12 @@
         }
     }
 
-    // --- FONCTION ADMIN AVEC MOT DE PASSE ---
+    // --- FONCTION ADMIN ---
     function toggleDevBox() {
         const box = document.getElementById('dev-box');
-        if (box.style.display === 'block') {
-            box.style.display = 'none';
-            return;
-        }
+        if (box.style.display === 'block') { box.style.display = 'none'; return; }
         const password = prompt("Saisir le mot de passe administrateur :");
-        if (password === "RAPCOM47T") {
-            box.style.display = 'block';
-        } else {
-            alert("Accès refusé.");
-        }
+        if (password === "RAPCOM47T") { box.style.display = 'block'; } else { alert("Accès refusé."); }
     }
 
     function rotateImageInCrop() {
@@ -575,16 +571,11 @@
         const companyName = document.getElementById('input-company-name').value.trim();
         const projectRef = document.getElementById('input-project-ref').value.trim();
 
-        if (!bNameInput || !userName) {
-            alert("⚠️ Veuillez renseigner au moins le nom de la brique et votre nom.");
-            return;
-        }
-        
+        if (!bNameInput || !userName) { alert("⚠️ Veuillez renseigner au moins le nom de la brique et votre nom."); return; }
         if(!confirm("⚠️ Avez-vous enregistré votre visuel (JPG ou PDF) ? Il est indispensable de le joindre manuellement.")) return;
 
         const jointName = currentJointColor ? currentJointColor.name : "Non sélectionné";
         const subject = encodeURIComponent(`DEMANDE ÉCHANTILLON : ${jointName} / ${bNameInput}`);
-        
         let body = `Bonjour l'équipe Biallais,%0D%0A%0D%0A`;
         body += `Voici une nouvelle demande d'échantillon configurée :%0D%0A%0D%0A`;
         body += `👤 CLIENT : ${userName}%0D%0A`;
@@ -698,6 +689,7 @@
         scheduleRender();
     }
 
+    // --- LOGIQUE AUTO ET PIPETTE RÉVISÉE (POST-CALIBRATION) ---
     function triggerAutoDetection() {
         const best = analyzeFilteredColorAndSuggest();
         if (best) {
@@ -710,16 +702,15 @@
     }
 
     function analyzeFilteredColorAndSuggest() {
-        const cvs = document.createElement('canvas'); cvs.width = 50; cvs.height = 50;
+        const W = canvas.width;
+        const H = canvas.height - 110;
+        const cvs = document.createElement('canvas'); cvs.width = 100; cvs.height = 100;
         const ctxA = cvs.getContext('2d');
+        // Capture du centre du rendu actuel (incluant la calibration brique)
+        ctxA.drawImage(canvas, W/2 - 50, H/2 - 50, 100, 100, 0, 0, 100, 100);
+        const data = ctxA.getImageData(0,0,100,100).data;
         let tR=0, tG=0, tB=0, cnt=0;
-        const validBricks = loadedBricks.filter(b => b && !b.isPlaceholder);
-        if(validBricks.length === 0) return null;
-        validBricks.forEach(img => {
-            ctxA.drawImage(img, 0, 0, 50, 50);
-            const data = ctxA.getImageData(0,0,50,50).data;
-            for(let i=0; i<data.length; i+=4) { tR+=data[i]; tG+=data[i+1]; tB+=data[i+2]; cnt++; }
-        });
+        for(let i=0; i<data.length; i+=4) { tR+=data[i]; tG+=data[i+1]; tB+=data[i+2]; cnt++; }
         const r = tR/cnt, g = tG/cnt, b = tB/cnt;
         let minD = Infinity, best = null;
         NUANCIER_COMPLET.forEach(j => {
@@ -907,8 +898,19 @@
             return cvs;
         });
 
-        // Application de la couleur du joint avec les valeurs RGB exactes
-        ctx.fillStyle = currentJointColor ? `rgb(${currentJointColor.r}, ${currentJointColor.g}, ${currentJointColor.b})` : "#e0e0e0";
+        // --- GESTION COULEUR JOINT (CORRECTION MOBILE) ---
+        let jr = currentJointColor ? currentJointColor.r : 224;
+        let jg = currentJointColor ? currentJointColor.g : 224;
+        let jb = currentJointColor ? currentJointColor.b : 224;
+
+        if (isMobile) {
+            // Assombrissement de 10% sur mobile pour compenser la brillance OLED
+            jr = Math.round(jr * 0.9);
+            jg = Math.round(jg * 0.9);
+            jb = Math.round(jb * 0.9);
+        }
+
+        ctx.fillStyle = `rgb(${jr}, ${jg}, ${jb})`;
         ctx.fillRect(0, 0, W, H);
         
         ctx.globalCompositeOperation = 'overlay'; ctx.fillStyle = grainTexture; ctx.fillRect(0,0,W,H);
@@ -930,7 +932,6 @@
         ctx.fillStyle = "#222"; ctx.font = "bold 22px 'Segoe UI'"; ctx.textAlign = "left";
         ctx.fillText(`JOINT : ${currentJointColor ? currentJointColor.name : "Aucun"}`, 30, H+45);
         ctx.textAlign = "right"; ctx.fillText(`PROJET : ${document.getElementById('input-brick-name').value || "Brique"}`, W-30, H+45);
-        
         ctx.fillStyle = "#dc3545"; ctx.font = "italic 18px 'Segoe UI'"; ctx.textAlign = "center";
         ctx.fillText("Document à caractère indicatif. Nuance et aspect à valider impérativement par un essai sur chantier.", W/2, H+85);
     }
