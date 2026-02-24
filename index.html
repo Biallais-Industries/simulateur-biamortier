@@ -283,70 +283,70 @@
 </div>
 
 <script>
-    // --- LISTE DES COULEURS (NUANCIER_COMPLET) ---
+    // --- LISTE DES COULEURS AVEC VALEURS RGB FIGÉES POUR FIDÉLITÉ ABSOLUE ---
     let NUANCIER_COMPLET = [
-        { cat: "Standards", name: "SUPER BLANC", l: 78.00, c: 7.50, h: 83.00 },
-        { cat: "Standards", name: "BLANC", l: 76.50, c: 10.00, h: 86.00 },
-        { cat: "Standards", name: "TON PIERRE", l: 74.00, c: 24.00, h: 87.00 },
-        { cat: "Standards", name: "GRIS CLAIR", l: 60.50, c: 13.50, h: 91.00 },
-        { cat: "Noirs & Gris", name: "50% BL 50% GR", l: 71.50, c: 10.00, h: 86.00 },
-        { cat: "Noirs & Gris", name: "GS15", l: 74.50, c: 10.00, h: 81.00 },
-        { cat: "Noirs & Gris", name: "SBN125", l: 61.00, c: 3.50, h: 90.00 },
-        { cat: "Noirs & Gris", name: "SBN250", l: 52.00, c: 3.50, h: 90.00 },
-        { cat: "Noirs & Gris", name: "GA125", l: 40.50, c: 1.50, h: 91.00 },
-        { cat: "Noirs & Gris", name: "SBA250", l: 35.50, c: 0.50, h: 110.00 },
-        { cat: "Noirs & Gris", name: "GA450R50", l: 26.00, c: 1.50, h: 91.00 },
-        { cat: "Noirs & Gris", name: "SBA500", l: 19.00, c: 0.50, h: 20.00 },
-        { cat: "Noirs & Gris", name: "GN500", l: 44.50, c: 2.00, h: 85.00 },
-        { cat: "Noirs & Gris", name: "GA500", l: 26.50, c: 1.00, h: 75.00 },
-        { cat: "Jaunes", name: "SBJ8.25", l: 78.00, c: 15.50, h: 83.00 },
-        { cat: "Jaunes", name: "SBJ30", l: 80.00, c: 21.50, h: 87.00 },
-        { cat: "Jaunes", name: "SBJ62.5", l: 75.50, c: 31.00, h: 87.00 },
-        { cat: "Jaunes", name: "75% TP 25% BL", l: 76.50, c: 20.00, h: 88.00 },
-        { cat: "Jaunes", name: "SBJ250", l: 71.00, c: 55.50, h: 84.00 },
-        { cat: "Jaunes", name: "GJ250", l: 61.50, c: 42.00, h: 84.00 },
-        { cat: "Jaunes", name: "SBJ500", l: 66.50, c: 60.00, h: 82.00 },
-        { cat: "Jaunes", name: "GJ500", l: 58.00, c: 53.50, h: 80.00 },
-        { cat: "Jaunes", name: "SBJ120N30", l: 63.00, c: 33.50, h: 87.00 },
-        { cat: "Marron", name: "GS15J10", l: 65.00, c: 19.00, h: 81.00 },
-        { cat: "Marron", name: "GN90S35", l: 48.00, c: 11.00, h: 74.00 },
-        { cat: "Marron", name: "GS150N100", l: 62.50, c: 21.00, h: 74.00 },
-        { cat: "Marron", name: "GS200N150", l: 49.00, c: 21.50, h: 71.00 },
-        { cat: "Marron", name: "SBJ90R70N90", l: 57.00, c: 24.00, h: 67.00 },
-        { cat: "Marron", name: "GS150A100", l: 48.00, c: 12.00, h: 81.00 },
-        { cat: "Marron", name: "GS125N250R125", l: 48.50, c: 19.00, h: 58.00 },
-        { cat: "Marron", name: "SBJ180R180N140", l: 54.50, c: 27.50, h: 64.00 },
-        { cat: "Marron", name: "GN416S84", l: 29.00, c: 7.50, h: 78.00 },
-        { cat: "Marron", name: "GS250A250", l: 34.00, c: 8.00, h: 78.00 },
-        { cat: "Marron", name: "GS300A200", l: 33.00, c: 12.00, h: 72.00 },
-        { cat: "Rouges", name: "GR150J100", l: 53.50, c: 39.00, h: 57.00 },
-        { cat: "Rouges", name: "SBR125", l: 63.50, c: 34.50, h: 45.00 },
-        { cat: "Rouges", name: "GR125", l: 50.50, c: 29.00, h: 47.00 },
-        { cat: "Rouges", name: "GR150S100", l: 55.00, c: 39.50, h: 53.00 },
-        { cat: "Rouges", name: "SBR250", l: 60.00, c: 37.50, h: 42.00 },
-        { cat: "Rouges", name: "GR100N25", l: 48.00, c: 24.50, h: 48.00 },
-        { cat: "Rouges", name: "SBR375", l: 52.00, c: 45.00, h: 42.00 },
-        { cat: "Rouges", name: "GR375", l: 43.50, c: 43.50, h: 44.00 },
-        { cat: "Rouges", name: "GR250", l: 53.00, c: 36.50, h: 45.00 },
-        { cat: "Rouges", name: "GR250S250", l: 49.00, c: 49.00, h: 52.00 },
-        { cat: "Rouges", name: "GR300S200", l: 42.50, c: 46.00, h: 47.00 },
-        { cat: "Saumon", name: "SBS15J20", l: 75.50, c: 27.50, h: 77.00 },
-        { cat: "Saumon", name: "SBS62.5", l: 72.00, c: 28.00, h: 69.00 },
-        { cat: "Saumon", name: "SBS125", l: 64.00, c: 42.50, h: 64.00 },
-        { cat: "Saumon", name: "GS62.5", l: 63.50, c: 30.00, h: 72.00 },
-        { cat: "Saumon", name: "GS125", l: 54.50, c: 32.50, h: 67.00 },
-        { cat: "Saumon", name: "GS250", l: 57.50, c: 39.50, h: 66.00 },
-        { cat: "Saumon", name: "SBS250", l: 59.00, c: 47.50, h: 62.00 },
-        { cat: "Saumon", name: "SBJ45R45N35", l: 58.00, c: 22.50, h: 66.00 },
-        { cat: "Saumon", name: "SBS500", l: 57.00, c: 52.00, h: 61.00 },
-        { cat: "Saumon", name: "GS500", l: 49.00, c: 46.50, h: 58.00 },
-        { cat: "Saumon", name: "GS375R125", l: 45.00, c: 44.00, h: 53.00 },
-        { cat: "Lie de vin", name: "GR125N100S25", l: 51.50, c: 20.00, h: 50.00 },
-        { cat: "Lie de vin", name: "GR200N50", l: 52.00, c: 26.00, h: 47.00 },
-        { cat: "Lie de vin", name: "SBR250N125", l: 42.50, c: 22.50, h: 42.00 },
-        { cat: "Lie de vin", name: "GR300S100N100", l: 42.50, c: 32.00, h: 47.00 },
-        { cat: "Lie de vin", name: "GR200S200N100", l: 53.00, c: 32.00, h: 52.00 },
-        { cat: "Lie de vin", name: "GR416N84", l: 42.00, c: 35.00, h: 40.00 }
+        { cat: "Standards", name: "SUPER BLANC", l: 78.00, c: 7.50, h: 83.00, r: 204, g: 194, b: 182 },
+        { cat: "Standards", name: "BLANC", l: 76.50, c: 10.00, h: 86.00, r: 202, g: 190, b: 173 },
+        { cat: "Standards", name: "TON PIERRE", l: 74.00, c: 24.00, h: 87.00, r: 211, g: 178, b: 139 },
+        { cat: "Standards", name: "GRIS CLAIR", l: 60.50, c: 13.50, h: 91.00, r: 156, g: 147, b: 128 },
+        { cat: "Noirs & Gris", name: "50% BL 50% GR", l: 71.50, c: 10.00, h: 86.00, r: 188, g: 177, b: 161 },
+        { cat: "Noirs & Gris", name: "GS15", l: 74.50, c: 10.00, h: 81.00, r: 197, g: 185, b: 171 },
+        { cat: "Noirs & Gris", name: "SBN125", l: 61.00, c: 3.50, h: 90.00, r: 151, g: 148, b: 142 },
+        { cat: "Noirs & Gris", name: "SBN250", l: 52.00, c: 3.50, h: 90.00, r: 127, g: 124, b: 119 },
+        { cat: "Noirs & Gris", name: "GA125", l: 40.50, c: 1.50, h: 91.00, r: 97, g: 96, b: 93 },
+        { cat: "Noirs & Gris", name: "SBA250", l: 35.50, c: 0.50, h: 110.00, r: 85, g: 85, b: 84 },
+        { cat: "Noirs & Gris", name: "GA450R50", l: 26.00, c: 1.50, h: 91.00, r: 61, g: 60, b: 58 },
+        { cat: "Noirs & Gris", name: "SBA500", l: 19.00, c: 0.50, h: 20.00, r: 48, g: 44, b: 44 },
+        { cat: "Noirs & Gris", name: "GN500", l: 44.50, c: 2.00, h: 85.00, r: 107, g: 105, b: 102 },
+        { cat: "Noirs & Gris", name: "GA500", l: 26.50, c: 1.00, h: 75.00, r: 63, g: 61, b: 59 },
+        { cat: "Jaunes", name: "SBJ8.25", l: 78.00, c: 15.50, h: 83.00, r: 211, g: 193, b: 171 },
+        { cat: "Jaunes", name: "SBJ30", l: 80.00, c: 21.50, h: 87.00, r: 224, g: 196, b: 164 },
+        { cat: "Jaunes", name: "SBJ62.5", l: 75.50, c: 31.00, h: 87.00, r: 220, g: 180, b: 133 },
+        { cat: "Jaunes", name: "75% TP 25% BL", l: 76.50, c: 20.00, h: 88.00, r: 214, g: 187, b: 157 },
+        { cat: "Jaunes", name: "SBJ250", l: 71.00, c: 55.50, h: 84.00, r: 235, g: 159, b: 67 },
+        { cat: "Jaunes", name: "GJ250", l: 61.50, c: 42.00, h: 84.00, r: 193, g: 139, b: 73 },
+        { cat: "Jaunes", name: "SBJ500", l: 66.50, c: 60.00, h: 82.00, r: 228, g: 144, b: 38 },
+        { cat: "Jaunes", name: "GJ500", l: 58.00, c: 53.50, h: 80.00, r: 193, g: 125, b: 42 },
+        { cat: "Jaunes", name: "SBJ120N30", l: 63.00, c: 33.50, h: 87.00, r: 183, g: 147, b: 97 },
+        { cat: "Marron", name: "GS15J10", l: 65.00, c: 19.00, h: 81.00, r: 175, g: 155, b: 129 },
+        { cat: "Marron", name: "GN90S35", l: 48.00, c: 11.00, h: 74.00, r: 122, g: 111, b: 94 },
+        { cat: "Marron", name: "GS150N100", l: 62.50, c: 21.00, h: 74.00, r: 172, g: 146, b: 116 },
+        { cat: "Marron", name: "GS200N150", l: 49.00, c: 21.50, h: 71.00, r: 136, g: 110, b: 83 },
+        { cat: "Marron", name: "SBJ90R70N90", l: 57.00, c: 24.00, h: 67.00, r: 162, g: 129, b: 98 },
+        { cat: "Marron", name: "GS150A100", l: 48.00, c: 12.00, h: 81.00, r: 125, g: 111, b: 94 },
+        { cat: "Marron", name: "GS125N250R125", l: 48.50, c: 19.00, h: 58.00, r: 140, g: 107, b: 91 },
+        { cat: "Marron", name: "SBJ180R180N140", l: 54.50, c: 27.50, h: 64.00, r: 164, g: 120, b: 94 },
+        { cat: "Marron", name: "GN416S84", l: 29.00, c: 7.50, h: 78.00, r: 76, g: 68, b: 58 },
+        { cat: "Marron", name: "GS250A250", l: 34.00, c: 8.00, h: 78.00, r: 89, g: 80, b: 69 },
+        { cat: "Marron", name: "GS300A200", l: 33.00, c: 12.00, h: 72.00, r: 91, g: 76, b: 61 },
+        { cat: "Rouges", name: "GR150J100", l: 53.50, c: 39.00, h: 57.00, r: 170, g: 112, b: 79 },
+        { cat: "Rouges", name: "SBR125", l: 63.50, c: 34.50, h: 45.00, r: 200, g: 137, b: 117 },
+        { cat: "Rouges", name: "GR125", l: 50.50, c: 29.00, h: 47.00, r: 154, g: 109, b: 91 },
+        { cat: "Rouges", name: "GR150S100", l: 55.00, c: 39.50, h: 53.00, r: 178, g: 115, b: 87 },
+        { cat: "Rouges", name: "SBR250", l: 60.00, c: 37.50, h: 42.00, r: 196, g: 125, b: 106 },
+        { cat: "Rouges", name: "GR100N25", l: 48.00, c: 24.50, h: 48.00, r: 144, g: 104, b: 91 },
+        { cat: "Rouges", name: "SBR375", l: 52.00, c: 45.00, h: 42.00, r: 181, g: 100, b: 82 },
+        { cat: "Rouges", name: "GR375", l: 43.50, c: 43.50, h: 44.00, r: 154, g: 79, b: 65 },
+        { cat: "Rouges", name: "GR250", l: 53.00, c: 36.50, h: 45.00, r: 170, g: 111, b: 94 },
+        { cat: "Rouges", name: "GR250S250", l: 49.00, c: 49.00, h: 52.00, r: 167, g: 94, b: 72 },
+        { cat: "Rouges", name: "GR300S200", l: 42.50, c: 46.00, h: 47.00, r: 147, g: 78, b: 63 },
+        { cat: "Saumon", name: "SBS15J20", l: 75.50, c: 27.50, h: 77.00, r: 219, g: 180, b: 144 },
+        { cat: "Saumon", name: "SBS62.5", l: 72.00, c: 28.00, h: 69.00, r: 209, g: 168, b: 137 },
+        { cat: "Saumon", name: "SBS125", l: 64.00, c: 42.50, h: 64.00, r: 202, g: 141, b: 102 },
+        { cat: "Saumon", name: "GS62.5", l: 63.50, c: 30.00, h: 72.00, r: 182, g: 147, b: 116 },
+        { cat: "Saumon", name: "GS125", l: 54.50, c: 32.50, h: 67.00, r: 161, g: 122, b: 92 },
+        { cat: "Saumon", name: "GS250", l: 57.50, c: 39.50, h: 66.00, r: 176, g: 127, b: 92 },
+        { cat: "Saumon", name: "SBS250", l: 59.00, c: 47.50, h: 62.00, r: 189, g: 126, b: 88 },
+        { cat: "Saumon", name: "SBJ45R45N35", l: 58.00, c: 22.50, h: 66.00, r: 157, g: 135, b: 111 },
+        { cat: "Saumon", name: "SBS500", l: 57.00, c: 52.00, h: 61.00, r: 189, g: 118, b: 79 },
+        { cat: "Saumon", name: "GS500", l: 49.00, c: 46.50, h: 58.00, r: 161, g: 100, b: 68 },
+        { cat: "Saumon", name: "GS375R125", l: 45.00, c: 44.00, h: 53.00, r: 148, g: 90, b: 66 },
+        { cat: "Lie de vin", name: "GR125N100S25", l: 51.50, c: 20.00, h: 50.00, r: 143, g: 115, b: 101 },
+        { cat: "Lie de vin", name: "GR200N50", l: 52.00, c: 26.00, h: 47.00, r: 151, g: 113, b: 96 },
+        { cat: "Lie de vin", name: "SBR250N125", l: 42.50, c: 22.50, h: 42.00, r: 123, g: 91, b: 82 },
+        { cat: "Lie de vin", name: "GR300S100N100", l: 42.50, c: 32.00, h: 47.00, r: 133, g: 88, b: 75 },
+        { cat: "Lie de vin", name: "GR200S200N100", l: 53.00, c: 32.00, h: 52.00, r: 160, g: 115, b: 95 },
+        { cat: "Lie de vin", name: "GR416N84", l: 42.00, c: 35.00, h: 40.00, r: 133, g: 87, b: 78 }
     ];
 
     let ORIGINAL_NUANCIER = [];
@@ -363,7 +363,7 @@
     let cropStartX = 0; let cropStartY = 0;
 
     const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { colorSpace: 'srgb' }); // Force sRGB pour garantir la fidélité
     let currentSlot = 0;
     const STORAGE_KEY = 'biamortier_user_lib';
     
@@ -830,7 +830,7 @@
         const idx = NUANCIER_COMPLET.findIndex(x => x.name === currentJointColor.name);
         if(idx !== -1) {
             const tCvs = document.createElement('canvas'); tCvs.width = 1; tCvs.height = 1;
-            const tCtx = tCvs.getContext('2d');
+            const tCtx = tCvs.getContext('2d', { colorSpace: 'srgb' });
             tCtx.fillStyle = `lch(${l}% ${c} ${h})`; tCtx.fillRect(0,0,1,1);
             const p = tCtx.getImageData(0,0,1,1).data;
             NUANCIER_COMPLET[idx] = {...NUANCIER_COMPLET[idx], l, c, h, r:p[0], g:p[1], b:p[2]};
@@ -857,7 +857,7 @@
     function generateExportCode() {
         let code = "    let NUANCIER_COMPLET = [\n";
         NUANCIER_COMPLET.forEach((item, i) => {
-            code += `        { cat: "${item.cat}", name: "${item.name}", l: ${Number(item.l).toFixed(2)}, c: ${Number(item.c).toFixed(2)}, h: ${Number(item.h).toFixed(2)} }${i < NUANCIER_COMPLET.length-1 ? ',' : ''}\n`;
+            code += `        { cat: "${item.cat}", name: "${item.name}", l: ${Number(item.l).toFixed(2)}, c: ${Number(item.c).toFixed(2)}, h: ${Number(item.h).toFixed(2)}, r: ${item.r}, g: ${item.g}, b: ${item.b} }${i < NUANCIER_COMPLET.length-1 ? ',' : ''}\n`;
         });
         code += "    ];"; document.getElementById('export-text').value = code; document.getElementById('export-modal').style.display = 'flex';
     }
@@ -876,13 +876,13 @@
 
     function convertLchPaletteToRgb() {
         const tCvs = document.createElement('canvas'); tCvs.width = 1; tCvs.height = 1;
-        const tCtx = tCvs.getContext('2d', { willReadFrequently: true });
+        const tCtx = tCvs.getContext('2d', { willReadFrequently: true, colorSpace: 'srgb' });
         NUANCIER_COMPLET.forEach(item => {
             if (item.l !== undefined && item.r === undefined) {
                 tCtx.clearRect(0,0,1,1);
                 tCtx.fillStyle = `lch(${item.l}% ${item.c} ${item.h})`;
                 tCtx.fillRect(0, 0, 1, 1);
-                const p = tCtx.getImageData(0, 0, 1, 1).data;
+                const p = tCtx.getImageData(0, 0, 1, 1, { colorSpace: 'srgb' }).data;
                 item.r = p[0]; item.g = p[1]; item.b = p[2];
             }
         });
@@ -907,8 +907,10 @@
             return cvs;
         });
 
+        // Application de la couleur du joint avec les valeurs RGB exactes
         ctx.fillStyle = currentJointColor ? `rgb(${currentJointColor.r}, ${currentJointColor.g}, ${currentJointColor.b})` : "#e0e0e0";
         ctx.fillRect(0, 0, W, H);
+        
         ctx.globalCompositeOperation = 'overlay'; ctx.fillStyle = grainTexture; ctx.fillRect(0,0,W,H);
         ctx.globalCompositeOperation = 'source-over';
         
