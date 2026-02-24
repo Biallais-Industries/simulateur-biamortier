@@ -875,22 +875,17 @@
     }
 
     function convertLchPaletteToRgb() {
-        const tempDiv = document.createElement('div');
-        tempDiv.style.display = 'none';
-        document.body.appendChild(tempDiv);
+        const tCvs = document.createElement('canvas'); tCvs.width = 1; tCvs.height = 1;
+        const tCtx = tCvs.getContext('2d', { willReadFrequently: true });
         NUANCIER_COMPLET.forEach(item => {
             if (item.l !== undefined && item.r === undefined) {
-                tempDiv.style.color = `lch(${item.l}% ${item.c} ${item.h})`;
-                const rgb = window.getComputedStyle(tempDiv).color;
-                const match = rgb.match(/\d+/g);
-                if (match) {
-                    item.r = parseInt(match[0]);
-                    item.g = parseInt(match[1]);
-                    item.b = parseInt(match[2]);
-                }
+                tCtx.clearRect(0,0,1,1);
+                tCtx.fillStyle = `lch(${item.l}% ${item.c} ${item.h})`;
+                tCtx.fillRect(0, 0, 1, 1);
+                const p = tCtx.getImageData(0, 0, 1, 1).data;
+                item.r = p[0]; item.g = p[1]; item.b = p[2];
             }
         });
-        document.body.removeChild(tempDiv);
     }
 
     function render() {
