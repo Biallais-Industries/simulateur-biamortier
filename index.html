@@ -217,6 +217,11 @@
                 <input type="range" id="dev-h" min="0" max="360" step="1" value="0" oninput="updateAdminColor()">
                 <span class="val-badge" id="val-h">0</span>
             </div>
+            <div class="calibration-slider" style="border-top: 1px solid #ccc; padding-top: 10px; margin-top: 10px;">
+                <label style="color:#0d47a1; width: 110px;">Corr. Mobile</label>
+                <input type="range" id="dev-mobile-sat" min="0.5" max="1.5" step="0.05" value="1.0" oninput="updateMobileCorrection()">
+                <span class="val-badge" id="val-mobile-sat">1.0</span>
+            </div>
             <button onclick="generateExportCode()" style="margin-top:10px; width:100%; background:#343a40; color:white; padding:8px; border-radius:4px; font-size:0.8rem; cursor:pointer; border:none;">📥 Exporter le Nuancier mis à jour</button>
         </div>
 
@@ -285,6 +290,7 @@
 <script>
     // --- DÉTECTION MOBILE POUR CORRECTION GAMMA ---
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    let mobileSaturationCorrection = 1.0;
 
     // --- LISTE DES COULEURS AVEC VALEURS RGB FIGÉES ---
     let NUANCIER_COMPLET = [
@@ -387,6 +393,13 @@
         if (box.style.display === 'block') { box.style.display = 'none'; return; }
         const password = prompt("Saisir le mot de passe administrateur :");
         if (password === "RAPCOM47T") { box.style.display = 'block'; } else { alert("Accès refusé."); }
+    }
+
+    // --- CORRECTION MOBILE SPÉCIFIQUE ---
+    function updateMobileCorrection() {
+        mobileSaturationCorrection = parseFloat(document.getElementById('dev-mobile-sat').value);
+        document.getElementById('val-mobile-sat').innerText = mobileSaturationCorrection.toFixed(2);
+        scheduleRender();
     }
 
     function rotateImageInCrop() {
@@ -910,13 +923,20 @@
             return cvs;
         });
 
-        // --- GESTION COULEUR JOINT (CORRECTION MOBILE) ---
+        // --- GESTION COULEUR JOINT ---
         let jr = currentJointColor ? currentJointColor.r : 224;
         let jg = currentJointColor ? currentJointColor.g : 224;
         let jb = currentJointColor ? currentJointColor.b : 224;
 
         if (isMobile) {
-            // Assombrissement progressif sur mobile pour compenser la brillance OLED
+            // Application du coefficient correcteur uniquement sur mobile
+            const avg = (jr + jg + jb) / 3;
+            const satFact = mobileSaturationCorrection;
+            jr = Math.round(avg + (jr - avg) * satFact);
+            jg = Math.round(avg + (jg - avg) * satFact);
+            jb = Math.round(avg + (jb - avg) * satFact);
+            
+            // Légère compensation de luminosité pour les écrans OLED
             jr = Math.round(jr * 0.9);
             jg = Math.round(jg * 0.9);
             jb = Math.round(jb * 0.9);
