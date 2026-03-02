@@ -228,6 +228,14 @@
                 <span class="val-badge" id="val-mobile-sat">1.0</span>
             </div>
             <button onclick="generateExportCode()" style="margin-top:10px; width:100%; background:#343a40; color:white; padding:8px; border-radius:4px; font-size:0.8rem; cursor:pointer; border:none;">📥 Exporter le Nuancier mis à jour</button>
+			<h4 style="margin: 15px 0 10px 0; border-top: 1px solid #ccc; padding-top: 10px;">🔄 Partager une configuration</h4>
+           			 <div style="display: flex; gap: 10px;">
+             		<button onclick="exportConfiguration()" style="background: #17a2b8; color: white; flex: 1; font-size: 0.8rem; padding: 8px; border:none; border-radius:4px; 		cursor:pointer; font-weight:bold;">📤 Exporter (.json)</button>
+                        <label style="background: #6c757d; color: white; flex: 1; font-size: 0.8rem; padding: 8px; border:none; border-radius:4px; cursor:pointer; font-weight:bold; text-align:center; display:block; margin: 0;">
+                    📥 Importer (.json)
+                    <input type="file" accept=".json" style="display:none;" onchange="importConfiguration(event)">
+                </label>
+          		  </div>
         </div>
 
         <div class="input-row" style="margin-top:15px; align-items: flex-end;">
@@ -1002,6 +1010,71 @@
         const { jsPDF } = window.jspdf; const doc = new jsPDF('l', 'mm', 'a4');
         doc.addImage(canvas.toDataURL('image/jpeg', 0.90), 'JPEG', 10, 10, 277, 190);
         doc.save('Projet_Biamortier.pdf');
+    }
+// --- EXPORT / IMPORT DE CONFIGURATIONS (RÉSERVÉ ADMIN) ---
+
+    async function exportConfiguration() {
+        const idx = document.getElementById('userLibrarySelect').value;
+        if(idx === "") { alert("Veuillez d'abord sélectionner un projet dans 'Ma Bibliothèque' à exporter."); return; }
+        
+        const lib = await getUserLibrary();
+        const configToExport = lib[idx];
+        
+        // Convertir l'objet en texte JSON
+        const dataStr = JSON.stringify(configToExport);
+        const blob = new Blob([dataStr], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        
+        // Lancer le téléchargement
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Biamortier_${configToExport.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    async function importConfiguration(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            try {
+                const importedConfig = JSON.parse(e.target.result);
+                
+                // Vérification de sécurité basique
+                if (!importedConfig.name || !importedConfig.dims) {
+                    throw new Error("Fichier non reconnu.");
+                }
+                
+                // On met à jour l'ID pour éviter les conflits et on ajoute un tag
+                importedConfig.id = Date.now();
+                importedConfig.date = new Date().toISOString();
+                importedConfig.name = importedConfig.name + " (Import)";
+                
+                // Ajout à la base IndexedDB
+                const lib = await getUserLibrary();
+                lib.push(importedConfig);
+                await localforage.setItem(STORAGE_KEY, lib);
+                
+                alert(`✅ Configuration "${importedConfig.name}" importée avec succès !`);
+                await refreshLibraryUI();
+                
+                // Sélectionner et charger automatiquement la nouvelle configuration
+                const sel = document.getElementById('userLibrarySelect');
+                sel.selectedIndex = sel.options.length - 1;
+                loadUserPreset();
+
+            } catch (err) {
+                console.error("Erreur d'import :", err);
+                alert("❌ Impossible de lire ce fichier. Est-ce bien un fichier d'export valide ?");
+            }
+            // Réinitialiser le champ file
+            event.target.value = '';
+        };
+        reader.readAsText(file);
     }
 </script>
 </body>
