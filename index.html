@@ -10,6 +10,7 @@
     <meta name="theme-color" content="#0d47a1">
     <link rel="manifest" href="manifest.json">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', sans-serif; background: #eef2f6; margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: row; }
@@ -138,11 +139,15 @@
         <details class="tips-box">
             <summary>ℹ️ Conseils pour une bonne photo</summary>
             <ul>
+                <li><strong>Prise de vue groupée :</strong> Prenez <strong>une seule photo contenant 3 à 5 briques</strong> posées les unes au-dessus des autres (voir exemple ci-dessous). L'outil de recadrage vous permettra ensuite d'importer chaque brique indépendamment. Cela garantit un éclairage et un déclenchement identiques pour toutes les nuances.</li>
                 <li><strong>Lumière :</strong> Photo en extérieur, <strong>à l'ombre</strong> (ou ciel couvert). Pas de plein soleil ni de néons intérieurs.</li>
-                <li><strong>Support neutre :</strong> Posez la brique sur du béton ou du bitume. Évitez les fonds colorés (herbe, bâche) qui s'y reflètent.</li>
-                <li><strong>Humidité :</strong> La brique doit être parfaitement sèche (une brique mouillée paraît 20% plus foncée).</li>
-                <li><strong>Astuce :</strong> Restez appuyé 2 sec. sur la brique à l'écran du téléphone pour verrouiller l'exposition (Cadenas AE/AF) avant de prendre la photo.</li>
+                <li><strong>Support neutre :</strong> Posez les briques sur du béton ou du bitume. Évitez les fonds colorés (herbe, bâche) qui s'y reflètent.</li>
+                <li><strong>Humidité :</strong> Les briques doivent être parfaitement sèches (une brique mouillée paraît 20% plus foncée).</li>
             </ul>
+            <div style="text-align: center; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #90caf9;">
+                <strong style="display: block; margin-bottom: 8px; font-size: 0.85rem;">Exemple de photo idéale :</strong>
+                <img src="exemple-briques.jpg" alt="Exemple de prise de vue groupée" style="max-width: 100%; max-height: 250px; border-radius: 6px; border: 1px solid #90caf9; object-fit: contain;">
+            </div>
         </details>
 
         <div class="upload-grid">
@@ -489,10 +494,15 @@
         img.src = defaultBrickSrc;
     };
 
-    function getUserLibrary() { const s = localStorage.getItem(STORAGE_KEY); return s ? JSON.parse(s) : []; }
-    
-    function refreshLibraryUI() {
-        const lib = getUserLibrary();
+    // --- NOUVELLES FONCTIONS DE SAUVEGARDE VIA INDEXEDDB ---
+
+    async function getUserLibrary() {
+        const s = await localforage.getItem(STORAGE_KEY);
+        return s ? s : [];
+    }
+
+    async function refreshLibraryUI() {
+        const lib = await getUserLibrary();
         const sel = document.getElementById('userLibrarySelect');
         sel.innerHTML = '<option value="">-- Projets sauvegardés --</option>';
         lib.forEach((item, index) => {
@@ -503,9 +513,10 @@
         });
     }
 
-    function saveToUserLibrary() {
+    async function saveToUserLibrary() {
         const name = document.getElementById('input-brick-name').value;
         if(!name || name.trim() === "") { alert("Veuillez nommer le projet."); return; }
+        
         const config = {
             id: Date.now(), date: new Date().toISOString(), name: name,
             dims: { l: document.getElementById('input-longueur').value, h: document.getElementById('input-hauteur').value, ep: document.getElementById('slider-epaisseur').value },
@@ -513,33 +524,38 @@
             joint: currentJointColor,
             images: loadedBricks.map(img => img && img.src.startsWith('data:image') && !img.isPlaceholder ? img.src : null)
         };
+        
         try {
-            const lib = getUserLibrary(); lib.push(config);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(lib));
-            alert("✅ Configuration sauvegardée !");
+            const lib = await getUserLibrary();
+            lib.push(config);
+            await localforage.setItem(STORAGE_KEY, lib);
+            alert("✅ Configuration sauvegardée (avec vos images) !");
+            refreshLibraryUI();
         } catch (e) {
-            config.images = [null, null, null];
-            const lib = getUserLibrary(); lib.push(config);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(lib));
-            alert("⚠️ Sauvegardé sans images.");
+            console.error("Erreur d'écriture IndexedDB :", e);
+            alert("⚠️ Un problème est survenu lors de la sauvegarde.");
         }
-        refreshLibraryUI();
     }
 
-    function deleteFromUserLibrary() {
+    async function deleteFromUserLibrary() {
         const idx = document.getElementById('userLibrarySelect').value;
-        if(idx==="") return;
+        if(idx === "") return;
         if(confirm("Supprimer ce projet ?")) {
-            const lib = getUserLibrary(); lib.splice(idx, 1);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(lib)); refreshLibraryUI();
+            const lib = await getUserLibrary();
+            lib.splice(idx, 1);
+            await localforage.setItem(STORAGE_KEY, lib);
+            refreshLibraryUI();
         }
     }
 
-    function loadUserPreset() {
+    async function loadUserPreset() {
         const idx = document.getElementById('userLibrarySelect').value;
-        if(idx==="") return;
-        const p = getUserLibrary()[idx];
+        if(idx === "") return;
+        
+        const lib = await getUserLibrary();
+        const p = lib[idx];
         if(!p) return;
+        
         document.getElementById('input-brick-name').value = p.name;
         document.getElementById('input-longueur').value = p.dims.l;
         document.getElementById('input-hauteur').value = p.dims.h;
@@ -549,6 +565,7 @@
         document.getElementById('calib-contrast').value = p.calib.c;
         document.getElementById('calib-saturation').value = p.calib.s || 100;
         document.getElementById('calib-hue').value = p.calib.h || 0;
+        
         if(p.joint) {
             currentJointColor = p.joint;
             document.getElementById('categorySelect').value = p.joint.cat;
@@ -561,7 +578,13 @@
                  }
             }
         }
+        
         if(p.images) {
+            let loadedCount = 0;
+            let imagesToLoad = p.images.filter(src => src !== null).length;
+            
+            if (imagesToLoad === 0) forceWallRegen();
+            
             p.images.forEach((src, i) => {
                 if(src) {
                     const img = new Image();
@@ -569,13 +592,19 @@
                     img.onload = () => { 
                         loadedBricks[i] = img; 
                         updateSlotVisual(i, src, false); 
-                        if(i===p.images.length-1) forceWallRegen(); 
+                        loadedCount++;
+                        if(loadedCount === imagesToLoad) forceWallRegen(); 
                     };
                     img.src = src;
+                } else {
+                    loadedBricks[i] = null;
+                    updateSlotVisual(i, "", true);
                 }
             });
         }
     }
+
+    // --- FIN DES NOUVELLES FONCTIONS ---
 
     function submitToAdmin() {
         const bNameInput = document.getElementById('input-brick-name').value.trim();
@@ -702,7 +731,6 @@
         scheduleRender();
     }
 
-    // --- LOGIQUE AUTO ET PIPETTE RÉVISÉE (POST-CALIBRATION) ---
     function triggerAutoDetection() {
         const best = analyzeFilteredColorAndSuggest();
         if (best) {
@@ -715,7 +743,6 @@
     }
 
     function analyzeFilteredColorAndSuggest() {
-        // On crée un canvas temporaire pour appliquer les filtres à une brique test isolée
         const validBricks = loadedBricks.filter(b => b && !b.isPlaceholder);
         const targetImg = validBricks.length > 0 ? validBricks[0] : loadedBricks[0];
         
@@ -723,7 +750,6 @@
         tempCvs.width = 100; tempCvs.height = 100;
         const tCtx = tempCvs.getContext('2d');
         
-        // On applique les MÊMES filtres que le rendu principal pour avoir la couleur "réelle" de la brique calibrée
         tCtx.filter = `brightness(${document.getElementById('calib-brightness').value}%) contrast(${document.getElementById('calib-contrast').value}%) saturate(${document.getElementById('calib-saturation').value}%) hue-rotate(${document.getElementById('calib-hue').value}deg)`;
         tCtx.drawImage(targetImg, 0, 0, 100, 100);
         
@@ -737,7 +763,6 @@
         const r = tR/cnt, g = tG/cnt, b = tB/cnt;
         let minD = Infinity, best = null;
         
-        // Comparaison précise avec le nuancier figé
         NUANCIER_COMPLET.forEach(j => {
             if (j.r !== undefined) {
                 const dist = Math.sqrt((j.r-r)**2 + (j.g-g)**2 + (j.b-b)**2);
