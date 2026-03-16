@@ -12,7 +12,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
     <style>
-        /* STYLE ORIGINAL CONSERVÉ */
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', sans-serif; background: #eef2f6; margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: row; }
         .controls { width: 380px; min-width: 380px; background: white; height: 100%; overflow-y: auto; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 10; display: flex; flex-direction: column; gap: 15px; }
@@ -26,33 +25,57 @@
         input[type="text"], input[type="number"], select { width: 100%; padding: 8px; border: 1px solid #ced4da; border-radius: 6px; font-size: 0.9rem; }
         input[type="range"] { width: 100%; margin: 8px 0; }
         .upload-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+        .brick-container { display: flex; flex-direction: column; align-items: center; gap: 5px; }
         .brick-slot { width: 100%; aspect-ratio: 16/9; border: 2px dashed #cbd5e1; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; position: relative; background: #f8f9fa; transition: 0.2s; font-size: 0.8rem; color: #adb5bd; flex-direction: column; text-align:center; line-height: 1.3; }
         .brick-slot:hover { border-color: #007bff; color: #007bff; background: #eef7ff; }
         .brick-slot img { width: 100%; height: 100%; object-fit: cover; }
         .brick-slot.active { border-style: solid; border-color: #28a745; }
         .remove-btn { position: absolute; top: 2px; right: 2px; background: rgba(255,0,0,0.7); color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 10px; display: flex; align-items: center; justify-content: center; z-index: 10; cursor: pointer; }
+        
+        .tips-box { background: #e3f2fd; border: 1px solid #90caf9; border-radius: 6px; padding: 10px; margin-bottom: 15px; font-size: 0.8rem; color: #0d47a1; }
+        .tips-box summary { font-weight: bold; cursor: pointer; list-style: none; outline: none; }
+        .tips-box summary::-webkit-details-marker { display: none; }
+        .tips-box ul { margin: 8px 0 0 0; padding-left: 20px; color: #333; }
+        .tips-box li { margin-bottom: 6px; }
+        .tips-box strong { color: #0d47a1; }
+
         .calibration-box { background: #fff3cd; border: 1px solid #ffeeba; padding: 10px; border-radius: 8px; margin-top: 15px; position: relative; }
         .calibration-slider { display: flex; align-items: center; gap: 10px; font-size: 0.8rem; margin-bottom: 5px; }
         .calibration-slider label { width: 70px; margin:0; font-weight: bold; }
-        .dev-box { background: #e2e3e5; border: 1px solid #d6d8db; padding: 10px; border-radius: 8px; margin-top: 10px; }
+        .calibration-slider input[type="range"] { flex:1; }
+        .reset-calib-btn { position: absolute; top: 10px; right: 10px; background: #fff; border: 1px solid #e0c46c; border-radius: 4px; font-size: 0.7rem; padding: 2px 6px; cursor: pointer; color: #856404; }
+        
+        .dev-box { background: #e2e3e5; border: 1px solid #d6d8db; padding: 10px; border-radius: 8px; margin-top: 10px; margin-bottom: 10px; }
+        .dev-box h4 { margin:0 0 10px 0; font-size:0.85rem; color:#383d41; display:flex; justify-content:space-between; align-items:center; }
         .val-badge { background: #fff; padding: 2px 5px; border-radius: 4px; font-size: 0.7rem; border: 1px solid #ccc; width:45px; text-align:center; display:inline-block; }
+
         .btn-group { display: flex; gap: 10px; margin-top: 10px; }
         button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .btn-jpg { background: #198754; color: white; }
         .btn-pdf { background: #dc3545; color: white; }
+        button:hover { opacity: 0.95; transform: translateY(-1px); }
         #joint-preview-dot { width: 40px; height: 38px; border-radius: 6px; border: 1px solid #dee2e6; background-color: #f4f4f4; flex-shrink: 0; }
+        .btn-magic { background: linear-gradient(135deg, #6610f2, #5f3dc4); color: white; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(102, 16, 242, 0.2); transition: 0.2s; font-size: 0.85rem; }
+        .btn-magic-alt { background: linear-gradient(135deg, #0d6efd, #0b5ed7); color: white; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2); transition: 0.2s; font-size: 0.85rem; }
         
-        /* AJOUTS POUR FAVORIS ET RESET */
-        .btn-fav { background: #fff; border: 1px solid #ced4da; border-radius: 6px; width: 38px; height: 38px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
-        .fav-bar { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; min-height: 30px; padding: 5px; background: #f0f4f8; border-radius: 6px; }
-        .fav-pill { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px; border: 1px solid rgba(0,0,0,0.1); }
-        .submit-btn { background: #0d47a1; color: white; width: 100%; margin-top: 15px; padding: 12px; border-radius: 6px; border:none; cursor: pointer; font-weight: bold; }
-        .reset-btn { background: #6c757d; color: white; width: 100%; margin-top: 8px; padding: 8px; border-radius: 6px; border:none; cursor: pointer; font-weight: bold; font-size: 0.8rem; }
+        .submit-btn { background: #0d47a1; color: white; width: 100%; margin-top: 15px; padding: 12px; border-radius: 6px; border:none; cursor: pointer; font-weight: bold; display:flex; align-items:center; justify-content:center; gap:8px; }
+        .library-box { background: #e3f2fd; border: 1px solid #90caf9; padding: 15px; border-radius: 8px; margin-bottom: 5px; }
+        .lib-controls { display: flex; gap: 5px; margin-top: 10px; }
+        .btn-rotate { background: #ff9800; color: white; font-size: 0.9rem; margin-bottom: 10px; border:none; padding:8px; border-radius:6px; cursor:pointer; font-weight:bold;}
+        .btn-save-lib { background: #0d6efd; color: white; flex: 2; font-size: 0.8rem; padding: 8px; }
+        .btn-del-lib { background: #dc3545; color: white; flex: 1; font-size: 0.8rem; padding: 8px; }
+        .fixed-value-box { width: 100%; padding: 8px; background: #e9ecef; border: 1px solid #ced4da; border-radius: 6px; font-size: 0.85rem; color: #495057; text-align: center; font-weight: bold;}
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 2000; display: flex; justify-content: center; align-items: center; flex-direction: column; }
         .modal-content { background: white; padding: 20px; border-radius: 8px; text-align: center; max-width: 95vw; max-height: 95vh; display:flex; flex-direction:column; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
         .crop-canvas-container { position:relative; display:inline-block; max-width:100%; margin-top: 10px; background: #222; border-radius: 4px; overflow:hidden;}
         #crop-canvas { max-width: 100%; max-height: 60vh; cursor: crosshair; touch-action: none; display: block; }
+
+        @media (max-width: 850px) {
+            body { flex-direction: column; overflow: auto; height: auto; }
+            .preview-container { order: 1; position: sticky; top: 0; z-index: 100; height: 40vh; padding: 10px; border-bottom: 2px solid #ccc; }
+            .controls { order: 2; width: 100%; height: auto; overflow: visible; box-shadow: none; padding-bottom: 50px; }
+        }
     </style>
 </head>
 <body>
@@ -60,8 +83,11 @@
 <div id="crop-modal" class="modal-overlay" style="display:none;">
     <div class="modal-content">
         <h2 style="margin: 0; color: #0d47a1;">✂️ Recadrer la brique</h2>
-        <button onclick="rotateImageInCrop()" style="background:#ff9800; color:white; margin-bottom:10px; padding:8px; border-radius:6px; border:none; cursor:pointer; font-weight:bold;">🔄 Pivoter 90°</button>
-        <div class="crop-canvas-container"><canvas id="crop-canvas"></canvas></div>
+        <p style="font-size: 0.9rem; color: #555; margin-bottom: 5px;">Tracez un rectangle. <b>Les proportions sont automatiquement verrouillées.</b></p>
+        <button class="btn-rotate" onclick="rotateImageInCrop()">🔄 Pivoter 90°</button>
+        <div class="crop-canvas-container">
+            <canvas id="crop-canvas"></canvas>
+        </div>
         <div class="btn-group" style="margin-top:20px;">
             <button onclick="closeCropModal()" style="background:#6c757d; color:white;">❌ Annuler</button>
             <button onclick="validateCrop()" style="background:#198754; color:white;">✅ Valider le recadrage</button>
@@ -71,393 +97,985 @@
 
 <div id="export-modal" class="modal-overlay" style="display:none;">
     <div class="modal-content" style="width: 600px; max-width: 90vw;">
-        <h2>📥 Code Secret du Nuancier</h2>
-        <p style="font-size:0.8rem; color:#666; margin-bottom:10px;">Remplacez la variable _ENC_DATA tout en haut du script par ce code.</p>
-        <textarea id="export-text" style="width: 100%; height: 300px; font-family: monospace; font-size: 0.75rem; padding: 10px; border: 1px solid #ccc;" readonly></textarea>
+        <h2 style="margin: 0 0 10px 0; color: #0d47a1;">📥 Code du Nuancier Mis à Jour</h2>
+        <p style="font-size: 0.85rem; color: #555; margin-bottom: 15px;">Copiez ce texte et remplacez l'ancien bloc <b>NUANCIER_COMPLET</b> dans votre code HTML.</p>
+        <textarea id="export-text" style="width: 100%; height: 300px; font-family: monospace; font-size: 0.8rem; padding: 10px; border-radius: 4px; border: 1px solid #ccc;" readonly></textarea>
         <div class="btn-group" style="margin-top:20px;">
             <button onclick="document.getElementById('export-modal').style.display='none'" style="background:#6c757d; color:white;">Fermer</button>
-            <button onclick="copyExportText()" style="background:#0d6efd; color:white;">📋 Copier</button>
+            <button onclick="copyExportText()" style="background:#0d6efd; color:white;">📋 Copier le code</button>
         </div>
     </div>
 </div>
 
 <div class="controls">
-    <h2>🛠️ Configurateur V1.5.3</h2>
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid #f0f2f5; padding-bottom:10px; margin-bottom:5px;">
+        <h2>🛠️ Configurateur</h2>
+        <span style="font-size:0.7rem; color:#888;">V1 - Lancement</span>
+    </div>
 
-    <div style="background: #e3f2fd; border: 1px solid #90caf9; padding: 15px; border-radius: 8px; margin-bottom: 5px;">
-        <label>Ma Bibliothèque</label>
-        <select id="userLibrarySelect" onchange="loadUserPreset()"><option value="">-- Projets sauvegardés --</option></select>
-        <div style="display:flex; gap:5px; margin-top:8px;">
-            <button onclick="saveToUserLibrary()" style="background:#0d6efd; color:white; font-size:0.8rem; padding:8px;">+ Sauvegarder</button>
-            <button onclick="deleteFromUserLibrary()" style="background:#dc3545; color:white; font-size:0.8rem; padding:8px;">Suppr.</button>
+    <div class="library-box">
+        <h3 style="color:#0d47a1; margin:0 0 10px 0; font-size:0.9rem;">💾 Ma Bibliothèque</h3>
+        <select id="userLibrarySelect" onchange="loadUserPreset()" style="width:100%;">
+            <option value="">-- Projets sauvegardés --</option>
+        </select>
+        <div class="lib-controls">
+            <button class="btn-save-lib" onclick="saveToUserLibrary()">+ Sauvegarder</button>
+            <button class="btn-del-lib" onclick="deleteFromUserLibrary()">Supprimer</button>
         </div>
     </div>
     
     <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
         <h3>1. Configuration Brique</h3>
-        <input type="text" id="input-brick-name" placeholder="Nom de la brique" oninput="scheduleRender()" style="margin-bottom:10px;">
-        <div class="input-row">
-            <div class="input-group"><label>L. (mm)</label><input type="number" id="input-longueur" value="220" onchange="forceWallRegen()"></div>
-            <div class="input-group"><label>H. (mm)</label><input type="number" id="input-hauteur" value="60" onchange="forceWallRegen()"></div>
+        <div style="margin-bottom: 10px;">
+            <label>Nom de la brique (Fabricant + Type) <span style="color:red;">*</span> :</label>
+            <input type="text" id="input-brick-name" placeholder="Ex: Brique Moulée Main Rouge" oninput="scheduleRender()">
+        </div>
+        
+        <div class="input-row" style="margin-bottom:15px;">
+            <div class="input-group"><label>L. (mm)</label><input type="number" id="input-longueur" value="220" min="50" max="600" onchange="forceWallRegen()"></div>
+            <div class="input-group"><label>H. (mm)</label><input type="number" id="input-hauteur" value="60" min="20" max="300" onchange="forceWallRegen()"></div>
         </div>
 
+        <details class="tips-box">
+            <summary>ℹ️ Conseils pour une bonne photo</summary>
+            <ul>
+                <li><strong>Prise de vue groupée :</strong> Prenez <strong>une seule photo contenant 3 à 5 briques</strong> posées les unes au-dessus des autres (voir exemple ci-dessous). L'outil de recadrage vous permettra ensuite d'importer chaque brique indépendamment. Cela garantit un éclairage et un déclenchement identiques pour toutes les nuances.</li>
+                <li><strong>Lumière :</strong> Photo en extérieur, <strong>à l'ombre</strong> (ou ciel couvert). Pas de plein soleil ni de néons intérieurs.</li>
+                <li><strong>Support neutre :</strong> Posez les briques sur du béton ou du bitume. Évitez les fonds colorés (herbe, bâche) qui s'y reflètent.</li>
+                <li><strong>Humidité :</strong> Les briques doivent être parfaitement sèches (une brique mouillée paraît 20% plus foncée).</li>
+            </ul>
+            <div style="text-align: center; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #90caf9;">
+                <strong style="display: block; margin-bottom: 8px; font-size: 0.85rem;">Exemple de photo idéale :</strong>
+                <img src="exemple-briques.jpg" alt="Exemple de prise de vue groupée" style="max-width: 100%; max-height: 250px; border-radius: 6px; border: 1px solid #90caf9; object-fit: contain;">
+            </div>
+        </details>
+
         <div class="upload-grid">
-            <div class="brick-slot" id="slot-0" onclick="triggerUpload(0)"></div>
-            <div class="brick-slot" id="slot-1" onclick="triggerUpload(1)"></div>
-            <div class="brick-slot" id="slot-2" onclick="triggerUpload(2)"></div>
+            <div class="brick-container">
+                <div class="brick-slot" id="slot-0" onclick="triggerUpload(0)"></div>
+            </div>
+            <div class="brick-container">
+                <div class="brick-slot" id="slot-1" onclick="triggerUpload(1)"></div>
+            </div>
+            <div class="brick-container">
+                <div class="brick-slot" id="slot-2" onclick="triggerUpload(2)"></div>
+            </div>
         </div>
+
         <input type="file" id="hidden-file-input" accept="image/*" style="display: none;">
 
         <div class="calibration-box">
+            <h4 style="margin:0 0 5px 0; font-size:0.85rem; color:#856404;">🎨 Ajustement Réalité (Brique)</h4>
+            <p style="font-size:0.75rem; color:#666; margin:0 0 10px 0; line-height:1.2;">⚠️ <strong>Important :</strong> Ajustez ces curseurs pour que la couleur de la brique à l'écran corresponde exactement à la brique physique devant vous.</p>
+            
+            <button class="reset-calib-btn" onclick="resetCalibration()" title="Remettre à l'origine">↺ R.A.Z</button>
+            
             <div class="calibration-slider"><label>Lumière</label><input type="range" id="calib-brightness" min="50" max="150" value="100" oninput="scheduleRender()"></div>
+            <div class="calibration-slider"><label>Contraste</label><input type="range" id="calib-contrast" min="50" max="150" value="100" oninput="scheduleRender()"></div>
             <div class="calibration-slider"><label>Saturat.</label><input type="range" id="calib-saturation" min="0" max="300" value="100" oninput="scheduleRender()"></div>
+            <div class="calibration-slider"><label>Teinte</label><input type="range" id="calib-hue" min="-180" max="180" value="0" step="1" oninput="scheduleRender()"></div>
         </div>
     </div>
 
-    <div>
+    <div id="section-joint" style="padding: 0 5px;">
         <h3>2. Joint & Mortier</h3>
+        
+        <div style="display: flex; gap: 10px; margin-top: 15px; margin-bottom: 15px;">
+            <button class="btn-magic-alt" style="flex: 1;" onclick="triggerAutoDetection()">✨ Auto (Moyenne)</button>
+            <button id="btn-pipette-color" class="btn-magic" style="flex: 1;" onclick="toggleColorPicker()">🧪 Cible (Pipette)</button>
+        </div>
+
         <div class="input-group">
-            <div class="input-row" style="align-items: center;">
+            <label>Teinte :</label>
+            <div class="input-row">
                 <select id="categorySelect" onchange="filterColors()" style="flex:1;">
                     <option value="all">-- Tout afficher --</option>
                     <option value="Standards">Standards</option>
                     <option value="Noirs & Gris">Noirs & Gris</option>
                     <option value="Jaunes">Jaunes</option>
-                    <option value="Marron">Marron</option>
+                    <option value="Marron">Marron & Terre</option>
                     <option value="Rouges">Rouges</option>
                     <option value="Saumon">Saumons</option>
                     <option value="Lie de vin">Lie de Vin</option>
                 </select>
-                <div id="joint-preview-dot"></div>
-                <button class="btn-fav" onclick="toggleFavorite()" title="Favoris">⭐</button>
+                <div id="joint-preview-dot" title="Aperçu couleur"></div>
             </div>
-            <select id="jointColorSelect" onchange="onJointSelected()" style="margin-top:5px;"></select>
-        </div>
-
-        <div id="fav-bar" class="fav-bar">
-            <span style="font-size: 0.7rem; color: #888; width: 100%;">Comparateur rapide :</span>
+            <select id="jointColorSelect" onchange="onJointSelected();" style="margin-top:5px;"></select>
         </div>
 
         <div class="dev-box" id="dev-box" style="display: none;">
-            <h4 style="margin:0 0 10px 0;">⚙️ Admin : Gestion teintes</h4>
-            <div style="background:#fff; padding:8px; border-radius:4px; margin-bottom:10px; border:1px solid #ccc; display:flex; gap:5px;">
-                <input type="text" id="dev-new-name" placeholder="NOM..." style="flex:1; font-size:0.8rem;">
-                <button onclick="addNewColor()" style="background:#198754; color:white; padding:4px 8px; font-size:0.8rem;">➕</button>
+            <h4>⚙️ Mode Calibrage (BDD) 
+                <button onclick="resetCurrentDevColor()" style="background: #fff; border: 1px solid #dc3545; border-radius: 4px; font-size: 0.7rem; padding: 2px 6px; cursor: pointer; color: #dc3545; font-weight: normal;">↺ R.A.Z Couleur</button>
+            </h4>
+            <div class="calibration-slider">
+                <label style="color:#383d41;">Lumi. (L)</label>
+                <input type="range" id="dev-l" min="10" max="95" step="0.5" value="50" oninput="updateAdminColor()">
+                <span class="val-badge" id="val-l">50</span>
             </div>
-            <div class="calibration-slider"><label>L (Lum)</label><input type="range" id="dev-l" min="10" max="95" step="0.5" oninput="updateAdminColor()"><span class="val-badge" id="val-l">50</span></div>
-            <div class="calibration-slider"><label>C (Sat)</label><input type="range" id="dev-c" min="0" max="60" step="0.5" oninput="updateAdminColor()"><span class="val-badge" id="val-c">20</span></div>
-            <div class="calibration-slider"><label>H (Teinte)</label><input type="range" id="dev-h" min="0" max="360" step="1" oninput="updateAdminColor()"><span class="val-badge" id="val-h">0</span></div>
-            <div class="btn-group">
-                <button onclick="deleteCurrentColor()" style="background:#bb2d3b; color:white; font-size:0.7rem;">🗑️ Suppr.</button>
-                <button onclick="generateEncodedExport()" style="background:#0d6efd; color:white; font-size:0.7rem;">🔒 Export Secret</button>
+            <div class="calibration-slider">
+                <label style="color:#383d41;">Satur. (C)</label>
+                <input type="range" id="dev-c" min="0" max="60" step="0.5" value="20" oninput="updateAdminColor()">
+                <span class="val-badge" id="val-c">20</span>
             </div>
+            <div class="calibration-slider">
+                <label style="color:#383d41;">Teinte (H)</label>
+                <input type="range" id="dev-h" min="0" max="360" step="1" value="0" oninput="updateAdminColor()">
+                <span class="val-badge" id="val-h">0</span>
+            </div>
+            <div class="calibration-slider" style="border-top: 1px solid #ccc; padding-top: 10px; margin-top: 10px;">
+                <label style="color:#0d47a1; width: 110px;">Corr. Mobile</label>
+                <input type="range" id="dev-mobile-sat" min="0.5" max="1.5" step="0.05" value="1.0" oninput="updateMobileCorrection()">
+                <span class="val-badge" id="val-mobile-sat">1.0</span>
+            </div>
+            <button onclick="generateExportCode()" style="margin-top:10px; width:100%; background:#343a40; color:white; padding:8px; border-radius:4px; font-size:0.8rem; cursor:pointer; border:none;">📥 Exporter le Nuancier mis à jour</button>
+			<h4 style="margin: 15px 0 10px 0; border-top: 1px solid #ccc; padding-top: 10px;">🔄 Partager une configuration</h4>
+           			 <div style="display: flex; gap: 10px;">
+             		<button onclick="exportConfiguration()" style="background: #17a2b8; color: white; flex: 1; font-size: 0.8rem; padding: 8px; border:none; border-radius:4px; 		cursor:pointer; font-weight:bold;">📤 Exporter (.json)</button>
+                        <label style="background: #6c757d; color: white; flex: 1; font-size: 0.8rem; padding: 8px; border:none; border-radius:4px; cursor:pointer; font-weight:bold; text-align:center; display:block; margin: 0;">
+                    📥 Importer (.json)
+                    <input type="file" accept=".json" style="display:none;" onchange="importConfiguration(event)">
+                </label>
+          		  </div>
         </div>
 
-        <div class="input-row" style="margin-top:15px;">
-            <div class="input-group"><label>Ep. Joint (mm)</label><input type="range" id="slider-epaisseur" min="8" max="25" value="12" oninput="scheduleRender()"></div>
+        <div class="input-row" style="margin-top:15px; align-items: flex-end;">
+            <div class="input-group" style="flex: 0.8;">
+                <label>Ep. (mm) : <span id="val-ep" style="color:#007bff;">12</span></label>
+                <input type="range" id="slider-epaisseur" min="8" max="25" step="1" value="12" oninput="document.getElementById('val-ep').innerText = this.value; scheduleRender()">
+            </div>
+            <div class="input-group" style="flex: 1.2;">
+                <label>Texture Simulée :</label>
+                <div class="fixed-value-box">Joint Grain Fin</div>
+            </div>
         </div>
         
         <div style="background: #e9ecef; padding: 12px; border-radius: 8px; margin-top: 20px; border: 1px solid #ced4da;">
-            <span onclick="toggleDevBox()" style="color:#adb5bd; font-size:0.6rem; cursor:pointer;">Admin</span>
-            <input type="text" id="input-user-name" placeholder="Votre Nom / Prénom" style="margin-top:5px; margin-bottom:10px;">
-            <button class="submit-btn" onclick="submitToAdmin()">📤 Demande d'échantillon</button>
-            <button class="reset-btn" onclick="resetSimulator()">🔄 Réinitialiser le simulateur</button>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h4 style="margin:0 0 10px 0; font-size:0.85rem; color:#495057;">👤 Vos Coordonnées & Chantier</h4>
+                <span onclick="toggleDevBox()" style="color:#adb5bd; font-size:0.6rem; cursor:pointer; opacity: 0.6; user-select: none;">Admin</span>
+            </div>
+            
+            <div style="background: #fff; border: 1px dashed #0d47a1; padding: 8px; border-radius: 6px; margin-bottom: 12px; font-size: 0.75rem; color: #0d47a1; line-height: 1.3;">
+                <strong>📩 Étape importante :</strong><br>
+                Avant d'envoyer votre demande, cliquez sur <b>JPG</b> ou <b>PDF</b> (section 3) pour enregistrer votre visuel. Vous devrez le joindre manuellement à l'email.
+            </div>
+
+            <div style="margin-bottom: 8px;">
+                <input type="text" id="input-user-name" placeholder="Votre Nom et Prénom" style="width:100%; padding:8px; border:1px solid #ced4da; border-radius:6px; font-size:0.85rem;">
+            </div>
+            <div style="margin-bottom: 8px;">
+                <input type="text" id="input-user-phone" placeholder="Votre Numéro de Téléphone" style="width:100%; padding:8px; border:1px solid #ced4da; border-radius:6px; font-size:0.85rem;">
+            </div>
+            <div style="margin-bottom: 8px;">
+                <input type="text" id="input-company-name" placeholder="Nom de votre entreprise" style="width:100%; padding:8px; border:1px solid #ced4da; border-radius:6px; font-size:0.85rem;">
+            </div>
+            <div>
+                <input type="text" id="input-project-ref" placeholder="Référence du chantier" style="width:100%; padding:8px; border:1px solid #ced4da; border-radius:6px; font-size:0.85rem;">
+            </div>
+            <button class="submit-btn" onclick="submitToAdmin()" style="margin-top: 12px;">
+                📤 Demande d'échantillon
+            </button>
         </div>
     </div>
 
-    <div style="margin-top: 15px;">
+    <div style="background: #e7f5ff; padding: 15px; border-radius: 8px; border: 1px solid #d0ebff; margin-top: 15px;">
+        <h3>3. Vue & Export</h3>
+        <label style="margin-top:10px;">Distance de vue (Zoom) :</label>
         <input type="range" id="slider-zoom" min="0.5" max="5.0" step="0.1" value="1.5" oninput="scheduleRender()">
-        <div class="btn-group"><button class="btn-jpg" onclick="downloadImage()">JPG</button><button class="btn-pdf" onclick="downloadPDF()">PDF</button></div>
+        <div class="btn-group">
+            <button class="btn-jpg" onclick="downloadImage()">JPG</button>
+            <button class="btn-pdf" onclick="downloadPDF()">PDF</button>
+        </div>
+        <button onclick="forceWallRegen()" style="margin-top:10px; width:100%; background:#fff; border:1px solid #ccc; color:#666; padding:8px; border-radius:4px; font-size:0.8rem; cursor:pointer;">🔀 Régénérer le placement</button>
     </div>
 </div>
 
 <div class="preview-container">
-    <div class="canvas-wrapper"><canvas id="canvas"></canvas></div>
+    <div class="canvas-wrapper">
+        <canvas id="canvas"></canvas>
+    </div>
+    <div style="margin-top:10px; font-size:0.75rem; color:#666; display:flex; justify-content:space-between; width:100%; max-width:800px;">
+        <span id="scale-info"></span>
+        <span>Rendu Réaliste PBR</span>
+    </div>
 </div>
 
 <script>
-    // --- PROTECTION BASE64 DU NUANCIER ---
-    let _ENC_DATA = "W3siY2F0IjoiU3RhbmRhcmRzIiwibmFtZSI6IlNVUEVSIEJMQU5DIiwibCI6OTMsImMiOjMuNSwiaCI6NzMsInIiOjIzOSwiZyI6MjM0LCJiIjoyMjl9LHsiY2F0IjoiU3RhbmRhcmRzIiwibmFtZSI6IkJMQU5DIiwibCI6ODIsImMiOjUuNSwiaCI6ODYsInIiOjIwOCwiZyI6MjAzLCJiIjoxOTR9LHsiY2F0IjoiU3RhbmRhcmRzIiwibmFtZSI6IlRPTiBQSUVSUkUiLCJsIjo4NC41LCJjIjozMiwiaCI6ODksInIiOjIyOCwiZyI6MjA5LCJiIjoxNTB9LHsiY2F0IjoiU3RhbmRhcmRzIiwibmFtZSI6IkdSSVMgQ0xBSVIiLCJsIjo3Mi41LCJjIjoxNCwiaCI6OTEsInIiOjE4NSwiZyI6MTc3LCJiIjoxNTJ9LHsiY2F0IjoiTm9pcnMgJiBHcmlzIiwibmFtZSI6IjUwJSBCTCA1MCUgR1IiLCJsIjo3MS41LCJjIjoxMCwiaCI6ODYsInIiOjE4MiwiZyI6MTc0LCJiIjoxNTd9LHsiY2F0IjoiTm9pcnMgJiBHcmlzIiwibmFtZSI6IkdTMTUiLCJsIjo3NC41LCJjIjoxMCwiaCI6ODEsInIiOjE5MiwiZyI6MTgyLCJiIjoxNjV9LHsiY2F0IjoiTm9pcnMgJiBHcmlzIiwibmFtZSI6IlNCTjEyNSIsImwiOjYxLCJjIjozLjUsImgiOjkwLCJyIjoxNDksImciOjE0NywiYiI6MTQxfSx7ImNhdCI6Ik5vaXJzICYgR3JpcyIsIm5hbWUiOiJTQk4yNTAiLCJsIjo1MiwiYyI6My41LCJoIjo5MCwiciI6MTI2LCJnIjoxMjQsImIiOjExOH0seyJjYXQiOiJOb2lycyAmIEdyaXMiLCJuYW1lIjoiR0ExMjUiLCJsIjo0MC41LCJjIjoxLjUsImgiOjkxLCJyIjo5NiwiZyI6OTUsImIiOjkzfSx7ImNhdCI6Ik5vaXJzICYgR3JpcyIsIm5hbWUiOiJTQkEyNTAiLCJsIjozNS41LCJjIjowLjUsImgiOjExMCwiciI6ODMsImciOjg0LCJiIjo4M30seyJjYXQiOiJOb2lycyAmIEdyaXMiLCJuYW1lIjoiR0E0NTBSNTAiLCJsIjoyNiwiYyI6MS41LCJoIjo5MSwiciI6NjIsImciOjYxLCJiIjo1OX0seyJjYXQiOiJOb2lycyAmIEdyaXMiLCJuYW1lIjoiU0JBNTAwIiwibCI6MTksImMiOjAuNSwiaCI6MjAsInIiOjQ3LCJnIjo0NiwiYiI6NDZ9LHsiY2F0IjoiTm9pcnMgJiBHcmlzIiwibmFtZSI6IkdONTAwIiwibCI6MzYsImMiOjIsImgiOjg1LCJyIjo4NiwiZyI6ODQsImIiOjgxfSx7ImNhdCI6Ik5vaXJzICYgR3JpcyIsIm5hbWUiOiJHQTUwMCIsImwiOjI2LjUsImMiOjEsImgiOjc1LCJyIjo2NCwiZyI6NjIsImIiOjYxfSx7ImNhdCI6IkphdW5lcyIsIm5hbWUiOiJTQko4LjI1IiwibCI6ODUsImMiOjIwLCJoIjo3MywiciI6MjM0LCJnIjoyMDgsImIiOjE3Nn0seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiU0JKMzAiLCJsIjo4Ni41LCJjIjoyMi41LCJoIjo4MywiciI6MjM0LCJnIjoyMTQsImIiOjE3NH0seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiU0JKNjIuNSIsImwiOjg2LjUsImMiOjE3LjUsImgiOjgzLCJyIjoyMzAsImciOjIxNCwiYiI6MTg0fSx7ImNhdCI6IkphdW5lcyIsIm5hbWUiOiI3NSUgVFAgMjUlIEJMIiwibCI6ODQsImMiOjIwLCJoIjo4OCwiciI6MjIyLCJnIjoyMDgsImIiOjE3Mn0seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiU0JKMjUwIiwibCI6ODIuNSwiYyI6NDcsImgiOjgyLCJyIjoyMzgsImciOjIwMCwiYiI6MTE2fSx7ImNhdCI6IkphdW5lcyIsIm5hbWUiOiJHSlI1MCIsImwiOjY5LCJjIjo0MiwiaCI6ODQsInIiOjE5NCwiZyI6MTY0LCJiIjo5MX0seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiU0JKNTAwIiwibCI6ODMsImMiOjUyLCJoIjo4MiwiciI6MjQyLCJnIjoyMDAsImIiOjEwOH0seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiR0o1MDAiLCJsIjo2OSwiYyI6NDYuNSwiaCI6NzIsInIiOjIxMCwiZyI6MTU4LCJiIjo4N30seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiU0JKMTIwTjMwIiwibCI6NzAuNSwiYyI6MzMuNSwiaCI6ODcsInIiOjE5MSwiZyI6MTcwLCJiIjoxMTF9LHsiY2F0IjoiTWFycm9uIiwibmFtZSI6IkdTMTVKMTAiLCJsIjo2NSwiYyI6MTksImgiOjgxLCJyIjoxNzMsImciOjE1NSwiYiI6MTI0fSx7ImNhdCI6Ik1hcnJvbiIsIm5hbWUiOiJHTjkwUzM1IiwibCI6NDgsImMiOjExLCJoIjo3NCwiciI6MTI0LCJnIjoxMTIsImIiOjk2fSx7ImNhdCI6Ik1hcnJvbiIsIm5hbWUiOiJHUzE1ME4xMDAiLCJsIjo2Mi41LCJjIjoyMSwiaCI6NzQsInIiOjE3MSwiZyI6MTQ3LCJiIjoxMTZ9LHsiY2F0IjoiTWFycm9uIiwibmFtZSI6IkdTMjAwTjE1MCIsImwiOjQ5LCJjIjoyMS41LCJoIjo3MSwiciI6MTM3LCJnIjoxMTIsImIiOjgyfSx7ImNhdCI6Ik1hcnJvbiIsIm5hbWUiOiJTQko5MFI3ME45MCIsImwiOjU3LCJjIjoyNCwiaCI6NjcsInIiOjE2MiwiZyI6MTMwLCJiIjo5OX0seyJjYXQiOiJNYXJyb24iLCJuYW1lIjoiR1MxNTBBMTAwIiwibCI6NDgsImMiOjEyLCJoIjo4MSwiciI6MTIzLCJnIjoxMTIsImIiOjk0fSx7ImNhdCI6Ik1hcnJvbiIsIm5hbWUiOiJHUzEyNSExMjUiLCJsIjo0OC41LCJjIjoxOSwiaCI6NTgsInIiOjEzOSwiZyI6MTA5LCJiIjo4OH0seyJjYXQiOiJNYXJyb24iLCJuYW1lIjoiU0JKMTgwUjE4ME4xNDAiLCJsIjo1NC41LCJjIjoyNy41LCJoIjo2NCwiciI6MTYwLCJnIjoxMTksImIijo4OH0seyJjYXQiOiJNYXJyb24iLCJuYW1lIjoiR040MTZTODQiLCJsIjozOCwiYyI6Ny41LCJoIjo3OCwiciI6OTYsImciOjg4LCJiIjo3OH0seyJjYXQiOiJNYXJyb24iLCJuYW1lIjoiR1MyNTBBMjUwIiwibCI6MzEuNSwiYyI6OCwiaCI6NzgsInIiOjgwLCJnIjo3MywiYiI6NjJ9LHsiY2F0IjoiTWFycm9uIiwibmFtZSI6IkdTMzAwQTIwMCIsImwiOjMzLCJjIjoxMiwiaCI6NzIsInIiOjg4LCJnIjo3NSwiYiI6NjB9LHsiY2F0IjoiUm91Z2VzIiwibmFtZSI6IkdSMTUwSjEwMCIsImwiOjUzLjUsImMiOjM5LCJoIjo1NywiciI6MTczLCJnIjoxMTMsImIiOjcyfSx7ImNhdCI6IlJvdWdlcyIsIm5hbWUiOiJTQlIxMjUiLCJsIjo2My41LCJjIjozNC41LCJoIjo0NSwiciI6MjA0LCJnIjoxMzcsImIiOjExMn0seyJjYXQiOiJSb3VnZXMiLCJuYW1lIjoiR1IxMjUiLCJsIjo1Ny41LCJjIjoyOSwiaCI6NDcsInIiOjE3OSwiZyI6MTI1LCJiIjoxMDJ9LHsiY2F0IjoiUm91Z2VzIiwibmFtZSI6IkdSMTUwUzEwMCIsImwiOjU5LCJjIjoyOCwiaCI6NTMsInIiOjE5MiwiZyI6MTI1LCJiIjo4OH0seyJjYXQiOiJSb3VnZXMiLCJuYW1lIjoiU0JSMjUwIiwibCI6NjAsImMiOjM3LjUsImgiOjQyLCJyIjoxOTksImciOjEyNSwiYiI6MTAyfSx7ImNhdCI6IlJvdWdlcyIsIm5hbWUiOiJHUk0yNSIsImwiOjUwLjUsImMiOjI5LCJoIjo0NywiciI6MTYwLCJnIjoxMDcsImIiOjg1fSx7ImNhdCI6IlJvdWdlcyIsIm5hbWUiOiJTQlIzNzUiLCJsIjo1MiwiYyI6NDUsImgiOjQyLCJyIjoxODUsImciOjk5LCJiIjo3NH0seyJjYXQiOiJSb3VnZXMiLCJuYW1lIjoiR1RRMzc1IiwibCI6NDMuNSwiYyI6NDMuNSwiaCI6NDQsInIiOjE1NywiZyI6ODAsImIiOjU0fSx7ImNhdCI6IlJvdWdlcyIsIm5hbWUiOiJHUk0yNTAiLCJsIjo1MywiYyI6MzYuNSwiaCI6NDUsInIiOjE3NiwiZyI6MTA4LCJiIjo4NH0seyJjYXQiOiJSb3VnZXMiLCJuYW1lIjoiR1IyNTBTMjUwIiwibCI6NDksImMiOjU3LCJoIjo1MCwiciI6MTgyLCJnIjo4OCwiYiI6NDN9LHsiY2F0IjoiUm91Z2VzIiwibmFtZSI6IkdSMTMwMFMyMDAiLCJsIjo0Mi41LCJjIjo0NiwiaCI6NDcsInIiOjE1NSwiZyI6NzcsImIiOjQ2fSx7ImNhdCI6IlNhdW1vbiIsIm5hbWUiOiJTQlM4LjI1IiwibCI6NzMuNSwiYyI6MzMsImgiOjgwLCJyIjoyMTEsImciOjE3NiwiYiI6MTIyfSx7ImNhdCI6IlNhdW1vbiIsIm5hbWUiOiJTQlMxNUoyMCIsImwiOjc2LCJjIjoyNy41LCJoIjo3NywiciIjoyMTIsImciOjE4MywiYiI6MTM4fSx7ImNhdCI6IlNhdW1vbiIsIm5hbWUiOiJTQlM2Mi41IiwibCI6ODAsImMiOjM1LjUsImgiOjY0LCJyIjoyNDEsImciOjE4NywiYiI6MTM5fSx7ImNhdCI6IlNhdW1vbiIsIm5hbWUiOiJTQlMxMjUiLCJsIjo2NCwiYyI6NDIuNSwiaCI6NjQsInIiOjIwMCwiZyI6MTQyLCJiIjo4N31d";
-    
-    let NUANCIER_COMPLET = JSON.parse(atob(_ENC_DATA));
-    let favorites = [];
+    // --- DÉTECTION MOBILE POUR CORRECTION GAMMA ---
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    let mobileSaturationCorrection = 1.0;
+
+    // --- LISTE DES COULEURS AVEC VALEURS RGB FIGÉES ---
+   let NUANCIER_COMPLET = [
+        { cat: "Standards", name: "SUPER BLANC", l: 93.00, c: 3.50, h: 73.00, r: 239, g: 234, b: 229 },
+        { cat: "Standards", name: "BLANC", l: 82.00, c: 5.50, h: 86.00, r: 208, g: 203, b: 194 },
+        { cat: "Standards", name: "TON PIERRE", l: 84.50, c: 32.00, h: 89.00, r: 228, g: 209, b: 150 },
+        { cat: "Standards", name: "GRIS CLAIR", l: 72.50, c: 14.00, h: 91.00, r: 185, g: 177, b: 152 },
+        { cat: "Noirs & Gris", name: "50% BL 50% GR", l: 71.50, c: 10.00, h: 86.00, r: 182, g: 174, b: 157 },
+        { cat: "Noirs & Gris", name: "GS15", l: 74.50, c: 10.00, h: 81.00, r: 192, g: 182, b: 165 },
+        { cat: "Noirs & Gris", name: "SBN125", l: 61.00, c: 3.50, h: 90.00, r: 149, g: 147, b: 141 },
+        { cat: "Noirs & Gris", name: "SBN250", l: 52.00, c: 3.50, h: 90.00, r: 126, g: 124, b: 118 },
+        { cat: "Noirs & Gris", name: "GA125", l: 40.50, c: 1.50, h: 91.00, r: 96, g: 95, b: 93 },
+        { cat: "Noirs & Gris", name: "SBA250", l: 35.50, c: 0.50, h: 110.00, r: 83, g: 84, b: 83 },
+        { cat: "Noirs & Gris", name: "GA450R50", l: 26.00, c: 1.50, h: 91.00, r: 62, g: 61, b: 59 },
+        { cat: "Noirs & Gris", name: "SBA500", l: 19.00, c: 0.50, h: 20.00, r: 47, g: 46, b: 46 },
+        { cat: "Noirs & Gris", name: "GN500", l: 36.00, c: 2.00, h: 85.00, r: 86, g: 84, b: 81 },
+        { cat: "Noirs & Gris", name: "GA500", l: 26.50, c: 1.00, h: 75.00, r: 64, g: 62, b: 61 },
+        { cat: "Jaunes", name: "SBJ8.25", l: 85.00, c: 20.00, h: 73.00, r: 234, g: 208, b: 176 },
+        { cat: "Jaunes", name: "SBJ30", l: 86.50, c: 22.50, h: 83.00, r: 234, g: 214, b: 174 },
+        { cat: "Jaunes", name: "SBJ62.5", l: 86.50, c: 17.50, h: 83.00, r: 230, g: 214, b: 184 },
+        { cat: "Jaunes", name: "75% TP 25% BL", l: 84.00, c: 20.00, h: 88.00, r: 222, g: 208, b: 172 },
+        { cat: "Jaunes", name: "SBJ250", l: 82.50, c: 47.00, h: 82.00, r: 238, g: 200, b: 116 },
+        { cat: "Jaunes", name: "GJ250", l: 69.00, c: 42.00, h: 84.00, r: 194, g: 164, b: 91 },
+        { cat: "Jaunes", name: "SBJ500", l: 83.00, c: 52.00, h: 82.00, r: 242, g: 200, b: 108 },
+        { cat: "Jaunes", name: "GJ500", l: 69.00, c: 46.50, h: 72.00, r: 210, g: 158, b: 87 },
+        { cat: "Jaunes", name: "SBJ120N30", l: 70.50, c: 33.50, h: 87.00, r: 191, g: 170, b: 111 },
+        { cat: "Marron", name: "GS15J10", l: 65.00, c: 19.00, h: 81.00, r: 173, g: 155, b: 124 },
+        { cat: "Marron", name: "GN90S35", l: 48.00, c: 11.00, h: 74.00, r: 124, g: 112, b: 96 },
+        { cat: "Marron", name: "GS150N100", l: 62.50, c: 21.00, h: 74.00, r: 171, g: 147, b: 116 },
+        { cat: "Marron", name: "GS200N150", l: 49.00, c: 21.50, h: 71.00, r: 137, g: 112, b: 82 },
+        { cat: "Marron", name: "SBJ90R70N90", l: 57.00, c: 24.00, h: 67.00, r: 162, g: 130, b: 99 },
+        { cat: "Marron", name: "GS150A100", l: 48.00, c: 12.00, h: 81.00, r: 123, g: 112, b: 94 },
+        { cat: "Marron", name: "GS125N250R125", l: 48.50, c: 19.00, h: 58.00, r: 139, g: 109, b: 88 },
+        { cat: "Marron", name: "SBJ180R180N140", l: 54.50, c: 27.50, h: 64.00, r: 160, g: 122, b: 88 },
+        { cat: "Marron", name: "GN416S84", l: 38.00, c: 7.50, h: 78.00, r: 96, g: 88, b: 78 },
+        { cat: "Marron", name: "GS250A250", l: 31.50, c: 8.00, h: 78.00, r: 80, g: 73, b: 62 },
+        { cat: "Marron", name: "GS300A200", l: 33.00, c: 12.00, h: 72.00, r: 88, g: 75, b: 60 },
+        { cat: "Rouges", name: "GR150J100", l: 53.50, c: 39.00, h: 57.00, r: 173, g: 113, b: 72 },
+        { cat: "Rouges", name: "SBR125", l: 63.50, c: 34.50, h: 45.00, r: 204, g: 137, b: 112 },
+        { cat: "Rouges", name: "GR125", l: 57.50, c: 29.00, h: 47.00, r: 179, g: 125, b: 102 },
+        { cat: "Rouges", name: "GR150S100", l: 59.00, c: 39.50, h: 53.00, r: 192, g: 125, b: 88 },
+        { cat: "Rouges", name: "SBR250", l: 60.00, c: 37.50, h: 42.00, r: 199, g: 125, b: 102 },
+        { cat: "Rouges", name: "GR100N25", l: 50.50, c: 29.00, h: 47.00, r: 160, g: 107, b: 85 },
+        { cat: "Rouges", name: "SBR375", l: 52.00, c: 45.00, h: 42.00, r: 185, g: 99, b: 74 },
+        { cat: "Rouges", name: "GR375", l: 43.50, c: 43.50, h: 44.00, r: 157, g: 80, b: 54 },
+        { cat: "Rouges", name: "GR250", l: 53.00, c: 36.50, h: 45.00, r: 176, g: 108, b: 84 },
+        { cat: "Rouges", name: "GR250S250", l: 49.00, c: 57.00, h: 50.00, r: 182, g: 88, b: 43 },
+        { cat: "Rouges", name: "GR300S200", l: 42.50, c: 46.00, h: 47.00, r: 155, g: 77, b: 46 },
+	{ cat: "Saumon", name: "SBS8.25", l: 73.50, c: 33.00, h: 80.00, r: 211, g: 176, b: 122 },
+        { cat: "Saumon", name: "SBS15J20", l: 76.00, c: 27.50, h: 77.00, r: 212, g: 183, b: 138 },
+        { cat: "Saumon", name: "SBS62.5", l: 80.00, c: 35.50, h: 64.00, r: 241, g: 187, b: 139 },
+        { cat: "Saumon", name: "SBS125", l: 64.00, c: 42.50, h: 64.00, r: 200, g: 142, b: 87 },
+        { cat: "Saumon", name: "GS62.5", l: 63.50, c: 30.00, h: 72.00, r: 182, g: 147, b: 103 },
+        { cat: "Saumon", name: "GS125", l: 60.00, c: 23.50, h: 63.00, r: 172, g: 137, b: 108 },
+        { cat: "Saumon", name: "GS250", l: 61.50, c: 27.00, h: 51.00, r: 186, g: 137, b: 112 },
+        { cat: "Saumon", name: "SBS250", l: 67.00, c: 41.00, h: 56.00, r: 214, g: 147, b: 103 },
+        { cat: "Saumon", name: "SBJ45R45N35", l: 58.00, c: 22.50, h: 66.00, r: 164, g: 133, b: 104 },
+        { cat: "Saumon", name: "SBS500", l: 62.00, c: 50.50, h: 47.00, r: 217, g: 124, b: 86 },
+        { cat: "Saumon", name: "GS500", l: 49.00, c: 46.50, h: 58.00, r: 166, g: 99, b: 49 },
+        { cat: "Saumon", name: "GS375R125", l: 52.00, c: 44.00, h: 46.00, r: 181, g: 102, b: 71 },
+        { cat: "Lie de vin", name: "GR125N100S25", l: 51.50, c: 20.00, h: 50.00, r: 150, g: 114, b: 97 },
+        { cat: "Lie de vin", name: "GR200N50", l: 52.00, c: 26.00, h: 47.00, r: 160, g: 112, b: 92 },
+        { cat: "Lie de vin", name: "SBR250N125", l: 42.50, c: 22.50, h: 42.00, r: 132, g: 90, b: 76 },
+        { cat: "Lie de vin", name: "GR300S100N100", l: 42.50, c: 32.00, h: 47.00, r: 141, g: 86, b: 63 },
+        { cat: "Lie de vin", name: "GR200S200N100", l: 53.00, c: 32.00, h: 52.00, r: 167, g: 113, b: 84 },
+        { cat: "Lie de vin", name: "GR416N84", l: 42.00, c: 35.00, h: 40.00, r: 146, g: 80, b: 64 }
+    ];
+
+    let ORIGINAL_NUANCIER = [];
     let loadedBricks = [null, null, null];
     let grainTexture = null;
-    let wallLayoutCache = [];
+    let wallLayoutCache = []; 
     let currentJointColor = null;
-    let currentSlot = 0;
-    
+    let isColorPicking = false; 
+
     let cropImg = null;
     let cropScale = 1;
     let cropRect = { x: 0, y: 0, w: 0, h: 0 };
     let isDraggingCrop = false;
-    let cropStartX = 0, cropStartY = 0;
+    let cropStartX = 0; let cropStartY = 0;
 
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d', { colorSpace: 'srgb' }); 
+    let currentSlot = 0;
+    const STORAGE_KEY = 'biamortier_user_lib';
     
     let isRendering = false;
-    function scheduleRender() { if (!isRendering) { isRendering = true; requestAnimationFrame(() => { render(); isRendering = false; }); } }
-
-    // --- INITIALISATION (RÉTABLIE SUR VOTRE LOGIQUE) ---
-    window.onload = () => {
-        grainTexture = generateProceduralGrain();
-        forceWallRegen();
-        filterColors();
-        const sel = document.getElementById('jointColorSelect');
-        for(let i=0; i<sel.options.length; i++) { if(sel.options[i].text === "GRIS CLAIR") { sel.selectedIndex = i; onJointSelected(); break; } }
-        
-        const defaultSrc = generateDefaultBrick();
-        const img = new Image();
-        img.isPlaceholder = true;
-        img.onload = () => {
-            loadedBricks[0] = img;
-            updateSlotVisual(0, defaultSrc, true);
-            updateSlotVisual(1, "", true);
-            updateSlotVisual(2, "", true);
-            scheduleRender();
-        };
-        img.src = defaultSrc;
-        refreshLibraryUI();
-    };
-
-    function generateDefaultBrick() {
-        const cvs = document.createElement('canvas'); cvs.width = 440; cvs.height = 120;
-        const ctxt = cvs.getContext('2d'); ctxt.fillStyle = "#c25e44"; ctxt.fillRect(0,0,440,120);
-        const data = ctxt.getImageData(0,0,440,120);
-        for(let i=0; i<data.data.length; i+=4) { const n = (Math.random()-0.5)*40; data.data[i] = Math.min(255, Math.max(0, data.data[i]+n)); data.data[i+1] = Math.min(255, Math.max(0, data.data[i+1]+n)); data.data[i+2] = Math.min(255, Math.max(0, data.data[i+2]+n)); }
-        ctxt.putImageData(data, 0, 0);
-        ctxt.fillStyle = "rgba(255,255,255,0.4)"; ctxt.font = "bold 24px 'Segoe UI'"; ctxt.textAlign = "center"; ctxt.fillText("Brique d'exemple", 220, 70);
-        return cvs.toDataURL();
+    function scheduleRender() {
+        if (!isRendering) {
+            isRendering = true;
+            requestAnimationFrame(() => {
+                render();
+                isRendering = false;
+            });
+        }
     }
 
-    function forceWallRegen() {
-        wallLayoutCache = [];
-        for(let r=0; r<100; r++) { let row = []; for(let c=0; c<50; c++) row.push(Math.floor(Math.random() * 3)); wallLayoutCache.push(row); }
+    // --- FONCTION ADMIN ---
+    function toggleDevBox() {
+        const box = document.getElementById('dev-box');
+        if (box.style.display === 'block') { box.style.display = 'none'; return; }
+        const password = prompt("Saisir le mot de passe administrateur :");
+        if (password === "RapCom47T") { box.style.display = 'block'; } else { alert("Accès refusé."); }
+    }
+
+    // --- CORRECTION MOBILE SPÉCIFIQUE ---
+    function updateMobileCorrection() {
+        mobileSaturationCorrection = parseFloat(document.getElementById('dev-mobile-sat').value);
+        document.getElementById('val-mobile-sat').innerText = mobileSaturationCorrection.toFixed(2);
         scheduleRender();
     }
 
-    // --- MOTEUR DE RENDU (VOTRE VERSION ORIGINALE RESTAURÉE) ---
-    function render() {
-        let active = loadedBricks.filter(b => b !== null);
-        if(!active.length) return;
+    function rotateImageInCrop() {
+        if(!cropImg) return;
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = cropImg.height; tempCanvas.height = cropImg.width;
+        const tCtx = tempCanvas.getContext('2d');
+        tCtx.translate(tempCanvas.width/2, tempCanvas.height/2);
+        tCtx.rotate(Math.PI / 2);
+        tCtx.drawImage(cropImg, -cropImg.width/2, -cropImg.height/2);
+        const rotatedImg = new Image();
+        rotatedImg.onload = () => { cropImg = rotatedImg; openCropModal(cropImg); };
+        rotatedImg.src = tempCanvas.toDataURL('image/jpeg', 0.95);
+    }
 
-        const zoom = parseFloat(document.getElementById('slider-zoom').value);
-        const L = (parseInt(document.getElementById('input-longueur').value)||220)*zoom;
-        const Hb = (parseInt(document.getElementById('input-hauteur').value)||60)*zoom;
-        const J = (parseInt(document.getElementById('slider-epaisseur').value)||12)*zoom;
-        
-        canvas.width = 1200; canvas.height = 910; 
+    function generateProceduralGrain() {
+        const size = 512;
+        const cvs = document.createElement('canvas');
+        cvs.width = size; cvs.height = size;
+        const tCtx = cvs.getContext('2d');
+        tCtx.fillStyle = "rgb(128, 128, 128)";
+        tCtx.fillRect(0, 0, size, size);
+        const imgData = tCtx.getImageData(0, 0, size, size);
+        const data = imgData.data;
+        for (let i = 0; i < data.length; i += 4) {
+            const mod = (Math.random() - 0.5) * 100; 
+            data[i] = 128 + mod;
+            data[i+1] = 128 + mod;
+            data[i+2] = 128 + mod;
+            data[i+3] = 255;
+        }
+        tCtx.putImageData(imgData, 0, 0);
+        return tCtx.createPattern(cvs, 'repeat');
+    }
 
-        const pre = active.map(img => {
-            const cvs = document.createElement('canvas'); cvs.width = L; cvs.height = Hb;
-            const tx = cvs.getContext('2d');
-            tx.filter = `brightness(${document.getElementById('calib-brightness').value}%) saturate(${document.getElementById('calib-saturation').value}%)`;
-            tx.drawImage(img,0,0,L,Hb);
-            return cvs;
-        });
+    function generateDefaultBrick() {
+        const cvs = document.createElement('canvas');
+        cvs.width = 440; cvs.height = 120;
+        const ctx = cvs.getContext('2d');
+        ctx.fillStyle = "#c25e44";
+        ctx.fillRect(0, 0, cvs.width, cvs.height);
+        const imgData = ctx.getImageData(0, 0, cvs.width, cvs.height);
+        const data = imgData.data;
+        for(let i=0; i<data.length; i+=4) {
+            const noise = (Math.random() - 0.5) * 40;
+            data[i] = Math.min(255, Math.max(0, data[i] + noise));
+            data[i+1] = Math.min(255, Math.max(0, data[i+1] + noise));
+            data[i+2] = Math.min(255, Math.max(0, data[i+2] + noise));
+        }
+        ctx.putImageData(imgData, 0, 0);
+        ctx.fillStyle = "rgba(255,255,255,0.4)";
+        ctx.font = "bold 26px 'Segoe UI'";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("Brique d'exemple", cvs.width/2, cvs.height/2);
+        return cvs.toDataURL();
+    }
 
-        ctx.fillStyle = currentJointColor ? `rgb(${currentJointColor.r},${currentJointColor.g},${currentJointColor.b})` : "#eee";
-        ctx.fillRect(0,0,1200,800);
-        ctx.globalCompositeOperation = 'overlay'; ctx.fillStyle = grainTexture; ctx.fillRect(0,0,1200,800);
-        ctx.globalCompositeOperation = 'source-over';
-
-        let y=0, rIdx=0;
-        while(y < 800) {
-            let x = (rIdx%2 !== 0) ? -(L/2)-(J/2) : 0;
-            let cIdx = 0;
-            while(x < 1200) {
-                const bIdx = wallLayoutCache[rIdx%100][cIdx%50] % pre.length;
-                ctx.drawImage(pre[bIdx], x, y);
-                x += L + J; cIdx++;
+    window.onload = () => {
+        convertLchPaletteToRgb(); 
+        ORIGINAL_NUANCIER = JSON.parse(JSON.stringify(NUANCIER_COMPLET));
+        document.getElementById('categorySelect').value = "Standards";
+        filterColors();
+        const sel = document.getElementById('jointColorSelect');
+        for(let i=0; i<sel.options.length; i++) {
+            if(sel.options[i].value) {
+                const c = JSON.parse(sel.options[i].value);
+                if(c.name === "GRIS CLAIR") {
+                    sel.selectedIndex = i;
+                    onJointSelected();
+                    break;
+                }
             }
-            y += Hb + J; rIdx++;
         }
+        refreshLibraryUI();
+        grainTexture = generateProceduralGrain(); 
+        const defaultBrickSrc = generateDefaultBrick();
+        const img = new Image();
+        img.isPlaceholder = true; 
+        img.onload = () => { 
+            loadedBricks[0] = img; 
+            updateSlotVisual(0, defaultBrickSrc, true); 
+            updateSlotVisual(1, "", true);
+            updateSlotVisual(2, "", true);
+            forceWallRegen(); 
+        };
+        img.src = defaultBrickSrc;
+    };
 
-        // BARRE D'INFOS BASSE RESTAURÉE
-        ctx.fillStyle = "white"; ctx.fillRect(0, 800, 1200, 110);
-        ctx.fillStyle = "#222"; ctx.font = "bold 22px 'Segoe UI'"; ctx.textAlign = "left";
-        ctx.fillText(`JOINT : ${currentJointColor ? currentJointColor.name : "Non sélectionné"}`, 30, 845);
-        ctx.textAlign = "right";
-        ctx.fillText(`PROJET : ${document.getElementById('input-brick-name').value || "Brique standard"}`, 1170, 845);
-        ctx.fillStyle = "#dc3545"; ctx.font = "italic 16px 'Segoe UI'"; ctx.textAlign = "center";
-        ctx.fillText("Document indicatif à valider impérativement par un essai sur chantier.", 600, 885);
+    // --- NOUVELLES FONCTIONS DE SAUVEGARDE VIA INDEXEDDB ---
+
+    async function getUserLibrary() {
+        const s = await localforage.getItem(STORAGE_KEY);
+        return s ? s : [];
     }
 
-    // --- FAVORIS ---
-    function toggleFavorite() {
-        if (!currentJointColor) return;
-        if (favorites.find(f => f.name === currentJointColor.name)) {
-            favorites = favorites.filter(f => f.name !== currentJointColor.name);
-        } else {
-            if (favorites.length < 6) favorites.push(currentJointColor);
-        }
-        renderFavorites();
-    }
-
-    function renderFavorites() {
-        const bar = document.getElementById('fav-bar');
-        bar.innerHTML = '<span style="font-size: 0.7rem; color: #888; width: 100%;">Comparateur rapide :</span>';
-        favorites.forEach((fav, i) => {
-            const pill = document.createElement('div'); pill.className = 'fav-pill';
-            pill.style.backgroundColor = `rgb(${fav.r},${fav.g},${fav.b})`;
-            pill.style.color = (0.3*fav.r + 0.6*fav.g + 0.1*fav.b) > 130 ? '#000' : '#fff';
-            pill.innerHTML = `<span>${fav.name}</span><span style="margin-left:5px; opacity:0.5" onclick="event.stopPropagation(); favorites.splice(${i},1); renderFavorites();">✕</span>`;
-            pill.onclick = () => {
-                document.getElementById('categorySelect').value = fav.cat; filterColors();
-                const sel = document.getElementById('jointColorSelect');
-                for(let opt of sel.options) { if(opt.value && JSON.parse(opt.value).name === fav.name){ sel.value = opt.value; onJointSelected(); break; } }
-            };
-            bar.appendChild(pill);
+    async function refreshLibraryUI() {
+        const lib = await getUserLibrary();
+        const sel = document.getElementById('userLibrarySelect');
+        sel.innerHTML = '<option value="">-- Projets sauvegardés --</option>';
+        lib.forEach((item, index) => {
+            const opt = document.createElement('option');
+            opt.value = index;
+            opt.innerText = `${item.name} (${new Date(item.date).toLocaleDateString()})`;
+            sel.appendChild(opt);
         });
     }
 
-    // --- ADMIN ET GESTION ---
-    function toggleDevBox() { if (prompt("Mot de passe Admin :") === "RapCom47T") document.getElementById('dev-box').style.display = 'block'; }
-
-    function addNewColor() {
-        const n = document.getElementById('dev-new-name').value.trim().toUpperCase();
-        const cat = document.getElementById('categorySelect').value;
-        if (!n || cat === 'all') return;
-        NUANCIER_COMPLET.push({ cat, name: n, l: 50, c: 20, h: 0, r: 128, g: 128, b: 128 });
-        filterColors(); onJointSelected();
+    async function saveToUserLibrary() {
+        const name = document.getElementById('input-brick-name').value;
+        if(!name || name.trim() === "") { alert("Veuillez nommer le projet."); return; }
+        
+        const config = {
+            id: Date.now(), date: new Date().toISOString(), name: name,
+            dims: { l: document.getElementById('input-longueur').value, h: document.getElementById('input-hauteur').value, ep: document.getElementById('slider-epaisseur').value },
+            calib: { b: document.getElementById('calib-brightness').value, c: document.getElementById('calib-contrast').value, s: document.getElementById('calib-saturation').value, h: document.getElementById('calib-hue').value },
+            joint: currentJointColor,
+            images: loadedBricks.map(img => img && img.src.startsWith('data:image') && !img.isPlaceholder ? img.src : null)
+        };
+        
+        try {
+            const lib = await getUserLibrary();
+            lib.push(config);
+            await localforage.setItem(STORAGE_KEY, lib);
+            alert("✅ Configuration sauvegardée (avec vos images) !");
+            refreshLibraryUI();
+        } catch (e) {
+            console.error("Erreur d'écriture IndexedDB :", e);
+            alert("⚠️ Un problème est survenu lors de la sauvegarde.");
+        }
     }
 
-    function deleteCurrentColor() {
-        if (!currentJointColor || !confirm("Supprimer ?")) return;
-        NUANCIER_COMPLET = NUANCIER_COMPLET.filter(c => c.name !== currentJointColor.name);
-        currentJointColor = null; filterColors(); scheduleRender();
+    async function deleteFromUserLibrary() {
+        const idx = document.getElementById('userLibrarySelect').value;
+        if(idx === "") return;
+        if(confirm("Supprimer ce projet ?")) {
+            const lib = await getUserLibrary();
+            lib.splice(idx, 1);
+            await localforage.setItem(STORAGE_KEY, lib);
+            refreshLibraryUI();
+        }
     }
 
-    function generateEncodedExport() {
-        const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(NUANCIER_COMPLET))));
-        document.getElementById('export-text').value = `let _ENC_DATA = "${encoded}";`;
-        document.getElementById('export-modal').style.display = 'flex';
+    async function loadUserPreset() {
+        const idx = document.getElementById('userLibrarySelect').value;
+        if(idx === "") return;
+        
+        const lib = await getUserLibrary();
+        const p = lib[idx];
+        if(!p) return;
+        
+        document.getElementById('input-brick-name').value = p.name;
+        document.getElementById('input-longueur').value = p.dims.l;
+        document.getElementById('input-hauteur').value = p.dims.h;
+        document.getElementById('slider-epaisseur').value = p.dims.ep;
+        document.getElementById('val-ep').innerText = p.dims.ep;
+        document.getElementById('calib-brightness').value = p.calib.b;
+        document.getElementById('calib-contrast').value = p.calib.c;
+        document.getElementById('calib-saturation').value = p.calib.s || 100;
+        document.getElementById('calib-hue').value = p.calib.h || 0;
+        
+        if(p.joint) {
+            currentJointColor = p.joint;
+            document.getElementById('categorySelect').value = p.joint.cat;
+            filterColors();
+            const sel = document.getElementById('jointColorSelect');
+            for(let i=0; i<sel.options.length; i++){
+                 if(sel.options[i].value && JSON.parse(sel.options[i].value).name === p.joint.name) {
+                     sel.selectedIndex = i;
+                     onJointSelected();
+                 }
+            }
+        }
+        
+        if(p.images) {
+            let loadedCount = 0;
+            let imagesToLoad = p.images.filter(src => src !== null).length;
+            
+            if (imagesToLoad === 0) forceWallRegen();
+            
+            p.images.forEach((src, i) => {
+                if(src) {
+                    const img = new Image();
+                    img.isPlaceholder = false;
+                    img.onload = () => { 
+                        loadedBricks[i] = img; 
+                        updateSlotVisual(i, src, false); 
+                        loadedCount++;
+                        if(loadedCount === imagesToLoad) forceWallRegen(); 
+                    };
+                    img.src = src;
+                } else {
+                    loadedBricks[i] = null;
+                    updateSlotVisual(i, "", true);
+                }
+            });
+        }
     }
+
+    // --- FIN DES NOUVELLES FONCTIONS ---
+
+    function submitToAdmin() {
+        const bNameInput = document.getElementById('input-brick-name').value.trim();
+        const userName = document.getElementById('input-user-name').value.trim();
+        const userPhone = document.getElementById('input-user-phone').value.trim(); 
+        const companyName = document.getElementById('input-company-name').value.trim();
+        const projectRef = document.getElementById('input-project-ref').value.trim();
+
+        if (!bNameInput || !userName) { alert("⚠️ Veuillez renseigner au moins le nom de la brique et votre nom."); return; }
+        if(!confirm("⚠️ Avez-vous enregistré votre visuel (JPG ou PDF) ? Il est indispensable de le joindre manuellement.")) return;
+
+        const jointName = currentJointColor ? currentJointColor.name : "Non sélectionné";
+        const subject = encodeURIComponent(`DEMANDE ÉCHANTILLON : ${jointName} / ${bNameInput}`);
+        let body = `Bonjour l'équipe Biallais,%0D%0A%0D%0A`;
+        body += `Voici une nouvelle demande d'échantillon configurée :%0D%0A%0D%0A`;
+        body += `👤 CLIENT : ${userName}%0D%0A`;
+        body += `📞 TEL : ${userPhone || "Non renseigné"}%0D%0A`; 
+        body += `🏢 ENTREPRISE : ${companyName || "Non renseigné"}%0D%0A`;
+        body += `📍 RÉF. CHANTIER : ${projectRef || "Non renseigné"}%0D%0A%0D%0A`;
+        body += `🧱 BRIQUE : ${bNameInput}%0D%0A`;
+        body += `🧪 JOINT : ${jointName}%0D%0A%0D%0A`;
+        body += `👉 MERCI DE JOINDRE LE FICHIER PDF OU JPEG GÉNÉRÉ À CET EMAIL 👈`;
+
+        window.location.href = `mailto:contact@biallais.fr?subject=${subject}&body=${body}`;
+    }
+
+    function triggerUpload(i) { currentSlot = i; document.getElementById('hidden-file-input').click(); }
+
+    document.getElementById('hidden-file-input').onchange = function(e) {
+        const file = e.target.files[0]; if(!file) return;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            const img = new Image();
+            img.onload = () => { openCropModal(img); };
+            img.src = evt.target.result;
+        }
+        reader.readAsDataURL(file); e.target.value = ''; 
+    };
+
+    function openCropModal(img) {
+        cropImg = img;
+        const modal = document.getElementById('crop-modal');
+        const cropCvs = document.getElementById('crop-canvas');
+        const maxW = window.innerWidth * 0.9;
+        const maxH = window.innerHeight * 0.55;
+        cropScale = Math.min(maxW / img.width, maxH / img.height, 1);
+        cropCvs.width = img.width * cropScale;
+        cropCvs.height = img.height * cropScale;
+        const targetRatio = (parseFloat(document.getElementById('input-longueur').value) || 220) / (parseFloat(document.getElementById('input-hauteur').value) || 60);
+        let initW = cropCvs.width * 0.8;
+        let initH = initW / targetRatio;
+        if(initH > cropCvs.height * 0.8) { initH = cropCvs.height * 0.8; initW = initH * targetRatio; }
+        cropRect = { x: (cropCvs.width - initW) / 2, y: (cropCvs.height - initH) / 2, w: initW, h: initH };
+        modal.style.display = 'flex';
+        drawCropView();
+    }
+
+    function closeCropModal() { document.getElementById('crop-modal').style.display = 'none'; cropImg = null; }
+
+    function drawCropView() {
+        if(!cropImg) return;
+        const cropCvs = document.getElementById('crop-canvas');
+        const cCtx = cropCvs.getContext('2d');
+        cCtx.drawImage(cropImg, 0, 0, cropCvs.width, cropCvs.height);
+        cCtx.fillStyle = 'rgba(0, 0, 0, 0.65)';
+        cCtx.fillRect(0, 0, cropCvs.width, cropCvs.height);
+        cCtx.clearRect(cropRect.x, cropRect.y, cropRect.w, cropRect.h);
+        cCtx.drawImage(cropImg,
+            cropRect.x / cropScale, cropRect.y / cropScale, cropRect.w / cropScale, cropRect.h / cropScale,
+            cropRect.x, cropRect.y, cropRect.w, cropRect.h
+        );
+        cCtx.strokeStyle = '#3399ff'; cCtx.lineWidth = 2; cCtx.setLineDash([6, 6]);
+        cCtx.strokeRect(cropRect.x, cropRect.y, cropRect.w, cropRect.h);
+        cCtx.setLineDash([]);
+    }
+
+    const cropCanvasElement = document.getElementById('crop-canvas');
+    function getPointerPos(e) {
+        const rect = cropCanvasElement.getBoundingClientRect();
+        let clientX = e.clientX; let clientY = e.clientY;
+        if(e.touches && e.touches.length > 0) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
+        return { x: clientX - rect.left, y: clientY - rect.top };
+    }
+
+    function onCropStart(e) {
+        e.preventDefault(); isDraggingCrop = true;
+        const pos = getPointerPos(e); cropStartX = pos.x; cropStartY = pos.y;
+        cropRect = { x: cropStartX, y: cropStartY, w: 0, h: 0 }; drawCropView();
+    }
+
+    function onCropMove(e) {
+        if(!isDraggingCrop) return; e.preventDefault();
+        const pos = getPointerPos(e);
+        const targetRatio = (parseFloat(document.getElementById('input-longueur').value) || 220) / (parseFloat(document.getElementById('input-hauteur').value) || 60);
+        let w = Math.abs(pos.x - cropStartX); let h = Math.abs(pos.y - cropStartY);
+        if (w / h > targetRatio) { h = w / targetRatio; } else { w = h * targetRatio; }
+        cropRect.w = w; cropRect.h = h;
+        cropRect.x = (pos.x - cropStartX) < 0 ? cropStartX - w : cropStartX;
+        cropRect.y = (pos.y - cropStartY) < 0 ? cropStartY - h : cropStartY;
+        drawCropView();
+    }
+
+    function onCropEnd() { isDraggingCrop = false; }
+    cropCanvasElement.addEventListener('mousedown', onCropStart); cropCanvasElement.addEventListener('mousemove', onCropMove);
+    window.addEventListener('mouseup', onCropEnd);
+    cropCanvasElement.addEventListener('touchstart', onCropStart, {passive: false}); cropCanvasElement.addEventListener('touchmove', onCropMove, {passive: false});
+
+    function validateCrop() {
+        if(!cropImg || cropRect.w < 10 || cropRect.h < 10) return;
+        const cvs = document.createElement('canvas');
+        const outScale = Math.min(1500 / (cropRect.w / cropScale), 1); 
+        cvs.width = (cropRect.w / cropScale) * outScale; cvs.height = (cropRect.h / cropScale) * outScale;
+        const tCtx = cvs.getContext('2d');
+        tCtx.drawImage(cropImg, cropRect.x / cropScale, cropRect.y / cropScale, cropRect.w / cropScale, cropRect.h / cropScale, 0, 0, cvs.width, cvs.height);
+        const opt = cvs.toDataURL('image/jpeg', 0.95);
+        const final = new Image(); final.isPlaceholder = false; 
+        final.onload = () => { loadedBricks[currentSlot] = final; updateSlotVisual(currentSlot, opt, false); forceWallRegen(); closeCropModal(); };
+        final.src = opt;
+    }
+
+    function resetCalibration() {
+        document.getElementById('calib-brightness').value = 100; document.getElementById('calib-contrast').value = 100;
+        document.getElementById('calib-saturation').value = 100; document.getElementById('calib-hue').value = 0;
+        scheduleRender();
+    }
+
+    function triggerAutoDetection() {
+        const best = analyzeFilteredColorAndSuggest();
+        if (best) {
+            document.getElementById('categorySelect').value = best.cat; filterColors();
+            const sel = document.getElementById('jointColorSelect');
+            for(let i=0; i<sel.options.length; i++) {
+                if(sel.options[i].value && JSON.parse(sel.options[i].value).name === best.name) { sel.selectedIndex = i; onJointSelected(); }
+            }
+        }
+    }
+
+    function analyzeFilteredColorAndSuggest() {
+        const validBricks = loadedBricks.filter(b => b && !b.isPlaceholder);
+        const targetImg = validBricks.length > 0 ? validBricks[0] : loadedBricks[0];
+        
+        const tempCvs = document.createElement('canvas');
+        tempCvs.width = 100; tempCvs.height = 100;
+        const tCtx = tempCvs.getContext('2d');
+        
+        tCtx.filter = `brightness(${document.getElementById('calib-brightness').value}%) contrast(${document.getElementById('calib-contrast').value}%) saturate(${document.getElementById('calib-saturation').value}%) hue-rotate(${document.getElementById('calib-hue').value}deg)`;
+        tCtx.drawImage(targetImg, 0, 0, 100, 100);
+        
+        const data = tCtx.getImageData(0, 0, 100, 100).data;
+        let tR=0, tG=0, tB=0, cnt=0;
+        
+        for(let i=0; i<data.length; i+=4) {
+            tR += data[i]; tG += data[i+1]; tB += data[i+2]; cnt++;
+        }
+        
+        const r = tR/cnt, g = tG/cnt, b = tB/cnt;
+        let minD = Infinity, best = null;
+        
+        NUANCIER_COMPLET.forEach(j => {
+            if (j.r !== undefined) {
+                const dist = Math.sqrt((j.r-r)**2 + (j.g-g)**2 + (j.b-b)**2);
+                if(dist < minD) { minD = dist; best = j; }
+            }
+        });
+        return best;
+    }
+
+    function updateSlotVisual(idx, src, isPlace) {
+        const d = document.getElementById(`slot-${idx}`);
+        if (src === "") d.innerHTML = "";
+        else d.innerHTML = `<img src="${src}" style="width:100%;height:100%;object-fit:cover;">`;
+        if(!isPlace) {
+            d.classList.add('active');
+            const b = document.createElement('div'); b.className='remove-btn'; b.innerHTML='x';
+            b.onclick=(e)=>{e.stopPropagation(); removeBrick(idx);}; d.appendChild(b);
+        } else {
+            d.classList.remove('active');
+            d.innerHTML += `<div style="position:absolute; background:rgba(248,249,250,0.85); width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#007bff; font-weight:bold; font-size:0.8rem; pointer-events:none; text-align:center; line-height:1.2;">+ Photo ${idx+1}</div>`;
+        }
+    }
+
+    function removeBrick(i) {
+        const userBricks = loadedBricks.filter(b => b && !b.isPlaceholder);
+        if(userBricks.length <= 1) { 
+            const defaultBrickSrc = generateDefaultBrick();
+            const img = new Image(); img.isPlaceholder = true;
+            img.onload = () => { loadedBricks[i] = img; updateSlotVisual(i, defaultBrickSrc, true); forceWallRegen(); };
+            img.src = defaultBrickSrc; return; 
+        }
+        loadedBricks[i] = null; updateSlotVisual(i, "", true); forceWallRegen();
+    }
+
+    function toggleColorPicker() {
+        isColorPicking = !isColorPicking;
+        const btn = document.getElementById('btn-pipette-color');
+        btn.style.background = isColorPicking ? '#0d6efd' : 'linear-gradient(135deg, #6610f2, #5f3dc4)';
+        btn.innerText = isColorPicking ? '👉 Cliquez sur la brique' : '🧪 Cible (Pipette)';
+        canvas.style.cursor = isColorPicking ? 'crosshair' : 'default'; scheduleRender();
+    }
+
+    canvas.addEventListener('click', function(e) {
+        if (!isColorPicking) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = Math.floor((e.clientX - rect.left) * (canvas.width / rect.width));
+        const y = Math.floor((e.clientY - rect.top) * (canvas.height / rect.height));
+        const pixel = ctx.getImageData(x, y, 1, 1).data;
+        let minD = Infinity, best = null;
+        NUANCIER_COMPLET.forEach(j => {
+            if (j.r !== undefined) {
+                const dist = Math.sqrt((j.r-pixel[0])**2 + (j.g-pixel[1])**2 + (j.b-pixel[2])**2);
+                if(dist < minD) { minD = dist; best = j; }
+            }
+        });
+        if (best) {
+            document.getElementById('categorySelect').value = best.cat; filterColors();
+            const sel = document.getElementById('jointColorSelect');
+            for(let i=0; i<sel.options.length; i++) {
+                if(sel.options[i].value && JSON.parse(sel.options[i].value).name === best.name) { sel.selectedIndex = i; onJointSelected(); }
+            }
+        }
+        toggleColorPicker(); 
+    });
 
     function filterColors() {
-        const cat = document.getElementById('categorySelect').value, sel = document.getElementById('jointColorSelect');
+        const cat = document.getElementById('categorySelect').value;
+        const sel = document.getElementById('jointColorSelect');
         sel.innerHTML = '<option value="">-- Choisir une teinte --</option>';
-        let list = (cat === 'all' ? [...NUANCIER_COMPLET] : NUANCIER_COMPLET.filter(c => c.cat === cat));
-        list.sort((a,b) => b.l - a.l); // Tri clair vers foncé par Luminance
+        const list = cat === 'all' ? NUANCIER_COMPLET : NUANCIER_COMPLET.filter(c => c.cat === cat);
         list.forEach(c => {
-            const o = document.createElement('option'); o.value = JSON.stringify(c); o.textContent = c.name;
-            o.style.backgroundColor = `rgb(${c.r},${c.g},${c.b})`; o.style.color = (0.3*c.r+0.6*c.g+0.1*c.b)>130?'#000':'#fff'; sel.appendChild(o);
+            const o = document.createElement('option');
+            o.value = JSON.stringify(c); o.textContent = c.name;
+            if(c.r !== undefined) {
+                o.style.backgroundColor = `rgb(${c.r}, ${c.g}, ${c.b})`;
+                o.style.color = (0.299*c.r + 0.587*c.g + 0.114*c.b) > 130 ? '#000' : '#fff';
+            }
+            sel.appendChild(o);
         });
         updatePreviewDot(); scheduleRender();
     }
 
     function onJointSelected() {
-        const v = document.getElementById('jointColorSelect').value; 
-        if(v) { 
-            currentJointColor = JSON.parse(v); 
-            document.getElementById('dev-l').value = currentJointColor.l;
-            document.getElementById('dev-c').value = currentJointColor.c;
-            document.getElementById('dev-h').value = currentJointColor.h;
-        }
+        const v = document.getElementById('jointColorSelect').value;
+        if(v) {
+            const c = JSON.parse(v); currentJointColor = c;
+            document.getElementById('dev-l').value = c.l || 50;
+            document.getElementById('dev-c').value = c.c || 20;
+            document.getElementById('dev-h').value = c.h || 0;
+            updateAdminBadges();
+        } else { currentJointColor = null; }
+        updatePreviewDot(); scheduleRender();
+    }
+    
+    function updateAdminBadges() {
         document.getElementById('val-l').innerText = document.getElementById('dev-l').value;
         document.getElementById('val-c').innerText = document.getElementById('dev-c').value;
         document.getElementById('val-h').innerText = document.getElementById('dev-h').value;
-        updatePreviewDot(); scheduleRender();
     }
 
     function updateAdminColor() {
-        if(!currentJointColor) return;
-        const l = parseFloat(document.getElementById('dev-l').value), c = parseFloat(document.getElementById('dev-c').value), h = parseFloat(document.getElementById('dev-h').value);
+        if(!currentJointColor) return; updateAdminBadges();
+        const l = parseFloat(document.getElementById('dev-l').value);
+        const c = parseFloat(document.getElementById('dev-c').value);
+        const h = parseFloat(document.getElementById('dev-h').value);
         const idx = NUANCIER_COMPLET.findIndex(x => x.name === currentJointColor.name);
-        const tC = document.createElement('canvas'); tC.width=1; tC.height=1; const tx = tC.getContext('2d', {colorSpace:'srgb'});
-        tx.fillStyle = `lch(${l}% ${c} ${h})`; tx.fillRect(0,0,1,1); const p = tx.getImageData(0,0,1,1).data;
-        NUANCIER_COMPLET[idx] = {...NUANCIER_COMPLET[idx], l, c, h, r:p[0], g:p[1], b:p[2]};
-        currentJointColor = NUANCIER_COMPLET[idx]; onJointSelected();
+        if(idx !== -1) {
+            const tCvs = document.createElement('canvas'); tCvs.width = 1; tCvs.height = 1;
+            const tCtx = tCvs.getContext('2d', { colorSpace: 'srgb' });
+            tCtx.fillStyle = `lch(${l}% ${c} ${h})`; tCtx.fillRect(0,0,1,1);
+            const p = tCtx.getImageData(0,0,1,1).data;
+            NUANCIER_COMPLET[idx] = {...NUANCIER_COMPLET[idx], l, c, h, r:p[0], g:p[1], b:p[2]};
+            currentJointColor = NUANCIER_COMPLET[idx]; updatePreviewDot(); scheduleRender(); 
+        }
     }
 
-    // --- RECADRAGE ET IMPORT PHOTOS (RESTAURÉ À L'IDENTIQUE) ---
-    function triggerUpload(i) { currentSlot = i; document.getElementById('hidden-file-input').click(); }
-    document.getElementById('hidden-file-input').onchange = (e) => {
-        const f = e.target.files[0]; if(!f) return;
-        const r = new FileReader(); r.onload = (evt) => { const i = new Image(); i.onload = () => openCropModal(i); i.src = evt.target.result; }; r.readAsDataURL(f); e.target.value = '';
-    };
-
-    function openCropModal(img) {
-        cropImg = img; const m = document.getElementById('crop-modal'), c = document.getElementById('crop-canvas');
-        const mw = window.innerWidth*0.9, mh = window.innerHeight*0.55; cropScale = Math.min(mw/img.width, mh/img.height, 1);
-        c.width = img.width*cropScale; c.height = img.height*cropScale;
-        const r = (parseFloat(document.getElementById('input-longueur').value)||220)/(parseFloat(document.getElementById('input-hauteur').value)||60);
-        let iw = c.width*0.8, ih = iw/r; if(ih > c.height*0.8) { ih = c.height*0.8; iw = ih*r; }
-        cropRect = { x: (c.width-iw)/2, y: (c.height-ih)/2, w: iw, h: ih }; m.style.display = 'flex'; drawCropView();
+    function resetCurrentDevColor() {
+        if (!currentJointColor) return;
+        const orig = ORIGINAL_NUANCIER.find(c => c.name === currentJointColor.name);
+        if (orig) {
+            document.getElementById('dev-l').value = orig.l || 50;
+            document.getElementById('dev-c').value = orig.c || 20;
+            document.getElementById('dev-h').value = orig.h || 0;
+            updateAdminColor();
+        }
     }
 
-    function closeCropModal() { document.getElementById('crop-modal').style.display = 'none'; cropImg = null; }
-    function drawCropView() {
-        const c = document.getElementById('crop-canvas'), x = c.getContext('2d');
-        x.drawImage(cropImg, 0, 0, c.width, c.height);
-        x.fillStyle = 'rgba(0,0,0,0.6)'; x.fillRect(0,0,c.width,c.height);
-        x.clearRect(cropRect.x, cropRect.y, cropRect.w, cropRect.h);
-        x.drawImage(cropImg, cropRect.x/cropScale, cropRect.y/cropScale, cropRect.w/cropScale, cropRect.h/cropScale, cropRect.x, cropRect.y, cropRect.w, cropRect.h);
-        x.strokeStyle='#0d6efd'; x.lineWidth=2; x.strokeRect(cropRect.x, cropRect.y, cropRect.w, cropRect.h);
+    function updatePreviewDot() {
+        const dot = document.getElementById('joint-preview-dot');
+        dot.style.backgroundColor = currentJointColor ? `rgb(${currentJointColor.r},${currentJointColor.g},${currentJointColor.b})` : '#f4f4f4';
     }
 
-    const cv = document.getElementById('crop-canvas');
-    cv.addEventListener('mousedown', (e) => { isDraggingCrop = true; const r = cv.getBoundingClientRect(); cropStartX = e.clientX-r.left; cropStartY = e.clientY-r.top; });
-    cv.addEventListener('mousemove', (e) => {
-        if(!isDraggingCrop) return; const r = cv.getBoundingClientRect(); const cx = e.clientX-r.left, cy = e.clientY-r.top;
-        const rat = (parseFloat(document.getElementById('input-longueur').value)||220)/(parseFloat(document.getElementById('input-hauteur').value)||60);
-        let w = Math.abs(cx-cropStartX), h = w/rat;
-        cropRect = { x: cx<cropStartX?cropStartX-w:cropStartX, y: cy<cropStartY?cropStartY-h:cropStartY, w, h }; drawCropView();
-    });
-    window.addEventListener('mouseup', () => isDraggingCrop = false);
+    function generateExportCode() {
+        let code = "    let NUANCIER_COMPLET = [\n";
+        NUANCIER_COMPLET.forEach((item, i) => {
+            code += `        { cat: "${item.cat}", name: "${item.name}", l: ${Number(item.l).toFixed(2)}, c: ${Number(item.c).toFixed(2)}, h: ${Number(item.h).toFixed(2)}, r: ${item.r}, g: ${item.g}, b: ${item.b} }${i < NUANCIER_COMPLET.length-1 ? ',' : ''}\n`;
+        });
+        code += "    ];"; document.getElementById('export-text').value = code; document.getElementById('export-modal').style.display = 'flex';
+    }
+    
+    function copyExportText() { navigator.clipboard.writeText(document.getElementById("export-text").value); alert("✅ Copié !"); }
 
-    function validateCrop() {
-        const c = document.createElement('canvas'); const os = Math.min(1500/(cropRect.w/cropScale), 1);
-        c.width = (cropRect.w/cropScale)*os; c.height = (cropRect.h/cropScale)*os; const x = c.getContext('2d');
-        x.drawImage(cropImg, cropRect.x/cropScale, cropRect.y/cropScale, cropRect.w/cropScale, cropRect.h/cropScale, 0, 0, c.width, c.height);
-        const d = c.toDataURL('image/jpeg', 0.95); const f = new Image();
-        f.onload = () => { loadedBricks[currentSlot] = f; updateSlotVisual(currentSlot, d, false); forceWallRegen(); closeCropModal(); }; f.src = d;
+    function forceWallRegen() {
+        wallLayoutCache = [];
+        for(let r=0; r<100; r++) {
+            let row = [];
+            for(let c=0; c<50; c++) row.push(Math.floor(Math.random() * 3));
+            wallLayoutCache.push(row);
+        }
+        scheduleRender();
     }
 
-    // --- UTILITAIRES ---
-    function updateSlotVisual(idx, src, isPlace) {
-        const d = document.getElementById(`slot-${idx}`); d.innerHTML = src ? `<img src="${src}">` : "";
-        if(!isPlace) {
-            d.classList.add('active'); const b = document.createElement('div'); b.className='remove-btn'; b.innerHTML='x';
-            b.onclick=(e)=>{e.stopPropagation(); loadedBricks[idx]=null; updateSlotVisual(idx,"",true); forceWallRegen();}; d.appendChild(b);
-        } else { d.classList.remove('active'); d.innerHTML += `<div style="position:absolute; color:#007bff; font-weight:bold;">+ Photo ${idx+1}</div>`; }
+    function convertLchPaletteToRgb() {
+        const tCvs = document.createElement('canvas'); tCvs.width = 1; tCvs.height = 1;
+        const tCtx = tCvs.getContext('2d', { willReadFrequently: true, colorSpace: 'srgb' });
+        NUANCIER_COMPLET.forEach(item => {
+            if (item.l !== undefined && item.r === undefined) {
+                tCtx.clearRect(0,0,1,1);
+                tCtx.fillStyle = `lch(${item.l}% ${item.c} ${item.h})`;
+                tCtx.fillRect(0, 0, 1, 1);
+                const p = tCtx.getImageData(0, 0, 1, 1, { colorSpace: 'srgb' }).data;
+                item.r = p[0]; item.g = p[1]; item.b = p[2];
+            }
+        });
     }
 
-    function resetSimulator() { if (confirm("Réinitialiser le configurateur ?")) location.reload(); }
+    function render() {
+        let valid = loadedBricks.filter(b => b && !b.isPlaceholder);
+        if(!valid.length) valid = [loadedBricks[0]];
+        if(!valid[0]) return;
+        const zoom = parseFloat(document.getElementById('slider-zoom').value);
+        const L_px = (parseInt(document.getElementById('input-longueur').value)||220) * zoom;
+        const H_px = (parseInt(document.getElementById('input-hauteur').value)||60) * zoom;
+        const J_px = (parseInt(document.getElementById('slider-epaisseur').value)||12) * zoom;
+        const W = 1200; const H = 800;
+        canvas.width = W; canvas.height = H + 110;
+        
+        const preRendered = valid.map(img => {
+            const cvs = document.createElement('canvas'); cvs.width = L_px; cvs.height = H_px;
+            const tCtx = cvs.getContext('2d');
+            tCtx.filter = `brightness(${document.getElementById('calib-brightness').value}%) contrast(${document.getElementById('calib-contrast').value}%) saturate(${document.getElementById('calib-saturation').value}%) hue-rotate(${document.getElementById('calib-hue').value}deg)`;
+            tCtx.drawImage(img, 0, 0, L_px, H_px);
+            return cvs;
+        });
 
-    function generateProceduralGrain() {
-        const s = 512, c = document.createElement('canvas'); c.width = s; c.height = s; const x = c.getContext('2d');
-        x.fillStyle = "rgb(128,128,128)"; x.fillRect(0,0,s,s); const d = x.getImageData(0,0,s,s);
-        for(let i=0; i<d.data.length; i+=4){ const n = (Math.random()-0.5)*100; d.data[i]=128+n; d.data[i+1]=128+n; d.data[i+2]=128+n; d.data[i+3]=255; }
-        x.putImageData(d,0,0); return x.createPattern(c, 'repeat');
+        // --- GESTION COULEUR JOINT ---
+        let jr = currentJointColor ? currentJointColor.r : 224;
+        let jg = currentJointColor ? currentJointColor.g : 224;
+        let jb = currentJointColor ? currentJointColor.b : 224;
+
+        if (isMobile) {
+            // Application du coefficient correcteur uniquement sur mobile
+            const avg = (jr + jg + jb) / 3;
+            const satFact = mobileSaturationCorrection;
+            jr = Math.round(avg + (jr - avg) * satFact);
+            jg = Math.round(avg + (jg - avg) * satFact);
+            jb = Math.round(avg + (jb - avg) * satFact);
+            
+            // Légère compensation de luminosité pour les écrans OLED
+            jr = Math.round(jr * 0.9);
+            jg = Math.round(jg * 0.9);
+            jb = Math.round(jb * 0.9);
+        }
+
+        ctx.fillStyle = `rgb(${jr}, ${jg}, ${jb})`;
+        ctx.fillRect(0, 0, W, H);
+        
+        ctx.globalCompositeOperation = 'overlay'; ctx.fillStyle = grainTexture; ctx.fillRect(0,0,W,H);
+        ctx.globalCompositeOperation = 'source-over';
+        
+        let y = 0; let rIdx = 0;
+        while(y < H) {
+            let x = (rIdx % 2 !== 0) ? -(L_px/2) - (J_px/2) : 0;
+            let cIdx = 0;
+            while(x < W) {
+                const bIdx = wallLayoutCache[rIdx % 100][cIdx % 50] % preRendered.length;
+                ctx.drawImage(preRendered[bIdx], x, y);
+                x += L_px + J_px; cIdx++;
+            }
+            y += H_px + J_px; rIdx++;
+        }
+        
+        ctx.fillStyle = "white"; ctx.fillRect(0, H, W, 110);
+        ctx.fillStyle = "#222"; ctx.font = "bold 22px 'Segoe UI'"; ctx.textAlign = "left";
+        ctx.fillText(`JOINT : ${currentJointColor ? currentJointColor.name : "Aucun"}`, 30, H+45);
+        ctx.textAlign = "right"; ctx.fillText(`PROJET : ${document.getElementById('input-brick-name').value || "Brique"}`, W-30, H+45);
+        ctx.fillStyle = "#dc3545"; ctx.font = "italic 18px 'Segoe UI'"; ctx.textAlign = "center";
+        ctx.fillText("Document à caractère indicatif. Nuance et aspect à valider impérativement par un essai sur chantier.", W/2, H+85);
     }
 
-    function updatePreviewDot() { document.getElementById('joint-preview-dot').style.backgroundColor = currentJointColor ? `rgb(${currentJointColor.r},${currentJointColor.g},${currentJointColor.b})` : '#f4f4f4'; }
-    function downloadImage() { const a = document.createElement('a'); a.download = 'Projet.jpg'; a.href = canvas.toDataURL('image/jpeg', 0.92); a.click(); }
-    function downloadPDF() { const { jsPDF } = window.jspdf; const doc = new jsPDF('l','mm','a4'); doc.addImage(canvas.toDataURL('image/jpeg',0.9),'JPEG',10,10,277,190); doc.save('Projet.pdf'); }
-    function copyExportText() { navigator.clipboard.writeText(document.getElementById("export-text").value); alert("✅ Code copié !"); }
-    function submitToAdmin() { alert("Demande envoyée ! N'oubliez pas de joindre votre fichier PDF exporté à l'e-mail."); }
+    function downloadImage() {
+        const link = document.createElement('a'); link.download = 'Projet_Biamortier.jpg';
+        link.href = canvas.toDataURL('image/jpeg', 0.92); link.click();
+    }
+    
+    function downloadPDF() {
+        const { jsPDF } = window.jspdf; const doc = new jsPDF('l', 'mm', 'a4');
+        doc.addImage(canvas.toDataURL('image/jpeg', 0.90), 'JPEG', 10, 10, 277, 190);
+        doc.save('Projet_Biamortier.pdf');
+    }
+// --- EXPORT / IMPORT DE CONFIGURATIONS (RÉSERVÉ ADMIN) ---
 
-    // --- GESTION LIBRARY (INDEXEDDB - ORIGINALE) ---
-    async function getUserLibrary() { const s = await localforage.getItem(STORAGE_KEY); return s ? s : []; }
-    async function refreshLibraryUI() {
-        const lib = await getUserLibrary(); const sel = document.getElementById('userLibrarySelect');
-        sel.innerHTML = '<option value="">-- Projets sauvegardés --</option>';
-        lib.forEach((item, index) => { const opt = document.createElement('option'); opt.value = index; opt.innerText = item.name; sel.appendChild(opt); });
+    async function exportConfiguration() {
+        const idx = document.getElementById('userLibrarySelect').value;
+        if(idx === "") { alert("Veuillez d'abord sélectionner un projet dans 'Ma Bibliothèque' à exporter."); return; }
+        
+        const lib = await getUserLibrary();
+        const configToExport = lib[idx];
+        
+        // Convertir l'objet en texte JSON
+        const dataStr = JSON.stringify(configToExport);
+        const blob = new Blob([dataStr], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        
+        // Lancer le téléchargement
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Biamortier_${configToExport.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     }
-    async function saveToUserLibrary() {
-        const n = document.getElementById('input-brick-name').value; if(!n) return;
-        const config = { name: n, dims: { l: document.getElementById('input-longueur').value, h: document.getElementById('input-hauteur').value, ep: document.getElementById('slider-epaisseur').value }, calib: { b: document.getElementById('calib-brightness').value, s: document.getElementById('calib-saturation').value }, joint: currentJointColor, images: loadedBricks.map(img => img && !img.isPlaceholder ? img.src : null) };
-        const lib = await getUserLibrary(); lib.push(config); await localforage.setItem(STORAGE_KEY, lib); alert("✅ Sauvegardé !"); refreshLibraryUI();
-    }
-    async function deleteFromUserLibrary() { const idx = document.getElementById('userLibrarySelect').value; if(idx === "") return; const lib = await getUserLibrary(); lib.splice(idx, 1); await localforage.setItem(STORAGE_KEY, lib); refreshLibraryUI(); }
-    async function loadUserPreset() {
-        const idx = document.getElementById('userLibrarySelect').value; if(idx === "") return;
-        const lib = await getUserLibrary(); const p = lib[idx];
-        document.getElementById('input-brick-name').value = p.name;
-        if(p.joint) { currentJointColor = p.joint; filterColors(); const sel = document.getElementById('jointColorSelect'); for(let opt of sel.options){ if(opt.value && JSON.parse(opt.value).name === p.joint.name) { sel.value = opt.value; onJointSelected(); } } }
-        p.images.forEach((src, i) => { if(src) { const img = new Image(); img.onload = () => { loadedBricks[i] = img; updateSlotVisual(i, src, false); forceWallRegen(); }; img.src = src; } else { loadedBricks[i] = null; updateSlotVisual(i, "", true); } });
+
+    async function importConfiguration(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            try {
+                const importedConfig = JSON.parse(e.target.result);
+                
+                // Vérification de sécurité basique
+                if (!importedConfig.name || !importedConfig.dims) {
+                    throw new Error("Fichier non reconnu.");
+                }
+                
+                // On met à jour l'ID pour éviter les conflits et on ajoute un tag
+                importedConfig.id = Date.now();
+                importedConfig.date = new Date().toISOString();
+                importedConfig.name = importedConfig.name + " (Import)";
+                
+                // Ajout à la base IndexedDB
+                const lib = await getUserLibrary();
+                lib.push(importedConfig);
+                await localforage.setItem(STORAGE_KEY, lib);
+                
+                alert(`✅ Configuration "${importedConfig.name}" importée avec succès !`);
+                await refreshLibraryUI();
+                
+                // Sélectionner et charger automatiquement la nouvelle configuration
+                const sel = document.getElementById('userLibrarySelect');
+                sel.selectedIndex = sel.options.length - 1;
+                loadUserPreset();
+
+            } catch (err) {
+                console.error("Erreur d'import :", err);
+                alert("❌ Impossible de lire ce fichier. Est-ce bien un fichier d'export valide ?");
+            }
+            // Réinitialiser le champ file
+            event.target.value = '';
+        };
+        reader.readAsText(file);
     }
 </script>
 </body>
