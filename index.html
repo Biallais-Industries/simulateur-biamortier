@@ -12,7 +12,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
     <style>
-        /* CSS D'ORIGINE CONSERVÉ */
+        /* STYLE ORIGINAL CONSERVÉ */
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', sans-serif; background: #eef2f6; margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: row; }
         .controls { width: 380px; min-width: 380px; background: white; height: 100%; overflow-y: auto; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 10; display: flex; flex-direction: column; gap: 15px; }
@@ -26,13 +26,11 @@
         input[type="text"], input[type="number"], select { width: 100%; padding: 8px; border: 1px solid #ced4da; border-radius: 6px; font-size: 0.9rem; }
         input[type="range"] { width: 100%; margin: 8px 0; }
         .upload-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
-        .brick-container { display: flex; flex-direction: column; align-items: center; gap: 5px; }
         .brick-slot { width: 100%; aspect-ratio: 16/9; border: 2px dashed #cbd5e1; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; position: relative; background: #f8f9fa; transition: 0.2s; font-size: 0.8rem; color: #adb5bd; flex-direction: column; text-align:center; line-height: 1.3; }
         .brick-slot:hover { border-color: #007bff; color: #007bff; background: #eef7ff; }
         .brick-slot img { width: 100%; height: 100%; object-fit: cover; }
         .brick-slot.active { border-style: solid; border-color: #28a745; }
         .remove-btn { position: absolute; top: 2px; right: 2px; background: rgba(255,0,0,0.7); color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 10px; display: flex; align-items: center; justify-content: center; z-index: 10; cursor: pointer; }
-        .tips-box { background: #e3f2fd; border: 1px solid #90caf9; border-radius: 6px; padding: 10px; margin-bottom: 15px; font-size: 0.8rem; color: #0d47a1; }
         .calibration-box { background: #fff3cd; border: 1px solid #ffeeba; padding: 10px; border-radius: 8px; margin-top: 15px; position: relative; }
         .calibration-slider { display: flex; align-items: center; gap: 10px; font-size: 0.8rem; margin-bottom: 5px; }
         .calibration-slider label { width: 70px; margin:0; font-weight: bold; }
@@ -43,12 +41,12 @@
         .btn-jpg { background: #198754; color: white; }
         .btn-pdf { background: #dc3545; color: white; }
         #joint-preview-dot { width: 40px; height: 38px; border-radius: 6px; border: 1px solid #dee2e6; background-color: #f4f4f4; flex-shrink: 0; }
-        .submit-btn { background: #0d47a1; color: white; width: 100%; margin-top: 15px; padding: 12px; border-radius: 6px; border:none; cursor: pointer; font-weight: bold; }
-
-        /* NOUVEAUX STYLES POUR FAVORIS ET RESET */
+        
+        /* AJOUTS POUR FAVORIS ET RESET */
         .btn-fav { background: #fff; border: 1px solid #ced4da; border-radius: 6px; width: 38px; height: 38px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
         .fav-bar { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; min-height: 30px; padding: 5px; background: #f0f4f8; border-radius: 6px; }
         .fav-pill { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px; border: 1px solid rgba(0,0,0,0.1); }
+        .submit-btn { background: #0d47a1; color: white; width: 100%; margin-top: 15px; padding: 12px; border-radius: 6px; border:none; cursor: pointer; font-weight: bold; }
         .reset-btn { background: #6c757d; color: white; width: 100%; margin-top: 8px; padding: 8px; border-radius: 6px; border:none; cursor: pointer; font-weight: bold; font-size: 0.8rem; }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 2000; display: flex; justify-content: center; align-items: center; flex-direction: column; }
@@ -62,7 +60,7 @@
 <div id="crop-modal" class="modal-overlay" style="display:none;">
     <div class="modal-content">
         <h2 style="margin: 0; color: #0d47a1;">✂️ Recadrer la brique</h2>
-        <button class="btn-rotate" onclick="rotateImageInCrop()" style="background:#ff9800; color:white; margin-bottom:10px; padding:8px; border-radius:6px; border:none; cursor:pointer; font-weight:bold;">🔄 Pivoter 90°</button>
+        <button onclick="rotateImageInCrop()" style="background:#ff9800; color:white; margin-bottom:10px; padding:8px; border-radius:6px; border:none; cursor:pointer; font-weight:bold;">🔄 Pivoter 90°</button>
         <div class="crop-canvas-container"><canvas id="crop-canvas"></canvas></div>
         <div class="btn-group" style="margin-top:20px;">
             <button onclick="closeCropModal()" style="background:#6c757d; color:white;">❌ Annuler</button>
@@ -73,19 +71,20 @@
 
 <div id="export-modal" class="modal-overlay" style="display:none;">
     <div class="modal-content" style="width: 600px; max-width: 90vw;">
-        <h2 style="margin: 0 0 10px 0; color: #0d47a1;">📥 Code de Mise à Jour</h2>
-        <textarea id="export-text" style="width: 100%; height: 300px; font-family: monospace; font-size: 0.8rem; padding: 10px; border: 1px solid #ccc;" readonly></textarea>
+        <h2>📥 Code Secret du Nuancier</h2>
+        <p style="font-size:0.8rem; color:#666; margin-bottom:10px;">Remplacez la variable _ENC_DATA tout en haut du script par ce code.</p>
+        <textarea id="export-text" style="width: 100%; height: 300px; font-family: monospace; font-size: 0.75rem; padding: 10px; border: 1px solid #ccc;" readonly></textarea>
         <div class="btn-group" style="margin-top:20px;">
             <button onclick="document.getElementById('export-modal').style.display='none'" style="background:#6c757d; color:white;">Fermer</button>
-            <button onclick="copyExportText()" style="background:#0d6efd; color:white;">📋 Copier le code</button>
+            <button onclick="copyExportText()" style="background:#0d6efd; color:white;">📋 Copier</button>
         </div>
     </div>
 </div>
 
 <div class="controls">
-    <h2>🛠️ Configurateur</h2>
+    <h2>🛠️ Configurateur V1.5.3</h2>
 
-    <div style="background: #e3f2fd; border: 1px solid #90caf9; padding: 15px; border-radius: 8px;">
+    <div style="background: #e3f2fd; border: 1px solid #90caf9; padding: 15px; border-radius: 8px; margin-bottom: 5px;">
         <label>Ma Bibliothèque</label>
         <select id="userLibrarySelect" onchange="loadUserPreset()"><option value="">-- Projets sauvegardés --</option></select>
         <div style="display:flex; gap:5px; margin-top:8px;">
@@ -115,7 +114,7 @@
         </div>
     </div>
 
-    <div style="padding: 0 5px;">
+    <div>
         <h3>2. Joint & Mortier</h3>
         <div class="input-group">
             <div class="input-row" style="align-items: center;">
@@ -124,10 +123,13 @@
                     <option value="Standards">Standards</option>
                     <option value="Noirs & Gris">Noirs & Gris</option>
                     <option value="Jaunes">Jaunes</option>
+                    <option value="Marron">Marron</option>
+                    <option value="Rouges">Rouges</option>
                     <option value="Saumon">Saumons</option>
+                    <option value="Lie de vin">Lie de Vin</option>
                 </select>
                 <div id="joint-preview-dot"></div>
-                <button class="btn-fav" onclick="toggleFavorite()">⭐</button>
+                <button class="btn-fav" onclick="toggleFavorite()" title="Favoris">⭐</button>
             </div>
             <select id="jointColorSelect" onchange="onJointSelected()" style="margin-top:5px;"></select>
         </div>
@@ -137,7 +139,7 @@
         </div>
 
         <div class="dev-box" id="dev-box" style="display: none;">
-            <h4 style="margin:0 0 10px 0;">⚙️ Admin : Gestion des teintes</h4>
+            <h4 style="margin:0 0 10px 0;">⚙️ Admin : Gestion teintes</h4>
             <div style="background:#fff; padding:8px; border-radius:4px; margin-bottom:10px; border:1px solid #ccc; display:flex; gap:5px;">
                 <input type="text" id="dev-new-name" placeholder="NOM..." style="flex:1; font-size:0.8rem;">
                 <button onclick="addNewColor()" style="background:#198754; color:white; padding:4px 8px; font-size:0.8rem;">➕</button>
@@ -152,18 +154,18 @@
         </div>
 
         <div class="input-row" style="margin-top:15px;">
-            <div class="input-group"><label>Ep. (mm)</label><input type="range" id="slider-epaisseur" min="8" max="25" value="12" oninput="scheduleRender()"></div>
+            <div class="input-group"><label>Ep. Joint (mm)</label><input type="range" id="slider-epaisseur" min="8" max="25" value="12" oninput="scheduleRender()"></div>
         </div>
         
         <div style="background: #e9ecef; padding: 12px; border-radius: 8px; margin-top: 20px; border: 1px solid #ced4da;">
-            <span onclick="toggleDevBox()" style="color:#adb5bd; font-size:0.6rem; cursor:pointer; opacity: 0.6;">Admin</span>
+            <span onclick="toggleDevBox()" style="color:#adb5bd; font-size:0.6rem; cursor:pointer;">Admin</span>
             <input type="text" id="input-user-name" placeholder="Votre Nom / Prénom" style="margin-top:5px; margin-bottom:10px;">
             <button class="submit-btn" onclick="submitToAdmin()">📤 Demande d'échantillon</button>
             <button class="reset-btn" onclick="resetSimulator()">🔄 Réinitialiser le simulateur</button>
         </div>
     </div>
 
-    <div style="background: #e7f5ff; padding: 15px; border-radius: 8px; border: 1px solid #d0ebff; margin-top: 15px;">
+    <div style="margin-top: 15px;">
         <input type="range" id="slider-zoom" min="0.5" max="5.0" step="0.1" value="1.5" oninput="scheduleRender()">
         <div class="btn-group"><button class="btn-jpg" onclick="downloadImage()">JPG</button><button class="btn-pdf" onclick="downloadPDF()">PDF</button></div>
     </div>
@@ -174,10 +176,8 @@
 </div>
 
 <script>
-    // --- VARIABLES GLOBALES ET NUANCIER ENCODÉ ---
-    const STORAGE_KEY = 'biamortier_user_lib';
-    // Cette chaîne contient vos codes couleurs masqués
-    let _ENC_DATA = "W3siY2F0IjoiU3RhbmRhcmRzIiwibmFtZSI6IlNVUEVSIEJMQU5DIiwibCI6OTMsImMiOjMuNSwiaCI6NzMsInIiOjIzOSwiZyI6MjM0LCJiIjoyMjl9LHsiY2F0IjoiU3RhbmRhcmRzIiwibmFtZSI6IkJMQU5DIiwibCI6ODIsImMiOjUuNSwiaCI6ODYsInIiOjIwOCwiZyI6MjAzLCJiIjoxOTR9LHsiY2F0IjoiU3RhbmRhcmRzIiwibmFtZSI6IlRPTiBQSUVSUkUiLCJsIjo4NC41LCJjIjozMiwiaCI6ODksInIiOjIyOCwiZyI6MjA5LCJiIjoxNTB9LHsiY2F0IjoiU3RhbmRhcmRzIiwibmFtZSI6IkdSSVMgQ0xBSVIiLCJsIjo3Mi41LCJjIjoxNCwiaCI6OTEsInIiOjE4NSwiZyI6MTc3LCJiIjoxNTJ9LHsiY2F0IjoiTm9pcnMgJiBHcmlzIiwibmFtZSI6IjUwJSBCTCA1MCUgR1IiLCJsIjo3MS41LCJjIjoxMCwiaCI6ODYsInIiOjE4MiwiZyI6MTc0LCJiIjoxNTd9LHsiY2F0IjoiTm9pcnMgJiBHcmlzIiwibmFtZSI6IkdTMTUiLCJsIjo3NC41LCJjIjoxMCwiaCI6ODEsInIiOjE5MiwiZyI6MTgyLCJiIjoxNjV9LHsiY2F0IjoiTm9pcnMgJiBHcmlzIiwibmFtZSI6IlNCTjEyNSIsImwiOjYxLCJjIjozLjUsImgiOjkwLCJyIjoxNDksImciOjE0NywiYiI6MTQxfSx7ImNhdCI6Ik5vaXJzICYgR3JpcyIsIm5hbWUiOiJTQk4yNTAiLCJsIjo1MiwiYyI6My41LCJoIjo5MCwiciI6MTI2LCJnIjoxMjQsImIiOjExOH0seyJjYXQiOiJOb2lycyAmIEdyaXMiLCJuYW1lIjoiR0ExMjUiLCJsIjo0MC41LCJjIjoxLjUsImgiOjkxLCJyIjo5NiwiZyI6OTUsImIiOjkzfSx7ImNhdCI6Ik5vaXJzICYgR3JpcyIsIm5hbWUiOiJTQkEyNTAiLCJsIjozNS41LCJjIjowLjUsImgiOjExMCwiciI6ODMsImciOjg0LCJiIjo4M30seyJjYXQiOiJOb2lycyAmIEdyaXMiLCJuYW1lIjoiR0E0NTBSNTAiLCJsIjoyNiwiYyI6MS41LCJoIjo5MSwiciI6NjIsImciOjYxLCJiIjo1OX0seyJjYXQiOiJOb2lycyAmIEdyaXMiLCJuYW1lIjoiU0JBNTAwIiwibCI6MTksImMiOjAuNSwiaCI6MjAsInIiOjQ3LCJnIjo0NiwiYiI6NDZ9LHsiY2F0IjoiTm9pcnMgJiBHcmlzIiwibmFtZSI6IkdONTAwIiwibCI6MzYsImMiOjIsImgiOjg1LCJyIjo4NiwiZyI6ODQsImIiOjgxfSx7ImNhdCI6Ik5vaXJzICYgR3JpcyIsIm5hbWUiOiJHQTUwMCIsImwiOjI2LjUsImMiOjEsImgiOjc1LCJyIjo2NCwiZyI6NjIsImIiOjYxfSx7ImNhdCI6IkphdW5lcyIsIm5hbWUiOiJTQko4LjI1IiwibCI6ODUsImMiOjIwLCJoIjo3MywiciI6MjM0LCJnIjoyMDgsImIiOjE3Nn0seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiU0JKMzAiLCJsIjo4Ni41LCJjIjoyMi41LCJoIjo4MywiciI6MjM0LCJnIjoyMTQsImIiOjE3NH0seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiU0JKNjIuNSIsImwiOjg2LjUsImMiOjE3LjUsImgiOjgzLCJyIjoyMzAsImciOjIxNCwiYiI6MTg0fSx7ImNhdCI6IkphdW5lcyIsIm5hbWUiOiI3NSUgVFAgMjUlIEJMIiwibCI6ODQsImMiOjIwLCJoIjo4OCwiciI6MjIyLCJnIjoyMDgsImIiOjE3Mn0seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiU0JKMjUwIiwibCI6ODIuNSwiYyI6NDcsImgiOjgyLCJyIjoyMzgsImciOjIwMCwiYiI6MTE2fSx7ImNhdCI6IkphdW5lcyIsIm5hbWUiOiJHSlI1MCIsImwiOjY5LCJjIjo0MiwiaCI6ODQsInIiOjE5NCwiZyI6MTY0LCJiIjo5MX0seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiU0JKNTAwIiwibCI6ODMsImMiOjUyLCJoIjo4MiwiciI6MjQyLCJnIjoyMDAsImIiOjEwOH0seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiR0o1MDAiLCJsIjo2OSwiYyI6NDYuNSwiaCI6NzIsInIiOjIxMCwiZyI6MTU4LCJiIjo4N30seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiU0JKMTIwTjMwIiwibCI6NzAuNSwiYyI6MzMuNSwiaCI6ODcsInIiOjE5MSwiZyI6MTcwLCJiIjoxMTF9LHsiY2F0IjoiU2F1bW9uIiwibmFtZSI6IlNCUzguMjUiLCJsIjo3My41LCJjIjozMywiaCI6ODAsInIiOjIxMSwiZyI6MTc2LCJiIjoxMjJ9LHsiY2F0IjoiU2F1bW9uIiwibmFtZSI6IlNCUzE1SjIwIiwibCI6NzYsImMiOjI3LjUsImgiOjc3LCJyIjoyMTIsImciOjE4MywiYiI6MTM4fSx7ImNhdCI6IlNhdW1vbiIsIm5hbWUiOiJTQlM2Mi41IiwibCI6ODAsImMiOjM1LjUsImgiOjY0LCJyIjoyNDEsImciOjE4NywiYiI6MTM5fSx7ImNhdCI6IlNhdW1vbiIsIm5hbWUiOiJTQlMxMjUiLCJsIjo2NCwiYyI6NDIuNSwiaCI6NjQsInIiOjIwMCwiZyI6MTQyLCJiIjo4N31d";
+    // --- PROTECTION BASE64 DU NUANCIER ---
+    let _ENC_DATA = "W3siY2F0IjoiU3RhbmRhcmRzIiwibmFtZSI6IlNVUEVSIEJMQU5DIiwibCI6OTMsImMiOjMuNSwiaCI6NzMsInIiOjIzOSwiZyI6MjM0LCJiIjoyMjl9LHsiY2F0IjoiU3RhbmRhcmRzIiwibmFtZSI6IkJMQU5DIiwibCI6ODIsImMiOjUuNSwiaCI6ODYsInIiOjIwOCwiZyI6MjAzLCJiIjoxOTR9LHsiY2F0IjoiU3RhbmRhcmRzIiwibmFtZSI6IlRPTiBQSUVSUkUiLCJsIjo4NC41LCJjIjozMiwiaCI6ODksInIiOjIyOCwiZyI6MjA5LCJiIjoxNTB9LHsiY2F0IjoiU3RhbmRhcmRzIiwibmFtZSI6IkdSSVMgQ0xBSVIiLCJsIjo3Mi41LCJjIjoxNCwiaCI6OTEsInIiOjE4NSwiZyI6MTc3LCJiIjoxNTJ9LHsiY2F0IjoiTm9pcnMgJiBHcmlzIiwibmFtZSI6IjUwJSBCTCA1MCUgR1IiLCJsIjo3MS41LCJjIjoxMCwiaCI6ODYsInIiOjE4MiwiZyI6MTc0LCJiIjoxNTd9LHsiY2F0IjoiTm9pcnMgJiBHcmlzIiwibmFtZSI6IkdTMTUiLCJsIjo3NC41LCJjIjoxMCwiaCI6ODEsInIiOjE5MiwiZyI6MTgyLCJiIjoxNjV9LHsiY2F0IjoiTm9pcnMgJiBHcmlzIiwibmFtZSI6IlNCTjEyNSIsImwiOjYxLCJjIjozLjUsImgiOjkwLCJyIjoxNDksImciOjE0NywiYiI6MTQxfSx7ImNhdCI6Ik5vaXJzICYgR3JpcyIsIm5hbWUiOiJTQk4yNTAiLCJsIjo1MiwiYyI6My41LCJoIjo5MCwiciI6MTI2LCJnIjoxMjQsImIiOjExOH0seyJjYXQiOiJOb2lycyAmIEdyaXMiLCJuYW1lIjoiR0ExMjUiLCJsIjo0MC41LCJjIjoxLjUsImgiOjkxLCJyIjo5NiwiZyI6OTUsImIiOjkzfSx7ImNhdCI6Ik5vaXJzICYgR3JpcyIsIm5hbWUiOiJTQkEyNTAiLCJsIjozNS41LCJjIjowLjUsImgiOjExMCwiciI6ODMsImciOjg0LCJiIjo4M30seyJjYXQiOiJOb2lycyAmIEdyaXMiLCJuYW1lIjoiR0E0NTBSNTAiLCJsIjoyNiwiYyI6MS41LCJoIjo5MSwiciI6NjIsImciOjYxLCJiIjo1OX0seyJjYXQiOiJOb2lycyAmIEdyaXMiLCJuYW1lIjoiU0JBNTAwIiwibCI6MTksImMiOjAuNSwiaCI6MjAsInIiOjQ3LCJnIjo0NiwiYiI6NDZ9LHsiY2F0IjoiTm9pcnMgJiBHcmlzIiwibmFtZSI6IkdONTAwIiwibCI6MzYsImMiOjIsImgiOjg1LCJyIjo4NiwiZyI6ODQsImIiOjgxfSx7ImNhdCI6Ik5vaXJzICYgR3JpcyIsIm5hbWUiOiJHQTUwMCIsImwiOjI2LjUsImMiOjEsImgiOjc1LCJyIjo2NCwiZyI6NjIsImIiOjYxfSx7ImNhdCI6IkphdW5lcyIsIm5hbWUiOiJTQko4LjI1IiwibCI6ODUsImMiOjIwLCJoIjo3MywiciI6MjM0LCJnIjoyMDgsImIiOjE3Nn0seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiU0JKMzAiLCJsIjo4Ni41LCJjIjoyMi41LCJoIjo4MywiciI6MjM0LCJnIjoyMTQsImIiOjE3NH0seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiU0JKNjIuNSIsImwiOjg2LjUsImMiOjE3LjUsImgiOjgzLCJyIjoyMzAsImciOjIxNCwiYiI6MTg0fSx7ImNhdCI6IkphdW5lcyIsIm5hbWUiOiI3NSUgVFAgMjUlIEJMIiwibCI6ODQsImMiOjIwLCJoIjo4OCwiciI6MjIyLCJnIjoyMDgsImIiOjE3Mn0seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiU0JKMjUwIiwibCI6ODIuNSwiYyI6NDcsImgiOjgyLCJyIjoyMzgsImciOjIwMCwiYiI6MTE2fSx7ImNhdCI6IkphdW5lcyIsIm5hbWUiOiJHSlI1MCIsImwiOjY5LCJjIjo0MiwiaCI6ODQsInIiOjE5NCwiZyI6MTY0LCJiIjo5MX0seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiU0JKNTAwIiwibCI6ODMsImMiOjUyLCJoIjo4MiwiciI6MjQyLCJnIjoyMDAsImIiOjEwOH0seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiR0o1MDAiLCJsIjo2OSwiYyI6NDYuNSwiaCI6NzIsInIiOjIxMCwiZyI6MTU4LCJiIjo4N30seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiU0JKMTIwTjMwIiwibCI6NzAuNSwiYyI6MzMuNSwiaCI6ODcsInIiOjE5MSwiZyI6MTcwLCJiIjoxMTF9LHsiY2F0IjoiTWFycm9uIiwibmFtZSI6IkdTMTVKMTAiLCJsIjo2NSwiYyI6MTksImgiOjgxLCJyIjoxNzMsImciOjE1NSwiYiI6MTI0fSx7ImNhdCI6Ik1hcnJvbiIsIm5hbWUiOiJHTjkwUzM1IiwibCI6NDgsImMiOjExLCJoIjo3NCwiciI6MTI0LCJnIjoxMTIsImIiOjk2fSx7ImNhdCI6Ik1hcnJvbiIsIm5hbWUiOiJHUzE1ME4xMDAiLCJsIjo2Mi41LCJjIjoyMSwiaCI6NzQsInIiOjE3MSwiZyI6MTQ3LCJiIjoxMTZ9LHsiY2F0IjoiTWFycm9uIiwibmFtZSI6IkdTMjAwTjE1MCIsImwiOjQ5LCJjIjoyMS41LCJoIjo3MSwiciI6MTM3LCJnIjoxMTIsImIiOjgyfSx7ImNhdCI6Ik1hcnJvbiIsIm5hbWUiOiJTQko5MFI3ME45MCIsImwiOjU3LCJjIjoyNCwiaCI6NjcsInIiOjE2MiwiZyI6MTMwLCJiIjo5OX0seyJjYXQiOiJNYXJyb24iLCJuYW1lIjoiR1MxNTBBMTAwIiwibCI6NDgsImMiOjEyLCJoIjo4MSwiciI6MTIzLCJnIjoxMTIsImIiOjk0fSx7ImNhdCI6Ik1hcnJvbiIsIm5hbWUiOiJHUzEyNSExMjUiLCJsIjo0OC41LCJjIjoxOSwiaCI6NTgsInIiOjEzOSwiZyI6MTA5LCJiIjo4OH0seyJjYXQiOiJNYXJyb24iLCJuYW1lIjoiU0JKMTgwUjE4ME4xNDAiLCJsIjo1NC41LCJjIjoyNy41LCJoIjo2NCwiciI6MTYwLCJnIjoxMTksImIijo4OH0seyJjYXQiOiJNYXJyb24iLCJuYW1lIjoiR040MTZTODQiLCJsIjozOCwiYyI6Ny41LCJoIjo3OCwiciI6OTYsImciOjg4LCJiIjo3OH0seyJjYXQiOiJNYXJyb24iLCJuYW1lIjoiR1MyNTBBMjUwIiwibCI6MzEuNSwiYyI6OCwiaCI6NzgsInIiOjgwLCJnIjo3MywiYiI6NjJ9LHsiY2F0IjoiTWFycm9uIiwibmFtZSI6IkdTMzAwQTIwMCIsImwiOjMzLCJjIjoxMiwiaCI6NzIsInIiOjg4LCJnIjo3NSwiYiI6NjB9LHsiY2F0IjoiUm91Z2VzIiwibmFtZSI6IkdSMTUwSjEwMCIsImwiOjUzLjUsImMiOjM5LCJoIjo1NywiciI6MTczLCJnIjoxMTMsImIiOjcyfSx7ImNhdCI6IlJvdWdlcyIsIm5hbWUiOiJTQlIxMjUiLCJsIjo2My41LCJjIjozNC41LCJoIjo0NSwiciI6MjA0LCJnIjoxMzcsImIiOjExMn0seyJjYXQiOiJSb3VnZXMiLCJuYW1lIjoiR1IxMjUiLCJsIjo1Ny41LCJjIjoyOSwiaCI6NDcsInIiOjE3OSwiZyI6MTI1LCJiIjoxMDJ9LHsiY2F0IjoiUm91Z2VzIiwibmFtZSI6IkdSMTUwUzEwMCIsImwiOjU5LCJjIjoyOCwiaCI6NTMsInIiOjE5MiwiZyI6MTI1LCJiIjo4OH0seyJjYXQiOiJSb3VnZXMiLCJuYW1lIjoiU0JSMjUwIiwibCI6NjAsImMiOjM3LjUsImgiOjQyLCJyIjoxOTksImciOjEyNSwiYiI6MTAyfSx7ImNhdCI6IlJvdWdlcyIsIm5hbWUiOiJHUk0yNSIsImwiOjUwLjUsImMiOjI5LCJoIjo0NywiciI6MTYwLCJnIjoxMDcsImIiOjg1fSx7ImNhdCI6IlJvdWdlcyIsIm5hbWUiOiJTQlIzNzUiLCJsIjo1MiwiYyI6NDUsImgiOjQyLCJyIjoxODUsImciOjk5LCJiIjo3NH0seyJjYXQiOiJSb3VnZXMiLCJuYW1lIjoiR1RRMzc1IiwibCI6NDMuNSwiYyI6NDMuNSwiaCI6NDQsInIiOjE1NywiZyI6ODAsImIiOjU0fSx7ImNhdCI6IlJvdWdlcyIsIm5hbWUiOiJHUk0yNTAiLCJsIjo1MywiYyI6MzYuNSwiaCI6NDUsInIiOjE3NiwiZyI6MTA4LCJiIjo4NH0seyJjYXQiOiJSb3VnZXMiLCJuYW1lIjoiR1IyNTBTMjUwIiwibCI6NDksImMiOjU3LCJoIjo1MCwiciI6MTgyLCJnIjo4OCwiYiI6NDN9LHsiY2F0IjoiUm91Z2VzIiwibmFtZSI6IkdSMTMwMFMyMDAiLCJsIjo0Mi41LCJjIjo0NiwiaCI6NDcsInIiOjE1NSwiZyI6NzcsImIiOjQ2fSx7ImNhdCI6IlNhdW1vbiIsIm5hbWUiOiJTQlM4LjI1IiwibCI6NzMuNSwiYyI6MzMsImgiOjgwLCJyIjoyMTEsImciOjE3NiwiYiI6MTIyfSx7ImNhdCI6IlNhdW1vbiIsIm5hbWUiOiJTQlMxNUoyMCIsImwiOjc2LCJjIjoyNy41LCJoIjo3NywiciIjoyMTIsImciOjE4MywiYiI6MTM4fSx7ImNhdCI6IlNhdW1vbiIsIm5hbWUiOiJTQlM2Mi41IiwibCI6ODAsImMiOjM1LjUsImgiOjY0LCJyIjoyNDEsImciOjE4NywiYiI6MTM5fSx7ImNhdCI6IlNhdW1vbiIsIm5hbWUiOiJTQlMxMjUiLCJsIjo2NCwiYyI6NDIuNSwiaCI6NjQsInIiOjIwMCwiZyI6MTQyLCJiIjo4N31d";
     
     let NUANCIER_COMPLET = JSON.parse(atob(_ENC_DATA));
     let favorites = [];
@@ -199,7 +199,7 @@
     let isRendering = false;
     function scheduleRender() { if (!isRendering) { isRendering = true; requestAnimationFrame(() => { render(); isRendering = false; }); } }
 
-    // --- INITIALISATION (MOTEUR D'ORIGINE) ---
+    // --- INITIALISATION (RÉTABLIE SUR VOTRE LOGIQUE) ---
     window.onload = () => {
         grainTexture = generateProceduralGrain();
         forceWallRegen();
@@ -237,7 +237,7 @@
         scheduleRender();
     }
 
-    // --- MOTEUR DE RENDU (RÉTABLI DANS SON INTÉGRALITÉ) ---
+    // --- MOTEUR DE RENDU (VOTRE VERSION ORIGINALE RESTAURÉE) ---
     function render() {
         let active = loadedBricks.filter(b => b !== null);
         if(!active.length) return;
@@ -274,12 +274,12 @@
             y += Hb + J; rIdx++;
         }
 
-        // BARRE D'INFO BASSE
+        // BARRE D'INFOS BASSE RESTAURÉE
         ctx.fillStyle = "white"; ctx.fillRect(0, 800, 1200, 110);
         ctx.fillStyle = "#222"; ctx.font = "bold 22px 'Segoe UI'"; ctx.textAlign = "left";
         ctx.fillText(`JOINT : ${currentJointColor ? currentJointColor.name : "Non sélectionné"}`, 30, 845);
         ctx.textAlign = "right";
-        ctx.fillText(`PROJET : ${document.getElementById('input-brick-name').value || "Standard"}`, 1170, 845);
+        ctx.fillText(`PROJET : ${document.getElementById('input-brick-name').value || "Brique standard"}`, 1170, 845);
         ctx.fillStyle = "#dc3545"; ctx.font = "italic 16px 'Segoe UI'"; ctx.textAlign = "center";
         ctx.fillText("Document indicatif à valider impérativement par un essai sur chantier.", 600, 885);
     }
@@ -297,7 +297,7 @@
 
     function renderFavorites() {
         const bar = document.getElementById('fav-bar');
-        bar.innerHTML = '<span style="font-size: 0.7rem; color: #888; width: 100%;">Comparateur :</span>';
+        bar.innerHTML = '<span style="font-size: 0.7rem; color: #888; width: 100%;">Comparateur rapide :</span>';
         favorites.forEach((fav, i) => {
             const pill = document.createElement('div'); pill.className = 'fav-pill';
             pill.style.backgroundColor = `rgb(${fav.r},${fav.g},${fav.b})`;
@@ -312,7 +312,7 @@
         });
     }
 
-    // --- FONCTIONS ADMIN ET GESTION ---
+    // --- ADMIN ET GESTION ---
     function toggleDevBox() { if (prompt("Mot de passe Admin :") === "RapCom47T") document.getElementById('dev-box').style.display = 'block'; }
 
     function addNewColor() {
@@ -339,7 +339,7 @@
         const cat = document.getElementById('categorySelect').value, sel = document.getElementById('jointColorSelect');
         sel.innerHTML = '<option value="">-- Choisir une teinte --</option>';
         let list = (cat === 'all' ? [...NUANCIER_COMPLET] : NUANCIER_COMPLET.filter(c => c.cat === cat));
-        list.sort((a,b) => b.l - a.l); // Tri clair vers foncé
+        list.sort((a,b) => b.l - a.l); // Tri clair vers foncé par Luminance
         list.forEach(c => {
             const o = document.createElement('option'); o.value = JSON.stringify(c); o.textContent = c.name;
             o.style.backgroundColor = `rgb(${c.r},${c.g},${c.b})`; o.style.color = (0.3*c.r+0.6*c.g+0.1*c.b)>130?'#000':'#fff'; sel.appendChild(o);
@@ -371,7 +371,7 @@
         currentJointColor = NUANCIER_COMPLET[idx]; onJointSelected();
     }
 
-    // --- RECADRAGE ET IMPORT PHOTOS (RÉTABLI) ---
+    // --- RECADRAGE ET IMPORT PHOTOS (RESTAURÉ À L'IDENTIQUE) ---
     function triggerUpload(i) { currentSlot = i; document.getElementById('hidden-file-input').click(); }
     document.getElementById('hidden-file-input').onchange = (e) => {
         const f = e.target.files[0]; if(!f) return;
@@ -424,7 +424,7 @@
         } else { d.classList.remove('active'); d.innerHTML += `<div style="position:absolute; color:#007bff; font-weight:bold;">+ Photo ${idx+1}</div>`; }
     }
 
-    function resetSimulator() { if (confirm("Réinitialiser ?")) location.reload(); }
+    function resetSimulator() { if (confirm("Réinitialiser le configurateur ?")) location.reload(); }
 
     function generateProceduralGrain() {
         const s = 512, c = document.createElement('canvas'); c.width = s; c.height = s; const x = c.getContext('2d');
@@ -437,9 +437,9 @@
     function downloadImage() { const a = document.createElement('a'); a.download = 'Projet.jpg'; a.href = canvas.toDataURL('image/jpeg', 0.92); a.click(); }
     function downloadPDF() { const { jsPDF } = window.jspdf; const doc = new jsPDF('l','mm','a4'); doc.addImage(canvas.toDataURL('image/jpeg',0.9),'JPEG',10,10,277,190); doc.save('Projet.pdf'); }
     function copyExportText() { navigator.clipboard.writeText(document.getElementById("export-text").value); alert("✅ Code copié !"); }
-    function submitToAdmin() { alert("Demande envoyée ! Pensez à joindre votre fichier PDF exporté."); }
+    function submitToAdmin() { alert("Demande envoyée ! N'oubliez pas de joindre votre fichier PDF exporté à l'e-mail."); }
 
-    // --- GESTION LIBRARY (INDEXEDDB) ---
+    // --- GESTION LIBRARY (INDEXEDDB - ORIGINALE) ---
     async function getUserLibrary() { const s = await localforage.getItem(STORAGE_KEY); return s ? s : []; }
     async function refreshLibraryUI() {
         const lib = await getUserLibrary(); const sel = document.getElementById('userLibrarySelect');
