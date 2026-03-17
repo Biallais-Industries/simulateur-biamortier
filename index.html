@@ -98,7 +98,7 @@
 <div id="export-modal" class="modal-overlay" style="display:none;">
     <div class="modal-content" style="width: 600px; max-width: 90vw;">
         <h2 style="margin: 0 0 10px 0; color: #0d47a1;">📥 Code du Nuancier Mis à Jour</h2>
-        <p style="font-size: 0.85rem; color: #555; margin-bottom: 15px;">Copiez ce texte et remplacez l'ancien bloc <b>_ENC_DATA</b> dans votre code HTML.</p>
+        <p style="font-size: 0.85rem; color: #555; margin-bottom: 15px;">Copiez ce texte et remplacez l'ancien bloc <b>NUANCIER_COMPLET</b> dans votre code HTML.</p>
         <textarea id="export-text" style="width: 100%; height: 300px; font-family: monospace; font-size: 0.8rem; padding: 10px; border-radius: 4px; border: 1px solid #ccc;" readonly></textarea>
         <div class="btn-group" style="margin-top:20px;">
             <button onclick="document.getElementById('export-modal').style.display='none'" style="background:#6c757d; color:white;">Fermer</button>
@@ -305,9 +305,72 @@
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     let mobileSaturationCorrection = 1.0;
 
-    // --- NUANCIER SECRET (MASQUÉ EN BASE64) ---
-    const _ENC_DATA = "W3siY2F0IjoiU3RhbmRhcmRzIiwibmFtZSI6IlNVUEVSIEJMQU5DIiwibCI6OTMsImMiOjMuNSwiaCI6NzMsInIiOjIzOSwiZyI6MjM0LCJiIjoyMjl9LHsiY2F0IjoiU3RhbmRhcmRzIiwibmFtZSI6IkJMQU5DIiwibCI6ODIsImMiOjUuNSwiaCI6ODYsInIiOjIwOCwiZyI6MjAzLCJiIjoxOTR9LHsiY2F0IjoiU3RhbmRhcmRzIiwibmFtZSI6IlRPTiBQSUVSUkUiLCJsIjo4NC41LCJjIjozMiwiaCI6ODksInIiOjIyOCwiZyI6MjA5LCJiIjoxNTB9LHsiY2F0IjoiU3RhbmRhcmRzIiwibmFtZSI6IkdSSVMgQ0xBSVIiLCJsIjo3Mi41LCJjIjoxNCwiaCI6OTEsInIiOjE4NSwiZyI6MTc3LCJiIjoxNTJ9LHsiY2F0IjoiTm9pcnMgJiBHcmlzIiwibmFtZSI6IjUwJSBCTCA1MCUgR1IiLCJsIjo3MS41LCJjIjoxMCwiaCI6ODYsInIiOjE4MiwiZyI6MTc0LCJiIjoxNTd9LHsiY2F0IjoiTm9pcnMgJiBHcmlzIiwibmFtZSI6IkdTMTUiLCJsIjo3NC41LCJjIjoxMCwiaCI6ODEsInIiOjE5MiwiZyI6MTgyLCJiIjoxNjV9LHsiY2F0IjoiTm9pcnMgJiBHcmlzIiwibmFtZSI6IlNCTjEyNSIsImwiOjYxLCJjIjozLjUsImgiOjkwLCJyIjoxNDksImciOjE0NywiYiI6MTQxfSx7ImNhdCI6Ik5vaXJzICYgR3JpcyIsIm5hbWUiOiJTQk4yNTAiLCJsIjo1MiwiYyI6My41LCJoIjo5MCwiciI6MTI2LCJnIjoxMjQsImIiOjExOH0seyJjYXQiOiJOb2lycyAmIEdyaXMiLCJuYW1lIjoiR0ExMjUiLCJsIjo0MC41LCJjIjoxLjUsImgiOjkxLCJyIjo5NiwiZyI6OTUsImIiOjkzfSx7ImNhdCI6Ik5vaXJzICYgR3JpcyIsIm5hbWUiOiJTQkEyNTAiLCJsIjozNS41LCJjIjowLjUsImgiOjExMCwiciI6ODMsImciOjg0LCJiIjo4M30seyJjYXQiOiJOb2lycyAmIEdyaXMiLCJuYW1lIjoiR0E0NTBSNTAiLCJsIjoyNiwiYyI6MS41LCJoIjo5MSwiciI6NjIsImciOjYxLCJiIjo1OX0seyJjYXQiOiJOb2lycyAmIEdyaXMiLCJuYW1lIjoiU0JBNTAwIiwibCI6MTksImMiOjAuNSwiaCI6MjAsInIiOjQ3LCJnIjo0NiwiYiI6NDZ9LHsiY2F0IjoiTm9pcnMgJiBHcmlzIiwibmFtZSI6IkdONTAwIiwibCI6MzYsImMiOjIsImgiOjg1LCJyIjo4NiwiZyI6ODQsImIiOjgxfSx7ImNhdCI6Ik5vaXJzICYgR3JpcyIsIm5hbWUiOiJHQTUwMCIsImwiOjI2LjUsImMiOjEsImgiOjc1LCJyIjo2NCwiZyI6NjIsImIiOjYxfSx7ImNhdCI6IkphdW5lcyIsIm5hbWUiOiJTQko4LjI1IiwibCI6ODUsImMiOjIwLCJoIjo3MywiciI6MjM0LCJnIjoyMDgsImIiOjE3Nn0seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiU0JKMzAiLCJsIjo4Ni41LCJjIjoyMi41LCJoIjo4MywiciI6MjM0LCJnIjoyMTQsImIiOjE3NH0seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiU0JKNjIuNSIsImwiOjg2LjUsImMiOjE3LjUsImgiOjgzLCJyIjoyMzAsImciOjIxNCwiYiI6MTg0fSx7ImNhdCI6IkphdW5lcyIsIm5hbWUiOiI3NSUgVFAgMjUlIEJMIiwibCI6ODQsImMiOjIwLCJoIjo4OCwiciI6MjIyLCJnIjoyMDgsImIiOjE3Mn0seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiU0JKMjUwIiwibCI6ODIuNSwiYyI6NDcsImgiOjgyLCJyIjoyMzgsImciOjIwMCwiYiI6MTE2fSx7ImNhdCI6IkphdW5lcyIsIm5hbWUiOiJHSlI1MCIsImwiOjY5LCJjIjo0MiwiaCI6ODQsInIiOjE5NCwiZyI6MTY0LCJiIjo5MX0seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiU0JKNTAwIiwibCI6ODMsImMiOjUyLCJoIjo4MiwiciI6MjQyLCJnIjoyMDAsImIiOjEwOH0seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiR0o1MDAiLCJsIjo2OSwiYyI6NDYuNSwiaCI6NzIsInIiOjIxMCwiZyI6MTU4LCJiIjo4N30seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiU0JKMTIwTjMwIiwibCI6NzAuNSwiYyI6MzMuNSwiaCI6ODcsInIiOjE5MSwiZyI6MTcwLCJiIjoxMTF9LHsiY2F0IjoiTWFycm9uIiwibmFtZSI6IkdTMTVKMTAiLCJsIjo2NSwiYyI6MTksImgiOjgxLCJyIjoxNzMsImciOjE1NSwiYiI6MTI0fSx7ImNhdCI6Ik1hcnJvbiIsIm5hbWUiOiJHTjkwUzM1IiwibCI6NDgsImMiOjExLCJoIjo3NCwiciI6MTI0LCJnIjoxMTIsImIiOjk2fSx7ImNhdCI6Ik1hcnJvbiIsIm5hbWUiOiJHUzE1ME4xMDAiLCJsIjo2Mi41LCJjIjoyMSwiaCI6NzQsInIiOjE3MSwiZyI6MTQ3LCJiIjoxMTZ9LHsiY2F0IjoiTWFycm9uIiwibmFtZSI6IkdTMjAwTjE1MCIsImwiOjQ5LCJjIjoyMS41LCJoIjo3MSwiciI6MTM3LCJnIjoxMTIsImIiOjgyfSx7ImNhdCI6Ik1hcnJvbiIsIm5hbWUiOiJTQko5MFI3ME45MCIsImwiOjU3LCJjIjoyNCwiaCI6NjcsInIiOjE2MiwiZyI6MTMwLCJiIjo5OX0seyJjYXQiOiJNYXJyb24iLCJuYW1lIjoiR1MxNTBBMTAwIiwibCI6NDgsImMiOjEyLCJoIjo4MSwiciI6MTIzLCJnIjoxMTIsImIiOjk0fSx7ImNhdCI6Ik1hcnJvbiIsIm5hbWUiOiJHUzEyNSExMjUiLCJsIjo0OC41LCJjIjoxOSwiaCI6NTgsInIiOjEzOSwiZyI6MTA5LCJiIjo4OH0seyJjYXQiOiJNYXJyb24iLCJuYW1lIjoiU0JKMTgwUjE4ME4xNDAiLCJsIjo1NC41LCJjIjoyNy41LCJoIjo2NCwiciI6MTYwLCJnIjoxMTksImIijo4OH0seyJjYXQiOiJNYXJyb24iLCJuYW1lIjoiR040MTZTODQiLCJsIjozOCwiYyI6Ny41LCJoIjo3OCwiciI6OTYsImciOjg4LCJiIjo3OH0seyJjYXQiOiJNYXJyb24iLCJuYW1lIjoiR1MyNTBBMjUwIiwibCI6MzEuNSwiYyI6OCwiaCI6NzgsInIiOjgwLCJnIjo3MywiYiI6NjJ9LHsiY2F0IjoiTWFycm9uIiwibmFtZSI6IkdTMzAwQTIwMCIsImwiOjMzLCJjIjoxMiwiaCI6NzIsInIiOjg4LCJnIjo3NSwiYiI6NjB9LHsiY2F0IjoiUm91Z2VzIiwibmFtZSI6IkdSMTUwSjEwMCIsImwiOjUzLjUsImMiOjM5LCJoIjo1NywiciI6MTczLCJnIjoxMTMsImIiOjcyfSx7ImNhdCI6IlJvdWdlcyIsIm5hbWUiOiJTQlIxMjUiLCJsIjo2My41LCJjIjozNC41LCJoIjo0NSwiciI6MjA0LCJnIjoxMzcsImIiOjExMn0seyJjYXQiOiJSb3VnZXMiLCJuYW1lIjoiR1IxMjUiLCJsIjo1Ny41LCJjIjoyOSwiaCI6NDcsInIiOjE3OSwiZyI6MTI1LCJiIjoxMDJ9LHsiY2F0IjoiUm91Z2VzIiwibmFtZSI6IkdSMTUwUzEwMCIsImwiOjU5LCJjIjoyOCwiaCI6NTMsInIiOjE5MiwiZyI6MTI1LCJiIjo4OH0seyJjYXQiOiJSb3VnZXMiLCJuYW1lIjoiU0JSMjUwIiwibCI6NjAsImMiOjM3LjUsImgiOjQyLCJyIjoxOTksImciOjEyNSwiYiI6MTAyfSx7ImNhdCI6IlJvdWdlcyIsIm5hbWUiOiJHUk0yNSIsImwiOjUwLjUsImMiOjI5LCJoIjo0NywiciI6MTYwLCJnIjoxMDcsImIiOjg1fSx7ImNhdCI6IlJvdWdlcyIsIm5hbWUiOiJTQlIzNzUiLCJsIjo1MiwiYyI6NDUsImgiOjQyLCJyIjoxODUsImciOjk5LCJiIjo3NH0seyJjYXQiOiJSb3VnZXMiLCJuYW1lIjoiR1RRMzc1IiwibCI6NDMuNSwiYyI6NDMuNSwiaCI6NDQsInIiOjE1NywiZyI6ODAsImIiOjU0fSx7ImNhdCI6IlJvdWdlcyIsIm5hbWUiOiJHUk0yNTAiLCJsIjo1MywiYyI6MzYuNSwiaCI6NDUsInIiOjE3NiwiZyI6MTA4LCJiIjo4NH0seyJjYXQiOiJSb3VnZXMiLCJuYW1lIjoiR1IyNTBTMjUwIiwibCI6NDksImMiOjU3LCJoIjo1MCwiciI6MTgyLCJnIjo4OCwiYiI6NDN9LHsiY2F0IjoiUm91Z2VzIiwibmFtZSI6IkdSMTMwMFMyMDAiLCJsIjo0Mi41LCJjIjo0NiwiaCI6NDcsInIiOjE1NSwiZyI6NzcsImIiOjQ2fSx7ImNhdCI6IlNhdW1vbiIsIm5hbWUiOiJTQlM4LjI1IiwibCI6NzMuNSwiYyI6MzMsImgiOjgwLCJyIjoyMTEsImciOjE3NiwiYiI6MTIyfSx7ImNhdCI6IlNhdW1vbiIsIm5hbWUiOiJTQlMxNUoyMCIsImwiOjc2LCJjIjoyNy41LCJoIjo3NywiciIjoyMTIsImciOjE4MywiYiI6MTM4fSx7ImNhdCI6IlNhdW1vbiIsIm5hbWUiOiJTQlM2Mi41IiwibCI6ODAsImMiOjM1LjUsImgiOjY0LCJyIjoyNDEsImciOjE4NywiYiI6MTM5fSx7ImNhdCI6IlNhdW1vbiIsIm5hbWUiOiJTQlMxMjUiLCJsIjo2NCwiYyI6NDIuNSwiaCI6NjQsInIiOjIwMCwiZyI6MTQyLCJiIjo4N30seyJjYXQiOiJTYXVtb24iLCJuYW1lIjoiR1M2Mi41IiwibCI6NjMuNSwiYyI6MzAsImgiOjcyLCJyIjoxODIsImciOjE0NywiYiI6MTAzfSx7ImNhdCI6IlNhdW1vbiIsIm5hbWUiOiJHUzEyNSIsImwiOjYwLCJjIjoyMy41LCJoIjo2MywiciI6MTcyLCJnIjoxMzcsImIiOjEwOH0seyJjYXQiOiJTYXVtb24iLCJuYW1lIjoiR1MyNTAiLCJsIjo2MS41LCJjIjoyNywiaCI6NTEsInIiOjE4NiwiZyI6MTM3LCJiIjoxMTJ9LHsiY2F0IjoiU2F1bW9uIiwibmFtZSI6IlNCUzI1MCIsImwiOjY3LCJjIjo0MSwiaCI6NTYsInIiOjIxNCwiZyI6MTQ3LCJiIjoxMDN9LHsiY2F0IjoiU2F1bW9uIiwibmFtZSI6IlNCSjQ1UjQ1TjM1IiwibCI6NTgsImMiOjIyLjUsImgiOjY2LCJyIjoxNjQsImciOjEzMywiYiI6MTA0fSx7ImNhdCI6IlNhdW1vbiIsIm5hbWUiOiJTQlM1MDAiLCJsIjo2MiwiYyI6NTAuNSwiaCI6NDcsInIiOjIxNywiZyI6MTI0LCJiIjo4Nn0seyJjYXQiOiJTYXVtb24iLCJuYW1lIjoiR1M1MDAiLCJsIjo0OSwiYyI6NDYuNSwiaCI6NTgsInIiOjE2NiwiZyI6OTksImIiOjQ5fSx7ImNhdCI6IlNhdW1vbiIsIm5hbWUiOiJHUzM3NVIxMjUiLCJsIjo1MiwiYyI6NDQsImgiOjQ2LCJyIjoxODEsImciOjEwMiwiYiI6NzF9LHsiY2F0IjoiTGllIGRlIHZpbiIsIm5hbWUiOiJHUkExMjVOMTAwUzI1IiwibCI6NTEuNSwiYyI6MjAsImgiOjUwLCJyIjoxNTAsImciOjExNCwiYiI6OTd9LHsiY2F0IjoiTGllIGRlIHZpbiIsIm5hbWUiOiJHUk0yMDBONTAsImwiOjUyLCJjIjoyNiwiaCI6NDcsInIiOjE2MCwiZyI6MTExLCJiIjo5Mn0seyJjYXQiOiJMaWUgZGUgdmluIiwibmFtZSI6IlNCUjI1ME4xMjUiLCJsIjo0Mi41LCJjIjoyMi41LCJoIjo0MiwiciI6MTMyLCJnIjo5MCwiYiI6NzZ9LHsiY2F0IjoiTGllIGRlIHZpbiIsIm5hbWUiOiJHUk0zMDBTMTAwTjEwMCIsImwiOjQyLjUsImMiOjMyLCJoIjo0NywiciI6MTQxLCJnIjo4NiwiYiI6NjN9LHsiY2F0IjoiTGllIGRlIHZpbiIsIm5hbWUiOiJHUk0yMDBTMjAwTjEwMCIsImwiOjUzLCJjIjozMiwiaCI6NTIsInIiOjE2NywiZyI6MTEzLCJiIjo4NH0seyJjYXQiOiJMaWUgZGUgdmluIiwibmFtZSI6IkdSMzE2Tjg0IiwibCI6NDIsImMiOjM1LCJoIjo0MCwiciI6MTQ2LCJnIjo4MCwiYiI6NjR9XQ==";
-    let NUANCIER_COMPLET = JSON.parse(atob(_ENC_DATA));
+    // --- LISTE DES COULEURS AVEC VALEURS RGB FIGÉES ---
+   let NUANCIER_COMPLET = [
+        { cat: "Standards", name: "SUPER BLANC", l: 93.00, c: 3.50, h: 73.00, r: 239, g: 234, b: 229 },
+        { cat: "Standards", name: "BLANC", l: 82.00, c: 5.50, h: 86.00, r: 208, g: 203, b: 194 },
+        { cat: "Standards", name: "TON PIERRE", l: 84.50, c: 32.00, h: 89.00, r: 228, g: 209, b: 150 },
+        { cat: "Standards", name: "GRIS CLAIR", l: 72.50, c: 14.00, h: 91.00, r: 185, g: 177, b: 152 },
+        { cat: "Noirs & Gris", name: "50% BL 50% GR", l: 71.50, c: 10.00, h: 86.00, r: 182, g: 174, b: 157 },
+        { cat: "Noirs & Gris", name: "GS15", l: 74.50, c: 10.00, h: 81.00, r: 192, g: 182, b: 165 },
+        { cat: "Noirs & Gris", name: "SBN125", l: 61.00, c: 3.50, h: 90.00, r: 149, g: 147, b: 141 },
+        { cat: "Noirs & Gris", name: "SBN250", l: 52.00, c: 3.50, h: 90.00, r: 126, g: 124, b: 118 },
+        { cat: "Noirs & Gris", name: "GA125", l: 40.50, c: 1.50, h: 91.00, r: 96, g: 95, b: 93 },
+        { cat: "Noirs & Gris", name: "SBA250", l: 35.50, c: 0.50, h: 110.00, r: 83, g: 84, b: 83 },
+        { cat: "Noirs & Gris", name: "GA450R50", l: 26.00, c: 1.50, h: 91.00, r: 62, g: 61, b: 59 },
+        { cat: "Noirs & Gris", name: "SBA500", l: 19.00, c: 0.50, h: 20.00, r: 47, g: 46, b: 46 },
+        { cat: "Noirs & Gris", name: "GN500", l: 36.00, c: 2.00, h: 85.00, r: 86, g: 84, b: 81 },
+        { cat: "Noirs & Gris", name: "GA500", l: 26.50, c: 1.00, h: 75.00, r: 64, g: 62, b: 61 },
+        { cat: "Jaunes", name: "SBJ8.25", l: 85.00, c: 20.00, h: 73.00, r: 234, g: 208, b: 176 },
+        { cat: "Jaunes", name: "SBJ30", l: 86.50, c: 22.50, h: 83.00, r: 234, g: 214, b: 174 },
+        { cat: "Jaunes", name: "SBJ62.5", l: 86.50, c: 17.50, h: 83.00, r: 230, g: 214, b: 184 },
+        { cat: "Jaunes", name: "75% TP 25% BL", l: 84.00, c: 20.00, h: 88.00, r: 222, g: 208, b: 172 },
+        { cat: "Jaunes", name: "SBJ250", l: 82.50, c: 47.00, h: 82.00, r: 238, g: 200, b: 116 },
+        { cat: "Jaunes", name: "GJ250", l: 69.00, c: 42.00, h: 84.00, r: 194, g: 164, b: 91 },
+        { cat: "Jaunes", name: "SBJ500", l: 83.00, c: 52.00, h: 82.00, r: 242, g: 200, b: 108 },
+        { cat: "Jaunes", name: "GJ500", l: 69.00, c: 46.50, h: 72.00, r: 210, g: 158, b: 87 },
+        { cat: "Jaunes", name: "SBJ120N30", l: 70.50, c: 33.50, h: 87.00, r: 191, g: 170, b: 111 },
+        { cat: "Marron", name: "GS15J10", l: 65.00, c: 19.00, h: 81.00, r: 173, g: 155, b: 124 },
+        { cat: "Marron", name: "GN90S35", l: 48.00, c: 11.00, h: 74.00, r: 124, g: 112, b: 96 },
+        { cat: "Marron", name: "GS150N100", l: 62.50, c: 21.00, h: 74.00, r: 171, g: 147, b: 116 },
+        { cat: "Marron", name: "GS200N150", l: 49.00, c: 21.50, h: 71.00, r: 137, g: 112, b: 82 },
+        { cat: "Marron", name: "SBJ90R70N90", l: 57.00, c: 24.00, h: 67.00, r: 162, g: 130, b: 99 },
+        { cat: "Marron", name: "GS150A100", l: 48.00, c: 12.00, h: 81.00, r: 123, g: 112, b: 94 },
+        { cat: "Marron", name: "GS125N250R125", l: 48.50, c: 19.00, h: 58.00, r: 139, g: 109, b: 88 },
+        { cat: "Marron", name: "SBJ180R180N140", l: 54.50, c: 27.50, h: 64.00, r: 160, g: 122, b: 88 },
+        { cat: "Marron", name: "GN416S84", l: 38.00, c: 7.50, h: 78.00, r: 96, g: 88, b: 78 },
+        { cat: "Marron", name: "GS250A250", l: 31.50, c: 8.00, h: 78.00, r: 80, g: 73, b: 62 },
+        { cat: "Marron", name: "GS300A200", l: 33.00, c: 12.00, h: 72.00, r: 88, g: 75, b: 60 },
+        { cat: "Rouges", name: "GR150J100", l: 53.50, c: 39.00, h: 57.00, r: 173, g: 113, b: 72 },
+        { cat: "Rouges", name: "SBR125", l: 63.50, c: 34.50, h: 45.00, r: 204, g: 137, b: 112 },
+        { cat: "Rouges", name: "GR125", l: 57.50, c: 29.00, h: 47.00, r: 179, g: 125, b: 102 },
+        { cat: "Rouges", name: "GR150S100", l: 59.00, c: 39.50, h: 53.00, r: 192, g: 125, b: 88 },
+        { cat: "Rouges", name: "SBR250", l: 60.00, c: 37.50, h: 42.00, r: 199, g: 125, b: 102 },
+        { cat: "Rouges", name: "GR100N25", l: 50.50, c: 29.00, h: 47.00, r: 160, g: 107, b: 85 },
+        { cat: "Rouges", name: "SBR375", l: 52.00, c: 45.00, h: 42.00, r: 185, g: 99, b: 74 },
+        { cat: "Rouges", name: "GR375", l: 43.50, c: 43.50, h: 44.00, r: 157, g: 80, b: 54 },
+        { cat: "Rouges", name: "GR250", l: 53.00, c: 36.50, h: 45.00, r: 176, g: 108, b: 84 },
+        { cat: "Rouges", name: "GR250S250", l: 49.00, c: 57.00, h: 50.00, r: 182, g: 88, b: 43 },
+        { cat: "Rouges", name: "GR300S200", l: 42.50, c: 46.00, h: 47.00, r: 155, g: 77, b: 46 },
+	{ cat: "Saumon", name: "SBS8.25", l: 73.50, c: 33.00, h: 80.00, r: 211, g: 176, b: 122 },
+        { cat: "Saumon", name: "SBS15J20", l: 76.00, c: 27.50, h: 77.00, r: 212, g: 183, b: 138 },
+        { cat: "Saumon", name: "SBS62.5", l: 80.00, c: 35.50, h: 64.00, r: 241, g: 187, b: 139 },
+        { cat: "Saumon", name: "SBS125", l: 64.00, c: 42.50, h: 64.00, r: 200, g: 142, b: 87 },
+        { cat: "Saumon", name: "GS62.5", l: 63.50, c: 30.00, h: 72.00, r: 182, g: 147, b: 103 },
+        { cat: "Saumon", name: "GS125", l: 60.00, c: 23.50, h: 63.00, r: 172, g: 137, b: 108 },
+        { cat: "Saumon", name: "GS250", l: 61.50, c: 27.00, h: 51.00, r: 186, g: 137, b: 112 },
+        { cat: "Saumon", name: "SBS250", l: 67.00, c: 41.00, h: 56.00, r: 214, g: 147, b: 103 },
+        { cat: "Saumon", name: "SBJ45R45N35", l: 58.00, c: 22.50, h: 66.00, r: 164, g: 133, b: 104 },
+        { cat: "Saumon", name: "SBS500", l: 62.00, c: 50.50, h: 47.00, r: 217, g: 124, b: 86 },
+        { cat: "Saumon", name: "GS500", l: 49.00, c: 46.50, h: 58.00, r: 166, g: 99, b: 49 },
+        { cat: "Saumon", name: "GS375R125", l: 52.00, c: 44.00, h: 46.00, r: 181, g: 102, b: 71 },
+        { cat: "Lie de vin", name: "GR125N100S25", l: 51.50, c: 20.00, h: 50.00, r: 150, g: 114, b: 97 },
+        { cat: "Lie de vin", name: "GR200N50", l: 52.00, c: 26.00, h: 47.00, r: 160, g: 112, b: 92 },
+        { cat: "Lie de vin", name: "SBR250N125", l: 42.50, c: 22.50, h: 42.00, r: 132, g: 90, b: 76 },
+        { cat: "Lie de vin", name: "GR300S100N100", l: 42.50, c: 32.00, h: 47.00, r: 141, g: 86, b: 63 },
+        { cat: "Lie de vin", name: "GR200S200N100", l: 53.00, c: 32.00, h: 52.00, r: 167, g: 113, b: 84 },
+        { cat: "Lie de vin", name: "GR416N84", l: 42.00, c: 35.00, h: 40.00, r: 146, g: 80, b: 64 }
+    ];
 
     let ORIGINAL_NUANCIER = [];
     let loadedBricks = [null, null, null];
@@ -325,6 +388,7 @@
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d', { colorSpace: 'srgb' }); 
     let currentSlot = 0;
+    const STORAGE_KEY = 'biamortier_user_lib';
     
     let isRendering = false;
     function scheduleRender() {
@@ -337,6 +401,7 @@
         }
     }
 
+    // --- FONCTION ADMIN ---
     function toggleDevBox() {
         const box = document.getElementById('dev-box');
         if (box.style.display === 'block') { box.style.display = 'none'; return; }
@@ -344,6 +409,7 @@
         if (password === "RapCom47T") { box.style.display = 'block'; } else { alert("Accès refusé."); }
     }
 
+    // --- CORRECTION MOBILE SPÉCIFIQUE ---
     function updateMobileCorrection() {
         mobileSaturationCorrection = parseFloat(document.getElementById('dev-mobile-sat').value);
         document.getElementById('val-mobile-sat').innerText = mobileSaturationCorrection.toFixed(2);
@@ -407,6 +473,7 @@
     }
 
     window.onload = () => {
+        convertLchPaletteToRgb(); 
         ORIGINAL_NUANCIER = JSON.parse(JSON.stringify(NUANCIER_COMPLET));
         document.getElementById('categorySelect').value = "Standards";
         filterColors();
@@ -436,7 +503,8 @@
         img.src = defaultBrickSrc;
     };
 
-    const STORAGE_KEY = 'biamortier_user_lib';
+    // --- NOUVELLES FONCTIONS DE SAUVEGARDE VIA INDEXEDDB ---
+
     async function getUserLibrary() {
         const s = await localforage.getItem(STORAGE_KEY);
         return s ? s : [];
@@ -523,7 +591,9 @@
         if(p.images) {
             let loadedCount = 0;
             let imagesToLoad = p.images.filter(src => src !== null).length;
+            
             if (imagesToLoad === 0) forceWallRegen();
+            
             p.images.forEach((src, i) => {
                 if(src) {
                     const img = new Image();
@@ -542,6 +612,8 @@
             });
         }
     }
+
+    // --- FIN DES NOUVELLES FONCTIONS ---
 
     function submitToAdmin() {
         const bNameInput = document.getElementById('input-brick-name').value.trim();
@@ -682,16 +754,24 @@
     function analyzeFilteredColorAndSuggest() {
         const validBricks = loadedBricks.filter(b => b && !b.isPlaceholder);
         const targetImg = validBricks.length > 0 ? validBricks[0] : loadedBricks[0];
+        
         const tempCvs = document.createElement('canvas');
         tempCvs.width = 100; tempCvs.height = 100;
         const tCtx = tempCvs.getContext('2d');
+        
         tCtx.filter = `brightness(${document.getElementById('calib-brightness').value}%) contrast(${document.getElementById('calib-contrast').value}%) saturate(${document.getElementById('calib-saturation').value}%) hue-rotate(${document.getElementById('calib-hue').value}deg)`;
         tCtx.drawImage(targetImg, 0, 0, 100, 100);
+        
         const data = tCtx.getImageData(0, 0, 100, 100).data;
         let tR=0, tG=0, tB=0, cnt=0;
-        for(let i=0; i<data.length; i+=4) { tR += data[i]; tG += data[i+1]; tB += data[i+2]; cnt++; }
+        
+        for(let i=0; i<data.length; i+=4) {
+            tR += data[i]; tG += data[i+1]; tB += data[i+2]; cnt++;
+        }
+        
         const r = tR/cnt, g = tG/cnt, b = tB/cnt;
         let minD = Infinity, best = null;
+        
         NUANCIER_COMPLET.forEach(j => {
             if (j.r !== undefined) {
                 const dist = Math.sqrt((j.r-r)**2 + (j.g-g)**2 + (j.b-b)**2);
@@ -824,12 +904,12 @@
         dot.style.backgroundColor = currentJointColor ? `rgb(${currentJointColor.r},${currentJointColor.g},${currentJointColor.b})` : '#f4f4f4';
     }
 
-    // --- MISE À JOUR DE LA FONCTION EXPORT POUR GÉNÉRER LE BASE64 ---
     function generateExportCode() {
-        const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(NUANCIER_COMPLET))));
-        const code = `const _ENC_DATA = "${encoded}";\nlet NUANCIER_COMPLET = JSON.parse(atob(_ENC_DATA));`;
-        document.getElementById('export-text').value = code; 
-        document.getElementById('export-modal').style.display = 'flex';
+        let code = "    let NUANCIER_COMPLET = [\n";
+        NUANCIER_COMPLET.forEach((item, i) => {
+            code += `        { cat: "${item.cat}", name: "${item.name}", l: ${Number(item.l).toFixed(2)}, c: ${Number(item.c).toFixed(2)}, h: ${Number(item.h).toFixed(2)}, r: ${item.r}, g: ${item.g}, b: ${item.b} }${i < NUANCIER_COMPLET.length-1 ? ',' : ''}\n`;
+        });
+        code += "    ];"; document.getElementById('export-text').value = code; document.getElementById('export-modal').style.display = 'flex';
     }
     
     function copyExportText() { navigator.clipboard.writeText(document.getElementById("export-text").value); alert("✅ Copié !"); }
@@ -842,6 +922,20 @@
             wallLayoutCache.push(row);
         }
         scheduleRender();
+    }
+
+    function convertLchPaletteToRgb() {
+        const tCvs = document.createElement('canvas'); tCvs.width = 1; tCvs.height = 1;
+        const tCtx = tCvs.getContext('2d', { willReadFrequently: true, colorSpace: 'srgb' });
+        NUANCIER_COMPLET.forEach(item => {
+            if (item.l !== undefined && item.r === undefined) {
+                tCtx.clearRect(0,0,1,1);
+                tCtx.fillStyle = `lch(${item.l}% ${item.c} ${item.h})`;
+                tCtx.fillRect(0, 0, 1, 1);
+                const p = tCtx.getImageData(0, 0, 1, 1, { colorSpace: 'srgb' }).data;
+                item.r = p[0]; item.g = p[1]; item.b = p[2];
+            }
+        });
     }
 
     function render() {
@@ -863,21 +957,28 @@
             return cvs;
         });
 
+        // --- GESTION COULEUR JOINT ---
         let jr = currentJointColor ? currentJointColor.r : 224;
         let jg = currentJointColor ? currentJointColor.g : 224;
         let jb = currentJointColor ? currentJointColor.b : 224;
 
         if (isMobile) {
+            // Application du coefficient correcteur uniquement sur mobile
             const avg = (jr + jg + jb) / 3;
             const satFact = mobileSaturationCorrection;
             jr = Math.round(avg + (jr - avg) * satFact);
             jg = Math.round(avg + (jg - avg) * satFact);
             jb = Math.round(avg + (jb - avg) * satFact);
-            jr = Math.round(jr * 0.9); jg = Math.round(jg * 0.9); jb = Math.round(jb * 0.9);
+            
+            // Légère compensation de luminosité pour les écrans OLED
+            jr = Math.round(jr * 0.9);
+            jg = Math.round(jg * 0.9);
+            jb = Math.round(jb * 0.9);
         }
 
         ctx.fillStyle = `rgb(${jr}, ${jg}, ${jb})`;
         ctx.fillRect(0, 0, W, H);
+        
         ctx.globalCompositeOperation = 'overlay'; ctx.fillStyle = grainTexture; ctx.fillRect(0,0,W,H);
         ctx.globalCompositeOperation = 'source-over';
         
@@ -911,15 +1012,21 @@
         doc.addImage(canvas.toDataURL('image/jpeg', 0.90), 'JPEG', 10, 10, 277, 190);
         doc.save('Projet_Biamortier.pdf');
     }
+// --- EXPORT / IMPORT DE CONFIGURATIONS (RÉSERVÉ ADMIN) ---
 
     async function exportConfiguration() {
         const idx = document.getElementById('userLibrarySelect').value;
         if(idx === "") { alert("Veuillez d'abord sélectionner un projet dans 'Ma Bibliothèque' à exporter."); return; }
+        
         const lib = await getUserLibrary();
         const configToExport = lib[idx];
+        
+        // Convertir l'objet en texte JSON
         const dataStr = JSON.stringify(configToExport);
         const blob = new Blob([dataStr], { type: "application/json" });
         const url = URL.createObjectURL(blob);
+        
+        // Lancer le téléchargement
         const a = document.createElement('a');
         a.href = url;
         a.download = `Biamortier_${configToExport.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`;
@@ -932,28 +1039,40 @@
     async function importConfiguration(event) {
         const file = event.target.files[0];
         if (!file) return;
+        
         const reader = new FileReader();
         reader.onload = async function(e) {
             try {
                 const importedConfig = JSON.parse(e.target.result);
+                
+                // Vérification de sécurité basique
                 if (!importedConfig.name || !importedConfig.dims) {
                     throw new Error("Fichier non reconnu.");
                 }
+                
+                // On met à jour l'ID pour éviter les conflits et on ajoute un tag
                 importedConfig.id = Date.now();
                 importedConfig.date = new Date().toISOString();
                 importedConfig.name = importedConfig.name + " (Import)";
+                
+                // Ajout à la base IndexedDB
                 const lib = await getUserLibrary();
                 lib.push(importedConfig);
                 await localforage.setItem(STORAGE_KEY, lib);
+                
                 alert(`✅ Configuration "${importedConfig.name}" importée avec succès !`);
                 await refreshLibraryUI();
+                
+                // Sélectionner et charger automatiquement la nouvelle configuration
                 const sel = document.getElementById('userLibrarySelect');
                 sel.selectedIndex = sel.options.length - 1;
                 loadUserPreset();
+
             } catch (err) {
                 console.error("Erreur d'import :", err);
                 alert("❌ Impossible de lire ce fichier. Est-ce bien un fichier d'export valide ?");
             }
+            // Réinitialiser le champ file
             event.target.value = '';
         };
         reader.readAsText(file);
@@ -961,3 +1080,4 @@
 </script>
 </body>
 </html>
+index.html
