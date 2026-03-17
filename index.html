@@ -66,15 +66,6 @@
         .btn-del-lib { background: #dc3545; color: white; flex: 1; font-size: 0.8rem; padding: 8px; }
         .fixed-value-box { width: 100%; padding: 8px; background: #e9ecef; border: 1px solid #ced4da; border-radius: 6px; font-size: 0.85rem; color: #495057; text-align: center; font-weight: bold;}
 
-        /* CSS NOUVELLES FONCTIONNALITÉS (Favoris et Reset) */
-        .btn-fav { background: #fff; border: 1px solid #ced4da; border-radius: 6px; width: 38px; height: 38px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: 0.2s; }
-        .btn-fav:hover { background: #f8f9fa; border-color: #ffc107; }
-        .fav-bar { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; min-height: 30px; padding: 5px; background: #f0f4f8; border-radius: 6px; }
-        .fav-pill { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px; border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .fav-pill:hover { transform: translateY(-1px); }
-        .reset-btn { background: #6c757d; color: white; width: 100%; margin-top: 8px; padding: 8px; border-radius: 6px; border:none; cursor: pointer; font-weight: bold; font-size: 0.8rem; transition: 0.2s; }
-        .reset-btn:hover { background: #5a6268; }
-
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 2000; display: flex; justify-content: center; align-items: center; flex-direction: column; }
         .modal-content { background: white; padding: 20px; border-radius: 8px; text-align: center; max-width: 95vw; max-height: 95vh; display:flex; flex-direction:column; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
         .crop-canvas-container { position:relative; display:inline-block; max-width:100%; margin-top: 10px; background: #222; border-radius: 4px; overflow:hidden;}
@@ -107,8 +98,8 @@
 <div id="export-modal" class="modal-overlay" style="display:none;">
     <div class="modal-content" style="width: 600px; max-width: 90vw;">
         <h2 style="margin: 0 0 10px 0; color: #0d47a1;">📥 Code du Nuancier Mis à Jour</h2>
-        <p style="font-size: 0.85rem; color: #555; margin-bottom: 15px;">Copiez ce texte et remplacez l'ancien bloc <b>const _ENC_DATA</b> dans votre code HTML.</p>
-        <textarea id="export-text" style="width: 100%; height: 300px; font-family: monospace; font-size: 0.8rem; padding: 10px; border-radius: 4px; border: 1px solid #ccc;" readonly></textarea>
+        <p style="font-size: 0.85rem; color: #555; margin-bottom: 15px;">Copiez ce texte et remplacez l'ancien bloc <b>_ENC_DATA</b> dans votre code HTML.</p>
+        <textarea id="export-text" style="width: 100%; height: 300px; font-family: monospace; font-size: 0.8rem; padding: 10px; border: 1px solid #ccc;" readonly></textarea>
         <div class="btn-group" style="margin-top:20px;">
             <button onclick="document.getElementById('export-modal').style.display='none'" style="background:#6c757d; color:white;">Fermer</button>
             <button onclick="copyExportText()" style="background:#0d6efd; color:white;">📋 Copier le code</button>
@@ -119,7 +110,7 @@
 <div class="controls">
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid #f0f2f5; padding-bottom:10px; margin-bottom:5px;">
         <h2>🛠️ Configurateur</h2>
-        <span style="font-size:0.7rem; color:#888;">V1.6 - Complet</span>
+        <span style="font-size:0.7rem; color:#888;">V1 - Lancement</span>
     </div>
 
     <div class="library-box">
@@ -148,10 +139,15 @@
         <details class="tips-box">
             <summary>ℹ️ Conseils pour une bonne photo</summary>
             <ul>
-                <li><strong>Prise de vue groupée :</strong> Prenez <strong>une seule photo contenant 3 à 5 briques</strong> posées les unes au-dessus des autres.</li>
-                <li><strong>Lumière :</strong> Photo en extérieur, <strong>à l'ombre</strong> (ou ciel couvert).</li>
-                <li><strong>Support neutre :</strong> Posez les briques sur du béton ou du bitume.</li>
+                <li><strong>Prise de vue groupée :</strong> Prenez <strong>une seule photo contenant 3 à 5 briques</strong> posées les unes au-dessus des autres (voir exemple ci-dessous). L'outil de recadrage vous permettra ensuite d'importer chaque brique indépendamment. Cela garantit un éclairage et un déclenchement identiques pour toutes les nuances.</li>
+                <li><strong>Lumière :</strong> Photo en extérieur, <strong>à l'ombre</strong> (ou ciel couvert). Pas de plein soleil ni de néons intérieurs.</li>
+                <li><strong>Support neutre :</strong> Posez les briques sur du béton ou du bitume. Évitez les fonds colorés (herbe, bâche) qui s'y reflètent.</li>
+                <li><strong>Humidité :</strong> Les briques doivent être parfaitement sèches (une brique mouillée paraît 20% plus foncée).</li>
             </ul>
+            <div style="text-align: center; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #90caf9;">
+                <strong style="display: block; margin-bottom: 8px; font-size: 0.85rem;">Exemple de photo idéale :</strong>
+                <img src="exemple-briques.jpg" alt="Exemple de prise de vue groupée" style="max-width: 100%; max-height: 250px; border-radius: 6px; border: 1px solid #90caf9; object-fit: contain;">
+            </div>
         </details>
 
         <div class="upload-grid">
@@ -203,25 +199,14 @@
                     <option value="Lie de vin">Lie de Vin</option>
                 </select>
                 <div id="joint-preview-dot" title="Aperçu couleur"></div>
-                <button class="btn-fav" onclick="toggleFavorite()" title="Ajouter aux favoris">⭐</button>
             </div>
             <select id="jointColorSelect" onchange="onJointSelected();" style="margin-top:5px;"></select>
-        </div>
-
-        <div id="fav-bar" class="fav-bar">
-            <span style="font-size: 0.7rem; color: #888; width: 100%;">Comparateur rapide :</span>
         </div>
 
         <div class="dev-box" id="dev-box" style="display: none;">
             <h4>⚙️ Mode Calibrage (BDD) 
                 <button onclick="resetCurrentDevColor()" style="background: #fff; border: 1px solid #dc3545; border-radius: 4px; font-size: 0.7rem; padding: 2px 6px; cursor: pointer; color: #dc3545; font-weight: normal;">↺ R.A.Z Couleur</button>
             </h4>
-            
-            <div style="background:#fff; padding:8px; border-radius:4px; margin-bottom:10px; border:1px solid #ccc; display:flex; gap:5px;">
-                <input type="text" id="dev-new-name" placeholder="Nom Nouvelle Couleur..." style="flex:1; font-size:0.8rem; padding:4px;">
-                <button onclick="addNewColor()" style="background:#198754; color:white; padding:4px 8px; font-size:0.8rem; flex:none;">➕ Ajouter</button>
-            </div>
-
             <div class="calibration-slider">
                 <label style="color:#383d41;">Lumi. (L)</label>
                 <input type="range" id="dev-l" min="10" max="95" step="0.5" value="50" oninput="updateAdminColor()">
@@ -242,20 +227,15 @@
                 <input type="range" id="dev-mobile-sat" min="0.5" max="1.5" step="0.05" value="1.0" oninput="updateMobileCorrection()">
                 <span class="val-badge" id="val-mobile-sat">1.0</span>
             </div>
-            
-            <div style="display:grid; grid-template-columns: 1fr 1.5fr; gap:10px; margin-top:10px;">
-                <button onclick="deleteCurrentColor()" style="background:#bb2d3b; color:white; padding:8px; border-radius:4px; font-size:0.8rem; cursor:pointer; border:none;">🗑️ Supprimer</button>
-                <button onclick="generateExportCode()" style="background:#343a40; color:white; padding:8px; border-radius:4px; font-size:0.8rem; cursor:pointer; border:none;">📥 Exporter le Nuancier mis à jour</button>
-            </div>
-            
+            <button onclick="generateExportCode()" style="margin-top:10px; width:100%; background:#343a40; color:white; padding:8px; border-radius:4px; font-size:0.8rem; cursor:pointer; border:none;">📥 Exporter le Nuancier mis à jour</button>
 			<h4 style="margin: 15px 0 10px 0; border-top: 1px solid #ccc; padding-top: 10px;">🔄 Partager une configuration</h4>
-            <div style="display: flex; gap: 10px;">
-                <button onclick="exportConfiguration()" style="background: #17a2b8; color: white; flex: 1; font-size: 0.8rem; padding: 8px; border:none; border-radius:4px; 		cursor:pointer; font-weight:bold;">📤 Exporter (.json)</button>
-                <label style="background: #6c757d; color: white; flex: 1; font-size: 0.8rem; padding: 8px; border:none; border-radius:4px; cursor:pointer; font-weight:bold; text-align:center; display:block; margin: 0;">
+           			 <div style="display: flex; gap: 10px;">
+             		<button onclick="exportConfiguration()" style="background: #17a2b8; color: white; flex: 1; font-size: 0.8rem; padding: 8px; border:none; border-radius:4px; 		cursor:pointer; font-weight:bold;">📤 Exporter (.json)</button>
+                        <label style="background: #6c757d; color: white; flex: 1; font-size: 0.8rem; padding: 8px; border:none; border-radius:4px; cursor:pointer; font-weight:bold; text-align:center; display:block; margin: 0;">
                     📥 Importer (.json)
                     <input type="file" accept=".json" style="display:none;" onchange="importConfiguration(event)">
                 </label>
-            </div>
+          		  </div>
         </div>
 
         <div class="input-row" style="margin-top:15px; align-items: flex-end;">
@@ -295,8 +275,6 @@
             <button class="submit-btn" onclick="submitToAdmin()" style="margin-top: 12px;">
                 📤 Demande d'échantillon
             </button>
-
-            <button class="reset-btn" onclick="resetSimulator()">🔄 Réinitialiser le simulateur</button>
         </div>
     </div>
 
@@ -327,31 +305,26 @@
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     let mobileSaturationCorrection = 1.0;
 
-    // --- NUANCIER SECRET ENCODÉ EN BASE64 ---
-    const _ENC_DATA = "W3siY2F0IjoiU3RhbmRhcmRzIiwibmFtZSI6IlNVUEVSIEJMQU5DIiwibCI6OTMsImMiOjMuNSwiaCI6NzMsInIiOjIzOSwiZyI6MjM0LCJiIjoyMjl9LHsiY2F0IjoiU3RhbmRhcmRzIiwibmFtZSI6IkJMQU5DIiwibCI6ODIsImMiOjUuNSwiaCI6ODYsInIiOjIwOCwiZyI6MjAzLCJiIjoxOTR9LHsiY2F0IjoiU3RhbmRhcmRzIiwibmFtZSI6IlRPTiBQSUVSUkUiLCJsIjo4NC41LCJjIjozMiwiaCI6ODksInIiOjIyOCwiZyI6MjA5LCJiIjoxNTB9LHsiY2F0IjoiU3RhbmRhcmRzIiwibmFtZSI6IkdSSVMgQ0xBSVIiLCJsIjo3Mi41LCJjIjoxNCwiaCI6OTEsInIiOjE4NSwiZyI6MTc3LCJiIjoxNTJ9LHsiY2F0IjoiTm9pcnMgJiBHcmlzIiwibmFtZSI6IjUwJSBCTCA1MCUgR1IiLCJsIjo3MS41LCJjIjoxMCwiaCI6ODYsInIiOjE4MiwiZyI6MTc0LCJiIjoxNTd9LHsiY2F0IjoiTm9pcnMgJiBHcmlzIiwibmFtZSI6IkdTMTUiLCJsIjo3NC41LCJjIjoxMCwiaCI6ODEsInIiOjE5MiwiZyI6MTgyLCJiIjoxNjV9LHsiY2F0IjoiTm9pcnMgJiBHcmlzIiwibmFtZSI6IlNCTjEyNSIsImwiOjYxLCJjIjozLjUsImgiOjkwLCJyIjoxNDksImciOjE0NywiYiI6MTQxfSx7ImNhdCI6Ik5vaXJzICYgR3JpcyIsIm5hbWUiOiJTQk4yNTAiLCJsIjo1MiwiYyI6My41LCJoIjo5MCwiciI6MTI2LCJnIjoxMjQsImIiOjExOH0seyJjYXQiOiJOb2lycyAmIEdyaXMiLCJuYW1lIjoiR0ExMjUiLCJsIjo0MC41LCJjIjoxLjUsImgiOjkxLCJyIjo5NiwiZyI6OTUsImIiOjkzfSx7ImNhdCI6Ik5vaXJzICYgR3JpcyIsIm5hbWUiOiJTQkEyNTAiLCJsIjozNS41LCJjIjowLjUsImgiOjExMCwiciI6ODMsImciOjg0LCJiIjo4M30seyJjYXQiOiJOb2lycyAmIEdyaXMiLCJuYW1lIjoiR0E0NTBSNTAiLCJsIjoyNiwiYyI6MS41LCJoIjo5MSwiciI6NjIsImciOjYxLCJiIjo1OX0seyJjYXQiOiJOb2lycyAmIEdyaXMiLCJuYW1lIjoiU0JBNTAwIiwibCI6MTksImMiOjAuNSwiaCI6MjAsInIiOjQ3LCJnIjo0NiwiYiI6NDZ9LHsiY2F0IjoiTm9pcnMgJiBHcmlzIiwibmFtZSI6IkdONTAwIiwibCI6MzYsImMiOjIsImgiOjg1LCJyIjo4NiwiZyI6ODQsImIiOjgxfSx7ImNhdCI6Ik5vaXJzICYgR3JpcyIsIm5hbWUiOiJHQTUwMCIsImwiOjI2LjUsImMiOjEsImgiOjc1LCJyIjo2NCwiZyI6NjIsImIiOjYxfSx7ImNhdCI6IkphdW5lcyIsIm5hbWUiOiJTQko4LjI1IiwibCI6ODUsImMiOjIwLCJoIjo3MywiciI6MjM0LCJnIjoyMDgsImIiOjE3Nn0seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiU0JKMzAiLCJsIjo4Ni41LCJjIjoyMi41LCJoIjo4MywiciI6MjM0LCJnIjoyMTQsImIiOjE3NH0seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiU0JKNjIuNSIsImwiOjg2LjUsImMiOjE3LjUsImgiOjgzLCJyIjoyMzAsImciOjIxNCwiYiI6MTg0fSx7ImNhdCI6IkphdW5lcyIsIm5hbWUiOiI3NSUgVFAgMjUlIEJMIiwibCI6ODQsImMiOjIwLCJoIjo4OCwiciI6MjIyLCJnIjoyMDgsImIiOjE3Mn0seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiU0JKMjUwIiwibCI6ODIuNSwiYyI6NDcsImgiOjgyLCJyIjoyMzgsImciOjIwMCwiYiI6MTE2fSx7ImNhdCI6IkphdW5lcyIsIm5hbWUiOiJHSlI1MCIsImwiOjY5LCJjIjo0MiwiaCI6ODQsInIiOjE5NCwiZyI6MTY0LCJiIjo5MX0seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiU0JKNTAwIiwibCI6ODMsImMiOjUyLCJoIjo4MiwiciI6MjQyLCJnIjoyMDAsImIiOjEwOH0seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiR0o1MDAiLCJsIjo2OSwiYyI6NDYuNSwiaCI6NzIsInIiOjIxMCwiZyI6MTU4LCJiIjo4N30seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiU0JKMTIwTjMwIiwibCI6NzAuNSwiYyI6MzMuNSwiaCI6ODcsInIiOjE5MSwiZyI6MTcwLCJiIjoxMTF9LHsiY2F0IjoiTWFycm9uIiwibmFtZSI6IkdTMTVKMTAiLCJsIjo2NSwiYyI6MTksImgiOjgxLCJyIjoxNzMsImciOjE1NSwiYiI6MTI0fSx7ImNhdCI6Ik1hcnJvbiIsIm5hbWUiOiJHTjkwUzM1IiwibCI6NDgsImMiOjExLCJoIjo3NCwiciI6MTI0LCJnIjoxMTIsImIiOjk2fSx7ImNhdCI6Ik1hcnJvbiIsIm5hbWUiOiJHUzE1ME4xMDAiLCJsIjo2Mi41LCJjIjoyMSwiaCI6NzQsInIiOjE3MSwiZyI6MTQ3LCJiIjoxMTZ9LHsiY2F0IjoiTWFycm9uIiwibmFtZSI6IkdTMjAwTjE1MCIsImwiOjQ5LCJjIjoyMS41LCJoIjo3MSwiciI6MTM3LCJnIjoxMTIsImIiOjgyfSx7ImNhdCI6Ik1hcnJvbiIsIm5hbWUiOiJTQko5MFI3ME45MCIsImwiOjU3LCJjIjoyNCwiaCI6NjcsInIiOjE2MiwiZyI6MTMwLCJiIjo5OX0seyJjYXQiOiJNYXJyb24iLCJuYW1lIjoiR1MxNTBBMTAwIiwibCI6NDgsImMiOjEyLCJoIjo4MSwiciI6MTIzLCJnIjoxMTIsImIiOjk0fSx7ImNhdCI6Ik1hcnJvbiIsIm5hbWUiOiJHUzEyNSExMjUiLCJsIjo0OC41LCJjIjoxOSwiaCI6NTgsInIiOjEzOSwiZyI6MTA5LCJiIjo4OH0seyJjYXQiOiJNYXJyb24iLCJuYW1lIjoiU0JKMTgwUjE4ME4xNDAiLCJsIjo1NC41LCJjIjoyNy41LCJoIjo2NCwiciI6MTYwLCJnIjoxMTksImIijo4OH0seyJjYXQiOiJNYXJyb24iLCJuYW1lIjoiR040MTZTODQiLCJsIjozOCwiYyI6Ny41LCJoIjo3OCwiciI6OTYsImciOjg4LCJiIjo3OH0seyJjYXQiOiJNYXJyb24iLCJuYW1lIjoiR1MyNTBBMjUwIiwibCI6MzEuNSwiYyI6OCwiaCI6NzgsInIiOjgwLCJnIjo3MywiYiI6NjJ9LHsiY2F0IjoiTWFycm9uIiwibmFtZSI6IkdTMzAwQTIwMCIsImwiOjMzLCJjIjoxMiwiaCI6NzIsInIiOjg4LCJnIjo3NSwiYiI6NjB9LHsiY2F0IjoiUm91Z2VzIiwibmFtZSI6IkdSMTUwSjEwMCIsImwiOjUzLjUsImMiOjM5LCJoIjo1NywiciI6MTczLCJnIjoxMTMsImIiOjcyfSx7ImNhdCI6IlJvdWdlcyIsIm5hbWUiOiJTQlIxMjUiLCJsIjo2My41LCJjIjozNC41LCJoIjo0NSwiciI6MjA0LCJnIjoxMzcsImIiOjExMn0seyJjYXQiOiJSb3VnZXMiLCJuYW1lIjoiR1IxMjUiLCJsIjo1Ny41LCJjIjoyOSwiaCI6NDcsInIiOjE3OSwiZyI6MTI1LCJiIjoxMDJ9LHsiY2F0IjoiUm91Z2VzIiwibmFtZSI6IkdSMTUwUzEwMCIsImwiOjU5LCJjIjoyOCwiaCI6NTMsInIiOjE5MiwiZyI6MTI1LCJiIjo4OH0seyJjYXQiOiJSb3VnZXMiLCJuYW1lIjoiU0JSMjUwIiwibCI6NjAsImMiOjM3LjUsImgiOjQyLCJyIjoxOTksImciOjEyNSwiYiI6MTAyfSx7ImNhdCI6IlJvdWdlcyIsIm5hbWUiOiJHUk0yNSIsImwiOjUwLjUsImMiOjI5LCJoIjo0NywiciI6MTYwLCJnIjoxMDcsImIiOjg1fSx7ImNhdCI6IlJvdWdlcyIsIm5hbWUiOiJTQlIzNzUiLCJsIjo1MiwiYyI6NDUsImgiOjQyLCJyIjoxODUsImciOjk5LCJiIjo3NH0seyJjYXQiOiJSb3VnZXMiLCJuYW1lIjoiR1RRMzc1IiwibCI6NDMuNSwiYyI6NDMuNSwiaCI6NDQsInIiOjE1NywiZyI6ODAsImIiOjU0fSx7ImNhdCI6IlJvdWdlcyIsIm5hbWUiOiJHUk0yNTAiLCJsIjo1MywiYyI6MzYuNSwiaCI6NDUsInIiOjE3NiwiZyI6MTA4LCJiIjo4NH0seyJjYXQiOiJSb3VnZXMiLCJuYW1lIjoiR1IyNTBTMjUwIiwibCI6NDksImMiOjU3LCJoIjo1MCwiciI6MTgyLCJnIjo4OCwiYiI6NDN9LHsiY2F0IjoiUm91Z2VzIiwibmFtZSI6IkdSMTMwMFMyMDAiLCJsIjo0Mi41LCJjIjo0NiwiaCI6NDcsInIiOjE1NSwiZyI6NzcsImIiOjQ2fSx7ImNhdCI6IlNhdW1vbiIsIm5hbWUiOiJTQlM4LjI1IiwibCI6NzMuNSwiYyI6MzMsImgiOjgwLCJyIjoyMTEsImciOjE3NiwiYiI6MTIyfSx7ImNhdCI6IlNhdW1vbiIsIm5hbWUiOiJTQlMxNUoyMCIsImwiOjc2LCJjIjoyNy41LCJoIjo3NywiciIjoyMTIsImciOjE4MywiYiI6MTM4fSx7ImNhdCI6IlNhdW1vbiIsIm5hbWUiOiJTQlM2Mi41IiwibCI6ODAsImMiOjM1LjUsImgiOjY0LCJyIjoyNDEsImciOjE4NywiYiI6MTM5fSx7ImNhdCI6IlNhdW1vbiIsIm5hbWUiOiJTQlMxMjUiLCJsIjo2NCwiYyI6NDIuNSwiaCI6NjQsInIiOjIwMCwiZyI6MTQyLCJiIjo4N30seyJjYXQiOiJTYXVtb24iLCJuYW1lIjoiR1M2Mi41IiwibCI6NjMuNSwiYyI6MzAsImgiOjcyLCJyIjoxODIsImciOjE0NywiYiI6MTAzfSx7ImNhdCI6IlNhdW1vbiIsIm5hbWUiOiJHUzEyNSIsImwiOjYwLCJjIjoyMy41LCJoIjo2MywiciI6MTcyLCJnIjoxMzcsImIiOjEwOH0seyJjYXQiOiJTYXVtb24iLCJuYW1lIjoiR1MyNTAiLCJsIjo2MS41LCJjIjoyNywiaCI6NTEsInIiOjE4NiwiZyI6MTM3LCJiIjoxMTJ9LHsiY2F0IjoiU2F1bW9uIiwibmFtZSI6IlNCUzI1MCIsImwiOjY3LCJjIjo0MSwiaCI6NTYsInIiOjIxNCwiZyI6MTQ3LCJiIjoxMDN9LHsiY2F0IjoiU2F1bW9uIiwibmFtZSI6IlNCSjQ1UjQ1TjM1IiwibCI6NTgsImMiOjIyLjUsImgiOjY2LCJyIjoxNjQsImciOjEzMywiYiI6MTA0fSx7ImNhdCI6IlNhdW1vbiIsIm5hbWUiOiJTQlM1MDAiLCJsIjo2MiwiYyI6NTAuNSwiaCI6NDcsInIiOjIxNywiZyI6MTI0LCJiIjo4Nn0seyJjYXQiOiJTYXVtb24iLCJuYW1lIjoiR1M1MDAiLCJsIjo0OSwiYyI6NDYuNSwiaCI6NTgsInIiOjE2NiwiZyI6OTksImIiOjQ5fSx7ImNhdCI6IlNhdW1vbiIsIm5hbWUiOiJHUzM3NVIxMjUiLCJsIjo1MiwiYyI6NDQsImgiOjQ2LCJyIjoxODEsImciOjEwMiwiYiI6NzF9LHsiY2F0IjoiTGllIGRlIHZpbiIsIm5hbWUiOiJHUkExMjVOMTAwUzI1IiwibCI6NTEuNSwiYyI6MjAsImgiOjUwLCJyIjoxNTAsImciOjExNCwiYiI6OTd9LHsiY2F0IjoiTGllIGRlIHZpbiIsIm5hbWUiOiJHUk0yMDBONTAsImwiOjUyLCJjIjoyNiwiaCI6NDcsInIiOjE2MCwiZyI6MTExLCJiIjo5Mn0seyJjYXQiOiJMaWUgZGUgdmluIiwibmFtZSI6IlNCUjI1ME4xMjUiLCJsIjo0Mi41LCJjIjoyMi41LCJoIjo0MiwiciI6MTMyLCJnIjo5MCwiYiI6NzZ9LHsiY2F0IjoiTGllIGRlIHZpbiIsIm5hbWUiOiJHUk0zMDBTMTAwTjEwMCIsImwiOjQyLjUsImMiOjMyLCJoIjo0NywiciI6MTQxLCJnIjo4NiwiYiI6NjN9LHsiY2F0IjoiTGllIGRlIHZpbiIsIm5hbWUiOiJHUk0yMDBTMjAwTjEwMCIsImwiOjUzLCJjIjoyMiwiaCI6NTIsInIiOjE2NywiZyI6MTEzLCJiIjo4NH0seyJjYXQiOiJMaWUgZGUgdmluIiwibmFtZSI6IkdSMzE2Tjg0IiwibCI6NDIsImMiOjM1LCJoIjo0MCwiciI6MTQ2LCJnIjo4MCwiYiI6NjR9XQ==";
-    
+    // --- LISTE DES COULEURS MASQUÉE (BASE64) ---
+    const _ENC_DATA = "W3siY2F0IjoiU3RhbmRhcmRzIiwibmFtZSI6IlNVUEVSIEJMQU5DIiwibCI6OTMsImMiOjMuNSwiaCI6NzMsInIiOjIzOSwiZyI6MjM0LCJiIjoyMjl9LHsiY2F0IjoiU3RhbmRhcmRzIiwibmFtZSI6IkJMQU5DIiwibCI6ODIsImMiOjUuNSwiaCI6ODYsInIiOjIwOCwiZyI6MjAzLCJiIjoxOTR9LHsiY2F0IjoiU3RhbmRhcmRzIiwibmFtZSI6IlRPTiBQSUVSUkUiLCJsIjo4NC41LCJjIjozMiwiaCI6ODksInIiOjIyOCwiZyI6MjA5LCJiIjoxNTB9LHsiY2F0IjoiU3RhbmRhcmRzIiwibmFtZSI6IkdSSVMgQ0xBSVIiLCJsIjo3Mi41LCJjIjoxNCwiaCI6OTEsInIiOjE4NSwiZyI6MTc3LCJiIjoxNTJ9LHsiY2F0IjoiTm9pcnMgJiBHcmlzIiwibmFtZSI6IjUwJSBCTCA1MCUgR1IiLCJsIjo3MS41LCJjIjoxMCwiaCI6ODYsInIiOjE4MiwiZyI6MTc0LCJiIjoxNTd9LHsiY2F0IjoiTm9pcnMgJiBHcmlzIiwibmFtZSI6IkdTMTUiLCJsIjo3NC41LCJjIjoxMCwiaCI6ODEsInIiOjE5MiwiZyI6MTgyLCJiIjoxNjV9LHsiY2F0IjoiTm9pcnMgJiBHcmlzIiwibmFtZSI6IlNCTjEyNSIsImwiOjYxLCJjIjozLjUsImgiOjkwLCJyIjoxNDksImciOjE0NywiYiI6MTQxfSx7ImNhdCI6Ik5vaXJzICYgR3JpcyIsIm5hbWUiOiJTQk4yNTAiLCJsIjo1MiwiYyI6My41LCJoIjo5MCwiciI6MTI2LCJnIjoxMjQsImIiOjExOH0seyJjYXQiOiJOb2lycyAmIEdyaXMiLCJuYW1lIjoiR0ExMjUiLCJsIjo0MC41LCJjIjoxLjUsImgiOjkxLCJyIjo5NiwiZyI6OTUsImIiOjkzfSx7ImNhdCI6Ik5vaXJzICYgR3JpcyIsIm5hbWUiOiJTQkEyNTAiLCJsIjozNS41LCJjIjowLjUsImgiOjExMCwiciI6ODMsImciOjg0LCJiIjo4M30seyJjYXQiOiJOb2lycyAmIEdyaXMiLCJuYW1lIjoiR0E0NTBSNTAiLCJsIjoyNiwiYyI6MS41LCJoIjo5MSwiciI6NjIsImciOjYxLCJiIjo1OX0seyJjYXQiOiJOb2lycyAmIEdyaXMiLCJuYW1lIjoiU0JBNTAwIiwibCI6MTksImMiOjAuNSwiaCI6MjAsInIiOjQ3LCJnIjo0NiwiYiI6NDZ9LHsiY2F0IjoiTm9pcnMgJiBHcmlzIiwibmFtZSI6IkdONTAwIiwibCI6MzYsImMiOjIsImgiOjg1LCJyIjo4NiwiZyI6ODQsImIiOjgxfSx7ImNhdCI6Ik5vaXJzICYgR3JpcyIsIm5hbWUiOiJHQTUwMCIsImwiOjI2LjUsImMiOjEsImgiOjc1LCJyIjo2NCwiZyI6NjIsImIiOjYxfSx7ImNhdCI6IkphdW5lcyIsIm5hbWUiOiJTQko4LjI1IiwibCI6ODUsImMiOjIwLCJoIjo3MywiciI6MjM0LCJnIjoyMDgsImIiOjE3Nn0seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiU0JKMzAiLCJsIjo4Ni41LCJjIjoyMi41LCJoIjo4MywiciI6MjM0LCJnIjoyMTQsImIiOjE3NH0seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiU0JKNjIuNSIsImwiOjg2LjUsImMiOjE3LjUsImgiOjgzLCJyIjoyMzAsImciOjIxNCwiYiI6MTg0fSx7ImNhdCI6IkphdW5lcyIsIm5hbWUiOiI3NSUgVFAgMjUlIEJMIiwibCI6ODQsImMiOjIwLCJoIjo4OCwiciI6MjIyLCJnIjoyMDgsImIiOjE3Mn0seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiU0JKMjUwIiwibCI6ODIuNSwiYyI6NDcsImgiOjgyLCJyIjoyMzgsImciOjIwMCwiYiI6MTE2fSx7ImNhdCI6IkphdW5lcyIsIm5hbWUiOiJHSlI1MCIsImwiOjY5LCJjIjo0MiwiaCI6ODQsInIiOjE5NCwiZyI6MTY0LCJiIjo5MX0seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiU0JKNTAwIiwibCI6ODMsImMiOjUyLCJoIjo4MiwiciI6MjQyLCJnIjoyMDAsImIiOjEwOH0seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiR0o1MDAiLCJsIjo2OSwiYyI6NDYuNSwiaCI6NzIsInIiOjIxMCwiZyI6MTU4LCJiIjo4N30seyJjYXQiOiJKYXVuZXMiLCJuYW1lIjoiU0JKMTIwTjMwIiwibCI6NzAuNSwiYyI6MzMuNSwiaCI6ODcsInIiOjE5MSwiZyI6MTcwLCJiIjoxMTF9LHsiY2F0IjoiTWFycm9uIiwibmFtZSI6IkdTMTVKMTAiLCJsIjo2NSwiYyI6MTksImgiOjgxLCJyIjoxNzMsImciOjE1NSwiYiI6MTI0fSx7ImNhdCI6Ik1hcnJvbiIsIm5hbWUiOiJHTjkwUzM1IiwibCI6NDgsImMiOjExLCJoIjo3NCwiciI6MTI0LCJnIjoxMTIsImIiOjk2fSx7ImNhdCI6Ik1hcnJvbiIsIm5hbWUiOiJHUzE1ME4xMDAiLCJsIjo2Mi41LCJjIjoyMSwiaCI6NzQsInIiOjE3MSwiZyI6MTQ3LCJiIjoxMTZ9LHsiY2F0IjoiTWFycm9uIiwibmFtZSI6IkdTMjAwTjE1MCIsImwiOjQ5LCJjIjoyMS41LCJoIjo3MSwiciI6MTM3LCJnIjoxMTIsImIiOjgyfSx7ImNhdCI6Ik1hcnJvbiIsIm5hbWUiOiJTQko5MFI3ME45MCIsImwiOjU3LCJjIjoyNCwiaCI6NjcsInIiOjE2MiwiZyI6MTMwLCJiIjo5OX0seyJjYXQiOiJNYXJyb24iLCJuYW1lIjoiR1MxNTBBMTAwIiwibCI6NDgsImMiOjEyLCJoIjo4MSwiciI6MTIzLCJnIjoxMTIsImIiOjk0fSx7ImNhdCI6Ik1hcnJvbiIsIm5hbWUiOiJHUzEyNSExMjUiLCJsIjo0OC41LCJjIjoxOSwiaCI6NTgsInIiOjEzOSwiZyI6MTA5LCJiIjo4OH0seyJjYXQiOiJNYXJyb24iLCJuYW1lIjoiU0JKMTgwUjE4ME4xNDAiLCJsIjo1NC41LCJjIjoyNy41LCJoIjo2NCwiciI6MTYwLCJnIjoxMjIsImIiOjg4fSx7ImNhdCI6Ik1hcnJvbiIsIm5hbWUiOiJHTjQxNlM4NCIsImwiOjM4LCJjIjo3LjUsImgiOjc4LCJyIjo5NiwiZyI6ODgsImIiOjc4fSx7ImNhdCI6Ik1hcnJvbiIsIm5hbWUiOiJHUzI1MEEyNTAiLCJsIjozMS41LCJjIjo4LCJoIjo3OCwiciI6ODAsImciOjczLCJiIjo2Mn0seyJjYXQiOiJNYXJyb24iLCJuYW1lIjoiR1MzMDBBMjAwIiwibCI6MzMsImMiOjEyLCJoIjo3MiwiciI6ODgsImciOjc1LCJiIjo2MH0seyJjYXQiOiJSb3VnZXMiLCJuYW1lIjoiR1IxNTBKMTAwIiwibCI6NTMuNSwiYyI6MzksImgiOjU3LCJyIjoxNzMsImciOjExMywiYiI6NzJ9LHsiY2F0IjoiUm91Z2VzIiwibmFtZSI6IlNCUjEyNSIsImwiOjYzLjUsImMiOjM0LjUsImgiOjQ1LCJyIjoyMDQsImciOjEzNywiYiI6MTEyfSx7ImNhdCI6IlJvdWdlcyIsIm5hbWUiOiJHUjEyNSIsImwiOjU3LjUsImMiOjI5LCJoIjo0NywiciI6MTc5LCJnIjoxMjUsImIiOjEwMn0seyJjYXQiOiJSb3VnZXMiLCJuYW1lIjoiR1IxNTBTMTAwIiwibCI6NTksImMiOjI4LCJoIjo1MywiciI6MTkyLCJnIjoxMjUsImIiOjg4fSx7ImNhdCI6IlJvdWdlcyIsIm5hbWUiOiJTQlIyNTAiLCJsIjo2MCwiYyI6MzcuNSwiaCI6NDIsInIiOjE5OSwiZyI6MTI1LCJiIjoxMDJ9LHsiY2F0IjoiUm91Z2VzIiwibmFtZSI6IkdSMTAwTjI1IiwibCI6NTAuNSwiYyI6MjksImgiOjQ3LCJyIjoxNjAsImciOjEwNywiYiI6ODV9LHsiY2F0IjoiUm91Z2VzIiwibmFtZSI6IlNCUjM3NSIsImwiOjUyLCJjIjo0NSwiaCI6NDIsInIiOjE4NSwiZyI6OTksImIiOjc0fSx7ImNhdCI6IlJvdWdlcyIsIm5hbWUiOiJHUk03NSIsImwiOjQzLjUsImMiOjQzLjUsImgiOjQ0LCJyIjoxNTcsImciOjgwLCJiIjo1NH0seyJjYXQiOiJSb3VnZXMiLCJuYW1lIjoiR1IyNTAiLCJsIjo1MywiYyI6MzYuNSwiaCI6NDUsInIiOjE3NiwiZyI6MTA4LCJiIjo4NH0seyJjYXQiOiJSb3VnZXMiLCJuYW1lIjoiR1IyNTBTMjUwIiwibCI6NDksImMiOjU3LCJoIjo1MCwiciI6MTgyLCJnIjo4OCwiYiI6NDN9LHsiY2F0IjoiUm91Z2VzIiwibmFtZSI6IkdSMzAwUzIwMCIsImwiOjQyLjUsImMiOjQ2LCJoIjo0NywiciI6MTU1LCJnIjo3NywiYiI6NDZ9LHsiY2F0IjoiU2F1bW9uIiwibmFtZSI6IlNCUzguMjUiLCJsIjo3My41LCJjIjozMywiaCI6ODAsInIiOjIxMSwiZyI6MTc2LCJiIjoxMjJ9LHsiY2F0IjoiU2F1bW9uIiwibmFtZSI6IlNCUzE1SjIwIiwibCI6NzYsImMiOjI3LjUsImgiOjc3LCJyIjoyMTIsImciOjE4MywiYiI6MTM4fSx7ImNhdCI6IlNhdW1vbiIsIm5hbWUiOiJTQlM2Mi41IiwibCI6ODAsImMiOjM1LjUsImgiOjY0LCJyIjoyNDEsImciOjE4NywiYiI6MTM5fSx7ImNhdCI6IlNhdW1vbiIsIm5hbWUiOiJTQlMxMjUiLCJsIjo2NCwiYyI6NDIuNSwiaCI6NjQsInIiOjIwMCwiZyI6MTQyLCJiIjo4N30seyJjYXQiOiJTYXVtb24iLCJuYW1lIjoiR1M2Mi41IiwibCI6NjMuNSwiYyI6MzAsImgiOjcyLCJyIjoxODIsImciOjE0NywiYiI6MTAzfSx7ImNhdCI6IlNhdW1vbiIsIm5hbWUiOiJHUzEyNSIsImwiOjYwLCJjIjoyMy41LCJoIjo2MywiciI6MTcyLCJnIjoxMzcsImIiOjEwOH0seyJjYXQiOiJTYXVtb24iLCJuYW1lIjoiR1MyNTAiLCJsIjo2MS41LCJjIjoyNywiaCI6NTEsInIiOjE4NiwiZyI6MTM3LCJiIjoxMTJ9LHsiY2F0IjoiU2F1bW9uIiwibmFtZSI6IlNCUzI1MCIsImwiOjY3LCJjIjo0MSwiaCI6NTYsInIiOjIxNCwiZyI6MTQ3LCJiIjoxMDN9LHsiY2F0IjoiU2F1bW9uIiwibmFtZSI6IlNCSjQ1UjQ1TjM1IiwibCI6NTgsImMiOjIyLjUsImgiOjY2LCJyIjoxNjQsImciOjEzMywiYiI6MTA0fSx7ImNhdCI6IlNhdW1vbiIsIm5hbWUiOiJTQlM1MDAiLCJsIjo2MiwiYyI6NTAuNSwiaCI6NDcsInIiOjIxNywiZyI6MTI0LCJiIjo4Nn0seyJjYXQiOiJTYXVtb24iLCJuYW1lIjoiR1M1MDAiLCJsIjo0OSwiYyI6NDYuNSwiaCI6NTgsInIiOjE2NiwiZyI6OTksImIiOjQ5fSx7ImNhdCI6IlNhdW1vbiIsIm5hbWUiOiJHUzM3NVIxMjUiLCJsIjo1MiwiYyI6NDQsImgiOjQ2LCJyIjoxODEsImciOjEwMiwiYiI6NzF9LHsiY2F0IjoiTGllIGRlIHZpbiIsIm5hbWUiOiJHUkExMjVOMTAwUzI1IiwibCI6NTEuNSwiYyI6MjAsImgiOjUwLCJyIjoxNTAsImciOjExNCwiYiI6OTd9LHsiY2F0IjoiTGllIGRlIHZpbiIsIm5hbWUiOiJHUk0yMDBONTAsImwiOjUyLCJjIjoyNiwiaCI6NDcsInIiOjE2MCwiZyI6MTEyLCJiIjo5Mn0seyJjYXQiOiJMaWUgZGUgdmluIiwibmFtZSI6IlNCUjI1ME4xMjUiLCJsIjo0Mi41LCJjIjoyMi41LCJoIjo0MiwiciI6MTMyLCJnIjo5MCwiYiI6NzZ9LHsiY2F0IjoiTGllIGRlIHZpbiIsIm5hbWUiOiJHUk0zMDBTMTAwTjEwMCIsImwiOjQyLjUsImMiOjMyLCJoIjo0NywiciI6MTQxLCJnIjo4NiwiYiI6NjN9LHsiY2F0IjoiTGllIGRlIHZpbiIsIm5hbWUiOiJHUk0yMDBTMjAwTjEwMCIsImwiOjUzLCJjIjozMiwiaCI6NTIsInIiOjE2NywiZyI6MTEzLCJiIjo4NH0seyJjYXQiOiJMaWUgZGUgdmluIiwibmFtZSI6IkdSMzE2Tjg0IiwibCI6NDIsImMiOjM1LCJoIjo0MCwiciI6MTQ2LCJnIjo4MCwiYiI6NjR9XQ==";
     let NUANCIER_COMPLET = JSON.parse(atob(_ENC_DATA));
 
-    // --- VARIABLES DE L'APPLICATION ---
     let ORIGINAL_NUANCIER = [];
     let loadedBricks = [null, null, null];
     let grainTexture = null;
     let wallLayoutCache = []; 
     let currentJointColor = null;
     let isColorPicking = false; 
-    let currentSlot = 0;
-    
+
     let cropImg = null;
     let cropScale = 1;
     let cropRect = { x: 0, y: 0, w: 0, h: 0 };
     let isDraggingCrop = false;
     let cropStartX = 0; let cropStartY = 0;
 
-    // --- NOUVELLES VARIABLES (FAVORIS) ---
-    let favorites = [];
-
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d', { colorSpace: 'srgb' }); 
+    let currentSlot = 0;
     const STORAGE_KEY = 'biamortier_user_lib';
     
     let isRendering = false;
@@ -363,46 +336,6 @@
                 isRendering = false;
             });
         }
-    }
-
-    // --- NOUVELLE FONCTION RESET ---
-    function resetSimulator() {
-        if (confirm("Voulez-vous vraiment réinitialiser le simulateur ? Tout votre travail en cours sera effacé.")) {
-            location.reload();
-        }
-    }
-
-    // --- NOUVELLES FONCTIONS FAVORIS ---
-    function toggleFavorite() {
-        if (!currentJointColor) return;
-        if (favorites.find(f => f.name === currentJointColor.name)) {
-            favorites = favorites.filter(f => f.name !== currentJointColor.name);
-        } else {
-            if (favorites.length < 6) favorites.push(currentJointColor);
-            else alert("Vous ne pouvez avoir que 6 couleurs favorites en même temps.");
-        }
-        renderFavorites();
-    }
-
-    function renderFavorites() {
-        const bar = document.getElementById('fav-bar');
-        bar.innerHTML = '<span style="font-size: 0.7rem; color: #888; width: 100%;">Comparateur rapide :</span>';
-        favorites.forEach((fav, i) => {
-            const pill = document.createElement('div'); pill.className = 'fav-pill';
-            pill.style.backgroundColor = `rgb(${fav.r},${fav.g},${fav.b})`;
-            pill.style.color = (0.3*fav.r + 0.6*fav.g + 0.1*fav.b) > 130 ? '#000' : '#fff';
-            pill.innerHTML = `<span>${fav.name}</span><span style="margin-left:5px; opacity:0.5" onclick="event.stopPropagation(); favorites.splice(${i},1); renderFavorites();">✕</span>`;
-            pill.onclick = () => {
-                document.getElementById('categorySelect').value = fav.cat; filterColors();
-                const sel = document.getElementById('jointColorSelect');
-                for(let opt of sel.options) { 
-                    if(opt.value && JSON.parse(opt.value).name === fav.name) { 
-                        sel.value = opt.value; onJointSelected(); break; 
-                    } 
-                }
-            };
-            bar.appendChild(pill);
-        });
     }
 
     function toggleDevBox() {
@@ -749,16 +682,24 @@
     function analyzeFilteredColorAndSuggest() {
         const validBricks = loadedBricks.filter(b => b && !b.isPlaceholder);
         const targetImg = validBricks.length > 0 ? validBricks[0] : loadedBricks[0];
+        
         const tempCvs = document.createElement('canvas');
         tempCvs.width = 100; tempCvs.height = 100;
         const tCtx = tempCvs.getContext('2d');
+        
         tCtx.filter = `brightness(${document.getElementById('calib-brightness').value}%) contrast(${document.getElementById('calib-contrast').value}%) saturate(${document.getElementById('calib-saturation').value}%) hue-rotate(${document.getElementById('calib-hue').value}deg)`;
         tCtx.drawImage(targetImg, 0, 0, 100, 100);
+        
         const data = tCtx.getImageData(0, 0, 100, 100).data;
         let tR=0, tG=0, tB=0, cnt=0;
-        for(let i=0; i<data.length; i+=4) { tR += data[i]; tG += data[i+1]; tB += data[i+2]; cnt++; }
+        
+        for(let i=0; i<data.length; i+=4) {
+            tR += data[i]; tG += data[i+1]; tB += data[i+2]; cnt++;
+        }
+        
         const r = tR/cnt, g = tG/cnt, b = tB/cnt;
         let minD = Infinity, best = null;
+        
         NUANCIER_COMPLET.forEach(j => {
             if (j.r !== undefined) {
                 const dist = Math.sqrt((j.r-r)**2 + (j.g-g)**2 + (j.b-b)**2);
@@ -824,17 +765,11 @@
         toggleColorPicker(); 
     });
 
-    // --- MISE À JOUR DE LA FONCTION FILTRE AVEC LE TRI ---
     function filterColors() {
         const cat = document.getElementById('categorySelect').value;
         const sel = document.getElementById('jointColorSelect');
         sel.innerHTML = '<option value="">-- Choisir une teinte --</option>';
-        
-        let list = cat === 'all' ? [...NUANCIER_COMPLET] : NUANCIER_COMPLET.filter(c => c.cat === cat);
-        
-        // Tri automatique du plus clair au plus foncé basé sur L (luminance)
-        list.sort((a, b) => b.l - a.l);
-
+        const list = cat === 'all' ? NUANCIER_COMPLET : NUANCIER_COMPLET.filter(c => c.cat === cat);
         list.forEach(c => {
             const o = document.createElement('option');
             o.value = JSON.stringify(c); o.textContent = c.name;
@@ -881,35 +816,6 @@
         }
     }
 
-    // --- NOUVELLES FONCTIONS D'ADMINISTRATION (AJOUT / SUPPRESSION) ---
-    function addNewColor() {
-        const n = document.getElementById('dev-new-name').value.trim().toUpperCase();
-        const cat = document.getElementById('categorySelect').value;
-        if (!n || cat === 'all') { alert("Veuillez choisir une catégorie précise (ex: Jaunes) et entrer un nom de couleur."); return; }
-        
-        NUANCIER_COMPLET.push({ cat, name: n, l: 50, c: 20, h: 0, r: 128, g: 128, b: 128 });
-        filterColors(); 
-        
-        const sel = document.getElementById('jointColorSelect');
-        for(let i=0; i<sel.options.length; i++) {
-            if(sel.options[i].value && JSON.parse(sel.options[i].value).name === n) {
-                sel.selectedIndex = i; break;
-            }
-        }
-        onJointSelected(); 
-        document.getElementById('dev-new-name').value = "";
-    }
-
-    function deleteCurrentColor() {
-        if (!currentJointColor) return;
-        if (confirm(`Voulez-vous supprimer définitivement la couleur "${currentJointColor.name}" de votre simulateur ?`)) {
-            NUANCIER_COMPLET = NUANCIER_COMPLET.filter(c => c.name !== currentJointColor.name);
-            currentJointColor = null; 
-            filterColors(); 
-            scheduleRender();
-        }
-    }
-
     function resetCurrentDevColor() {
         if (!currentJointColor) return;
         const orig = ORIGINAL_NUANCIER.find(c => c.name === currentJointColor.name);
@@ -926,7 +832,7 @@
         dot.style.backgroundColor = currentJointColor ? `rgb(${currentJointColor.r},${currentJointColor.g},${currentJointColor.b})` : '#f4f4f4';
     }
 
-    // --- MISE A JOUR DE L'EXPORT EN ENCODÉ ---
+    // --- FONCTION EXPORT MODIFIÉE POUR GÉNÉRER LE BASE64 ---
     function generateExportCode() {
         const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(NUANCIER_COMPLET))));
         const code = `const _ENC_DATA = "${encoded}";`;
@@ -1017,11 +923,14 @@
     async function exportConfiguration() {
         const idx = document.getElementById('userLibrarySelect').value;
         if(idx === "") { alert("Veuillez d'abord sélectionner un projet dans 'Ma Bibliothèque' à exporter."); return; }
+        
         const lib = await getUserLibrary();
         const configToExport = lib[idx];
+        
         const dataStr = JSON.stringify(configToExport);
         const blob = new Blob([dataStr], { type: "application/json" });
         const url = URL.createObjectURL(blob);
+        
         const a = document.createElement('a');
         a.href = url;
         a.download = `Biamortier_${configToExport.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`;
@@ -1034,24 +943,31 @@
     async function importConfiguration(event) {
         const file = event.target.files[0];
         if (!file) return;
+        
         const reader = new FileReader();
         reader.onload = async function(e) {
             try {
                 const importedConfig = JSON.parse(e.target.result);
+                
                 if (!importedConfig.name || !importedConfig.dims) {
                     throw new Error("Fichier non reconnu.");
                 }
+                
                 importedConfig.id = Date.now();
                 importedConfig.date = new Date().toISOString();
                 importedConfig.name = importedConfig.name + " (Import)";
+                
                 const lib = await getUserLibrary();
                 lib.push(importedConfig);
                 await localforage.setItem(STORAGE_KEY, lib);
+                
                 alert(`✅ Configuration "${importedConfig.name}" importée avec succès !`);
                 await refreshLibraryUI();
+                
                 const sel = document.getElementById('userLibrarySelect');
                 sel.selectedIndex = sel.options.length - 1;
                 loadUserPreset();
+
             } catch (err) {
                 console.error("Erreur d'import :", err);
                 alert("❌ Impossible de lire ce fichier. Est-ce bien un fichier d'export valide ?");
