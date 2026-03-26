@@ -300,12 +300,13 @@
     </div>
 </div>
 
+<script src="nuancier.js"></script>
+
 <script>
     // --- DÉTECTION MOBILE POUR CORRECTION GAMMA ---
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     let mobileSaturationCorrection = 1.0;
 
-   const _rawData = "Standards|SUPER BLANC|93|3.5|73|239|234|229~Standards|BLANC|82|5.5|86|208|203|194~Standards|TON PIERRE|84.5|32|89|228|209|150~Standards|GRIS CLAIR|72.5|14|91|185|177|152~Noirs & Gris|50% BL 50% GR|71.5|10|86|182|174|157~Noirs & Gris|GS15|74.5|10|81|192|182|165~Noirs & Gris|SBN125|61|3.5|90|149|147|141~Noirs & Gris|SBN250|52|3.5|90|126|124|118~Noirs & Gris|GA125|40.5|1.5|91|96|95|93~Noirs & Gris|SBA250|35.5|0.5|110|83|84|83~Noirs & Gris|GA450R50|26|1.5|91|62|61|59~Noirs & Gris|SBA500|19|0.5|20|47|46|46~Noirs & Gris|GN500|36|2|85|86|84|81~Noirs & Gris|GA500|26.5|1|75|64|62|61~Jaunes|SBJ8.25|85|20|73|234|208|176~Jaunes|SBJ30|86.5|22.5|83|234|214|174~Jaunes|SBJ62.5|86.5|17.5|83|230|214|184~Jaunes|75% TP 25% BL|84|20|88|222|208|172~Jaunes|SBJ250|82.5|47|82|238|200|116~Jaunes|GJ250|69|42|84|194|164|91~Jaunes|SBJ500|83|52|82|242|200|108~Jaunes|GJ500|69|46.5|72|210|158|87~Jaunes|SBJ120N30|70.5|33.5|87|191|170|111~Marron|GS15J10|65|19|81|173|155|124~Marron|GN90S35|48|11|74|124|112|96~Marron|GS150N100|62.5|21|74|171|147|116~Marron|GS200N150|49|21.5|71|137|112|82~Marron|SBJ90R70N90|57|24|67|162|130|99~Marron|GS150A100|48|12|81|123|112|94~Marron|GS125N250R125|48.5|19|58|139|109|88~Marron|SBJ180R180N140|54.5|27.5|64|160|122|88~Marron|GN416S84|38|7.5|78|96|88|78~Marron|GS250A250|31.5|8|78|80|73|62~Marron|GS300A200|33|12|72|88|75|60~Rouges|GR150J100|53.5|39|57|173|113|72~Rouges|SBR125|63.5|34.5|45|204|137|112~Rouges|GR125|57.5|29|47|179|125|102~Rouges|GR150S100|59|39.5|53|192|125|88~Rouges|SBR250|60|37.5|42|199|125|102~Rouges|GR100N25|50.5|29|47|160|107|85~Rouges|SBR375|52|45|42|185|99|74~Rouges|GR375|43.5|43.5|44|157|80|54~Rouges|GR250|53|36.5|45|176|108|84~Rouges|GR250S250|49|57|50|182|88|43~Rouges|GR300S200|42.5|46|47|155|77|46~Saumon|SBS8.25|73.5|33|80|211|176|122~Saumon|SBS15J20|76|27.5|77|212|183|138~Saumon|SBS62.5|80|35.5|64|241|187|139~Saumon|SBS125|64|42.5|64|200|142|87~Saumon|GS62.5|63.5|30|72|182|147|103~Saumon|GS125|60|23.5|63|172|137|108~Saumon|GS250|61.5|27|51|186|137|112~Saumon|SBS250|67|41|56|214|147|103~Saumon|SBJ45R45N35|58|22.5|66|164|133|104~Saumon|SBS500|62|50.5|47|217|124|86~Saumon|GS500|49|46.5|58|166|99|49~Saumon|GS375R125|52|44|46|181|102|71~Lie de vin|GR125N100S25|51.5|20|50|150|114|97~Lie de vin|GR200N50|52|26|47|160|112|92~Lie de vin|SBR250N125|42.5|22.5|42|132|90|76~Lie de vin|GR300S100N100|42.5|32|47|141|86|63~Lie de vin|GR200S200N100|53|32|52|167|113|84~Lie de vin|GR416N84|42|35|40|146|80|64";
     let NUANCIER_COMPLET = _rawData.split('~').map(s => { let p = s.split('|'); return { cat: p[0], name: p[1], l: parseFloat(p[2]), c: parseFloat(p[3]), h: parseFloat(p[4]), r: parseInt(p[5]), g: parseInt(p[6]), b: parseInt(p[7]) }; });
 
     let ORIGINAL_NUANCIER = [];
@@ -342,7 +343,8 @@
         const box = document.getElementById('dev-box');
         if (box.style.display === 'block') { box.style.display = 'none'; return; }
         const password = prompt("Saisir le mot de passe administrateur :");
-        if (password === "RapCom47T") { box.style.display = 'block'; } else { alert("Accès refusé."); }
+        // Modification ici : le mot de passe est vérifié en Base64
+        if (password && btoa(password) === "UmFwQ29tNDdU") { box.style.display = 'block'; } else { alert("Accès refusé."); }
     }
 
     // --- CORRECTION MOBILE SPÉCIFIQUE ---
@@ -1016,4 +1018,3 @@
 </script>
 </body>
 </html>
-index.html
