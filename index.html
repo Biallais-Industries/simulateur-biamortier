@@ -172,8 +172,8 @@
             
             <div class="calibration-slider"><label>Lumière</label><input type="range" id="calib-brightness" min="50" max="150" value="100" oninput="scheduleRender()"></div>
             <div class="calibration-slider"><label>Contraste</label><input type="range" id="calib-contrast" min="50" max="150" value="100" oninput="scheduleRender()"></div>
-            <div class="calibration-slider"><label>Saturat.</label><input type="range" id="calib-saturation" min="0" max="300" value="100" oninput="scheduleRender()"></div>
-            <div class="calibration-slider"><label>Teinte</label><input type="range" id="calib-hue" min="-180" max="180" value="0" step="1" oninput="scheduleRender()"></div>
+            <div class="calibration-slider" style="display: none;"><label>Saturat.</label><input type="range" id="calib-saturation" min="0" max="300" value="100" oninput="scheduleRender()"></div>
+            <div class="calibration-slider" style="display: none;"><label>Teinte</label><input type="range" id="calib-hue" min="-180" max="180" value="0" step="1" oninput="scheduleRender()"></div>
         </div>
     </div>
 
@@ -288,6 +288,12 @@
         </div>
         <button onclick="forceWallRegen()" style="margin-top:10px; width:100%; background:#fff; border:1px solid #ccc; color:#666; padding:8px; border-radius:4px; font-size:0.8rem; cursor:pointer;">🔀 Régénérer le placement</button>
     </div>
+
+    <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #ced4da; font-size: 0.65rem; color: #6c757d; text-align: justify; line-height: 1.4;">
+        <strong style="color: #495057; display: block; margin-bottom: 5px; font-size: 0.7rem;">À propos - Avertissement Légal et Propriété Intellectuelle</strong>
+        Le présent outil, son code, son design et ses bases de données sont la propriété exclusive de Biallais Industries. Cette application est concédée pour un usage strictement interne et encadré. Il est formellement interdit de copier, modifier, extraire, distribuer ou détourner cet outil de son usage initial sans autorisation écrite préalable. Toute infraction à ces règles constitue un acte de contrefaçon et fera l'objet de poursuites pénales et civiles.
+    </div>
+
 </div>
 
 <div class="preview-container">
@@ -343,7 +349,6 @@
         const box = document.getElementById('dev-box');
         if (box.style.display === 'block') { box.style.display = 'none'; return; }
         const password = prompt("Saisir le mot de passe administrateur :");
-        // Modification ici : le mot de passe est vérifié en Base64
         if (password && btoa(password) === "UmFwQ29tNDdU") { box.style.display = 'block'; } else { alert("Accès refusé."); }
     }
 
