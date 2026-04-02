@@ -314,7 +314,12 @@
     let mobileSaturationCorrection = 1.0;
 
     let NUANCIER_COMPLET = _rawData.split('~').map(s => { let p = s.split('|'); return { cat: p[0], name: p[1], l: parseFloat(p[2]), c: parseFloat(p[3]), h: parseFloat(p[4]), r: parseInt(p[5]), g: parseInt(p[6]), b: parseInt(p[7]) }; });
-
+// --- CHARGEMENT DU LOGO BIALLAIS ---
+    const logoBiallais = new Image();
+    logoBiallais.src = 'logo.png';
+    logoBiallais.onload = () => {
+        if (typeof scheduleRender === 'function') scheduleRender();
+    };
     let ORIGINAL_NUANCIER = [];
     let loadedBricks = [null, null, null];
     let grainTexture = null;
@@ -941,9 +946,17 @@
         ctx.fillStyle = "#222"; ctx.font = "bold 22px 'Segoe UI'"; ctx.textAlign = "left";
         ctx.fillText(`JOINT : ${currentJointColor ? currentJointColor.name : "Aucun"}`, 30, H+45);
         ctx.textAlign = "right"; ctx.fillText(`PROJET : ${document.getElementById('input-brick-name').value || "Brique"}`, W-30, H+45);
+        
+        // --- AFFICHAGE DU LOGO BIALLAIS ---
+        if (logoBiallais.complete && logoBiallais.naturalWidth > 0) {
+            const logoH = 45; // Hauteur du logo en pixels (vous pouvez ajuster cette valeur)
+            const logoW = (logoBiallais.width / logoBiallais.height) * logoH;
+            // On le place parfaitement au centre, entre "JOINT" et "PROJET"
+            ctx.drawImage(logoBiallais, (W / 2) - (logoW / 2), H + 12, logoW, logoH);
+        }
+
         ctx.fillStyle = "#dc3545"; ctx.font = "italic 18px 'Segoe UI'"; ctx.textAlign = "center";
         ctx.fillText("Document à caractère indicatif. Nuance et aspect à valider impérativement par un essai sur chantier.", W/2, H+85);
-    }
 
     function downloadImage() {
         const link = document.createElement('a'); link.download = 'Projet_Biamortier.jpg';
