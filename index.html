@@ -314,12 +314,14 @@
     let mobileSaturationCorrection = 1.0;
 
     let NUANCIER_COMPLET = _rawData.split('~').map(s => { let p = s.split('|'); return { cat: p[0], name: p[1], l: parseFloat(p[2]), c: parseFloat(p[3]), h: parseFloat(p[4]), r: parseInt(p[5]), g: parseInt(p[6]), b: parseInt(p[7]) }; });
-// --- CHARGEMENT DU LOGO BIALLAIS ---
+
+    // --- CHARGEMENT DU LOGO BIALLAIS ---
     const logoBiallais = new Image();
     logoBiallais.src = 'logo.png';
     logoBiallais.onload = () => {
         if (typeof scheduleRender === 'function') scheduleRender();
     };
+
     let ORIGINAL_NUANCIER = [];
     let loadedBricks = [null, null, null];
     let grainTexture = null;
@@ -957,6 +959,7 @@
 
         ctx.fillStyle = "#dc3545"; ctx.font = "italic 18px 'Segoe UI'"; ctx.textAlign = "center";
         ctx.fillText("Document à caractère indicatif. Nuance et aspect à valider impérativement par un essai sur chantier.", W/2, H+85);
+    }
 
     function downloadImage() {
         const link = document.createElement('a'); link.download = 'Projet_Biamortier.jpg';
